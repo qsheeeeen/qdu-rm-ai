@@ -19,34 +19,32 @@ if __name__ == '__main__':
     print('Start conversion...')
 
     path = os.path.expanduser(args.dji_roco_dir)
-    if not os.path.isdir(path) or not os.path.isdir(os.path.join(path, 'robomaster_Central China Regional Competition')) \
+    if not os.path.isdir(path) \
+            or not os.path.isdir(os.path.join(path, 'robomaster_Central China Regional Competition')) \
             or not os.path.isdir(os.path.join(path, 'robomaster_Final Tournament')) \
             or not os.path.isdir(os.path.join(path, 'robomaster_North China Regional Competition')) \
             or not os.path.isdir(os.path.join(path, 'robomaster_South China Regional Competition')):
         raise ValueError(('{} is not a valid directory, make sure it is present.'.format(path)))
 
-    print('DJI ROCO root path: {}'.format(args.dji_roco_dir))
+    dir_list = os.listdir(path)
 
-    group_list = os.listdir(path)
+    for dirt in dir_list:
+        if not os.path.isdir(os.path.join(path, dirt)):
+            continue
 
-    for group in group_list:
-        if not os.path.isdir(os.path.join(path, group)):
-            group_list.remove(group)
+        print('Processing {}...'.format(dirt))
+        dir_path = os.path.join(path, dirt)
 
-    for group in group_list:
-        print('Processing {}.'.format(group))
-        group_path = os.path.join(path, group)
-
-        print('Rename image -> JPEGImages')
-        image_src_path = os.path.join(group_path, 'image')
-        image_dst_path = os.path.join(group_path, 'JPEGImages')
+        print('Rename image -> JPEGImages.')
+        image_src_path = os.path.join(dir_path, 'image')
+        image_dst_path = os.path.join(dir_path, 'JPEGImages')
 
         if not os.path.exists(image_dst_path):
             os.rename(image_src_path, image_dst_path)
 
-        print('Rename image_annotation -> Annotations')
-        annotation_src_path = os.path.join(group_path, 'image_annotation')
-        annotation_dst_path = os.path.join(group_path, 'Annotations')
+        print('Rename image_annotation -> Annotations.')
+        annotation_src_path = os.path.join(dir_path, 'image_annotation')
+        annotation_dst_path = os.path.join(dir_path, 'Annotations')
 
         if not os.path.exists(annotation_dst_path):
             os.rename(annotation_src_path, annotation_dst_path)
@@ -55,10 +53,9 @@ if __name__ == '__main__':
         image_list = os.listdir(image_dst_path)
         annotation_list = os.listdir(annotation_dst_path)
 
+        print('Check pairing.')
         image_list.sort()
         annotation_list.sort()
-
-        print('Check list.')
         for i in range(len(image_list)):
             if image_list[i][0:-4] == annotation_list[i][0:-4]:
                 continue
@@ -66,7 +63,7 @@ if __name__ == '__main__':
                 raise (RuntimeError, 'Unmatched label: {} & {}'.format(image_list[i], annotation_list[i]))
         print('Pass.')
 
-        print('Get final list.')
+        print('Remove extension.')
         name_list = [image[0:-4] for image in image_list]
 
         random.shuffle(name_list)
@@ -76,8 +73,8 @@ if __name__ == '__main__':
         train_list = name_list[:split_index]
         test_list = name_list[split_index:]
 
-        print('Create dir for Imagesets.')
-        imagesets_path = os.path.join(group_path, 'ImageSets')
+        print('Create dir for pairing.')
+        imagesets_path = os.path.join(dir_path, 'ImageSets')
         if not os.path.exists(imagesets_path):
             os.mkdir(imagesets_path)
 
@@ -85,7 +82,7 @@ if __name__ == '__main__':
         if not os.path.exists(imagesets_main_path):
             os.mkdir(imagesets_main_path)
 
-        print('Write to file')
+        print('Write pairing to file')
         with open(os.path.join(imagesets_main_path, 'trainval.txt'), 'w+') as f:
             for name in train_list:
                 f.write(name + '\n')
@@ -94,7 +91,7 @@ if __name__ == '__main__':
             for name in test_list:
                 f.write(name + '\n')
 
-        print('Completed {}.'.format(group))
+        print('Completed {}.'.format(dirt))
         print()
 
     print('Converted.')
