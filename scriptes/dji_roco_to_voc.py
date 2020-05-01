@@ -9,8 +9,7 @@ import xml.etree.ElementTree as ETree
 def parse_args():
     parser = argparse.ArgumentParser(
         description='Rearrange DJI ROCO dataset to VOC style.',
-        epilog='Example: python3 dji_roco_to_voc.py --dji-roco-dir ~/Dataset/DJI ROCO/',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        epilog='Example: python3 dji_roco_to_voc.py --dji-roco-dir ~/Dataset/DJI ROCO/')
 
     parser.add_argument('--dji-roco-dir', type=str, default='~/Dataset/DJI ROCO/', help='dataset directory on disk')
     parser.add_argument('--split-ratio', type=float, default=0.8, help='Traing set size : test set size.')
@@ -83,20 +82,19 @@ if __name__ == '__main__':
                 raise (RuntimeError, 'Unmatched label: {} & {}'.format(image_list[i], annotation_list[i]))
         print('Pass.')
 
+        name_list = []
         print('Check annotation...')
         for index, annotation in enumerate(annotation_list):
             annotation_path = os.path.join(annotation_dst_path, annotation)
-
             tree = ETree.parse(annotation_path)
             root = tree.getroot()
             if root.find('object') is None:
-                print('No annotation found in {}. \nRemove it from list'.format(annotation_path))
-                annotation_list.remove(annotation)
+                print('No annotation found in {}. \nDropped.'.format(annotation))
+            else:
+                name_list.append(annotation[:-4])
 
             tree.write(annotation_path)
         print('Done.')
-
-        name_list = [annotation[:-4] for annotation in annotation_list]
 
         random.shuffle(name_list)
 
