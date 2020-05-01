@@ -13,6 +13,7 @@ def parse_args():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('--dji-roco-dir', type=str, default='~/Dataset/DJI ROCO/', help='dataset directory on disk')
+    parser.add_argument('--split-ratio', type=float, default=0.8, help='Traing set size : test set size.')
     return parser.parse_args()
 
 
@@ -72,7 +73,7 @@ if __name__ == '__main__':
         image_list = os.listdir(image_dst_path)
         annotation_list = os.listdir(annotation_dst_path)
 
-        print('Check pairing.')
+        print('Check pairing...')
         image_list.sort()
         annotation_list.sort()
         for i in range(len(image_list)):
@@ -82,28 +83,29 @@ if __name__ == '__main__':
                 raise (RuntimeError, 'Unmatched label: {} & {}'.format(image_list[i], annotation_list[i]))
         print('Pass.')
 
-        print('Check annotation.')
+        print('Check annotation...')
         for index, annotation in enumerate(annotation_list):
             annotation_path = os.path.join(annotation_dst_path, annotation)
 
             tree = ETree.parse(annotation_path)
             root = tree.getroot()
-            for obj in root.iter('object'):
-                if obj.find('difficult') is None:
-                    to_add = ETree.XML('<difficult>0</difficult>')
-                    to_add.tail = '\n\t'
-                    obj.insert(1, to_add)
+            if root.find('object') is None:
+                print('No annotation found in {}. \nRemove it from list'.format(annotation_path))
+                annotation_list.remove(annotation)
 
             tree.write(annotation_path)
+        print('Done.')
 
-        name_list = [image[0:-4] for image in image_list]
+        name_list = [annotation[:-4] for annotation in annotation_list]
 
         random.shuffle(name_list)
 
-        split_percent = 0.7
-        split_index = math.floor(len(name_list) * split_percent)
+        split_ratio = args.split_ratio
+        split_index = math.floor(len(name_list) * split_ratio)
         train_list = name_list[:split_index]
         test_list = name_list[split_index:]
+        print('Training set size: {}.'.format(len(train_list)))
+        print('Test set size: {}.'.format(len(test_list)))
 
         print('Create dir for pairing.')
         imagesets_path = os.path.join(dir_path, 'ImageSets')
@@ -114,7 +116,7 @@ if __name__ == '__main__':
         if not os.path.exists(imagesets_main_path):
             os.mkdir(imagesets_main_path)
 
-        print('Write pairing to file')
+        print('Write pairing to file.')
         with open(os.path.join(imagesets_main_path, 'trainval.txt'), 'w+') as f:
             for name in train_list:
                 f.write(name + '\n')
@@ -123,7 +125,7 @@ if __name__ == '__main__':
             for name in test_list:
                 f.write(name + '\n')
 
-        print('Completed {}.'.format(d))
+        print('Completed folder "{}".'.format(d))
         print()
 
     print('Converted.')
