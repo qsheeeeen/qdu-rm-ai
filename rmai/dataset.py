@@ -19,8 +19,7 @@ class DJIROCODetection(gdata.VOCDetection):
         Path to folder storing the dataset.
     target : str, default 'all'
         How dataset are generated.
-    splits : list of tuples, default
-        (('central', 'trainval'), ('north', 'trainval'), ('south', 'trainval'), ('final', 'trainval'))
+    splits : list of tuples, default use all trainval.txt.
         List of combinations of (competition, name)
         For competition, candidates can be: 'central', 'final', 'north', 'south'.
         For names, candidates can be: 'trainval', 'test'.
