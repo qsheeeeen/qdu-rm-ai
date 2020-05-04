@@ -76,7 +76,7 @@ if __name__ == '__main__':
         image_list.sort()
         annotation_list.sort()
         for i in range(len(image_list)):
-            if image_list[i][0:-4] == annotation_list[i][0:-4]:
+            if image_list[i].split('.')[0] == annotation_list[i].split('.')[0]:
                 continue
             else:
                 raise (RuntimeError, 'Unmatched label: {} & {}'.format(image_list[i], annotation_list[i]))
@@ -91,7 +91,7 @@ if __name__ == '__main__':
             if root.find('object') is None:
                 print('No annotation found in {}. \nDropped.'.format(annotation))
             else:
-                name_list.append(annotation[:-4])
+                name_list.append(annotation.split('.')[0])
 
             tree.write(annotation_path)
         print('Done.')
