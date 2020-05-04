@@ -129,4 +129,7 @@ dmypy.json
 .pyre/
 
 # Pycharm
-.idea
+.idea/
+
+# Runtime
+dask-worker-space/
