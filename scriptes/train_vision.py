@@ -7,22 +7,14 @@ import warnings
 
 import gluoncv as gcv
 import mxnet as mx
-import numpy as np
+from gluoncv import utils as gutils
+from gluoncv.data.batchify import Tuple, Stack, Pad
+from gluoncv.data.dataloader import RandomTransformDataLoader
+from gluoncv.data.transforms.presets.yolo import YOLO3DefaultTrainTransform, YOLO3DefaultValTransform
+from gluoncv.model_zoo import get_model
+from gluoncv.utils.metrics.voc_detection import VOC07MApMetric
 from mxnet import autograd
 from mxnet import gluon
-
-gcv.utils.check_version('0.6.0')
-from gluoncv import data as gdata
-from gluoncv import utils as gutils
-from gluoncv.model_zoo import get_model
-from gluoncv.data.batchify import Tuple, Stack, Pad
-from gluoncv.data.transforms.presets.yolo import YOLO3DefaultTrainTransform
-from gluoncv.data.transforms.presets.yolo import YOLO3DefaultValTransform
-from gluoncv.data.dataloader import RandomTransformDataLoader
-from gluoncv.utils.metrics.voc_detection import VOC07MApMetric
-from gluoncv.utils.metrics.coco_detection import COCODetectionMetric
-from gluoncv.utils import LRScheduler, LRSequential
-
 from mxnet.contrib import amp
 
 try:
@@ -32,49 +24,67 @@ except ImportError:
 
 import rmai
 
+gcv.utils.check_version('0.7.0')
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train YOLO networks with random input shape.')
+
     parser.add_argument('--network', type=str, default='mobilenet1.0',
                         help="Base network name which serves as feature extraction base.")
     parser.add_argument('--data-shape', type=int, default=320,
                         help="Input data shape for evaluation, use 320, 416, 608... " +
                              "Training is with random shapes from (320 to 608).")
-    parser.add_argument('--batch-size', type=int, default=16,
-                        help='Training mini-batch size')
+    parser.add_argument('--dtype', type=str, default='float16',
+                        help='')
+    parser.add_argument('--pretrain-dataset', type=str, default='voc',
+                        help='Training dataset. voc or coco.')
+
     parser.add_argument('--dataset', type=str, default='dji',
-                        help='Training dataset. Now support voc.')
+                        help='Training dataset. Now support dji.')
     parser.add_argument('--num-workers', '-j', dest='num_workers', type=int,
                         default=8, help='Number of data workers, you can use larger '
                                         'number to accelerate data loading, if you CPU and GPUs are powerful.')
+    parser.add_argument('--pin_memory', type=bool, default=True,
+                        help='Number of data workers, you can use larger '
+                             'number to accelerate data loading, if you CPU and GPUs are powerful.')
     parser.add_argument('--gpus', type=str, default='0',
                         help='Training with GPUs, you can specify 1,3 for example.')
-    parser.add_argument('--epochs', type=int, default=200,
-                        help='Training epochs.')
     parser.add_argument('--resume', type=str, default='',
                         help='Resume from previously saved parameters if not None. '
                              'For example, you can resume from ./yolo3_xxx_0123.params')
+
     parser.add_argument('--start-epoch', type=int, default=0,
                         help='Starting epoch for resuming, default is 0 for new training.'
                              'You can specify it to 100 for example to start from 100 epoch.')
-    parser.add_argument('--lr', type=float, default=0.001,
-                        help='Learning rate, default is 0.001')
+    parser.add_argument('--epochs', type=int, default=10,
+                        help='Training epochs.')
+    parser.add_argument('--batch-size', type=int, default=16,
+                        help='Training mini-batch size')
     parser.add_argument('--lr-mode', type=str, default='step',
                         help='learning rate scheduler mode. options are step, poly and cosine.')
-    parser.add_argument('--lr-decay', type=float, default=0.1,
-                        help='decay rate of learning rate. default is 0.1.')
-    parser.add_argument('--lr-decay-period', type=int, default=0,
-                        help='interval for periodic learning rate decays. default is 0 to disable.')
-    parser.add_argument('--lr-decay-epoch', type=str, default='160,180',
-                        help='epochs at which learning rate decays. default is 160,180.')
-    parser.add_argument('--warmup-lr', type=float, default=0.1,
-                        help='starting warmup learning rate. default is 0.1.')
-    parser.add_argument('--warmup-epochs', type=int, default=1,
-                        help='number of warmup epochs.')
-    parser.add_argument('--momentum', type=float, default=0.9,
-                        help='SGD momentum, default is 0.9')
+    parser.add_argument('--max-update', type=int, default=10,
+                        help='maximum number of updates before the decay reaches 0.')
+    parser.add_argument('--base-lr', type=float, default=0.001,
+                        help='base learning rate. default is 0.001')
+    parser.add_argument('--final-lr', type=float, default=0.00001,
+                        help='final learning rate after all steps. default is 0.0001')
+    parser.add_argument('--warmup-epochs', type=int, default=2,
+                        help='number of warmup steps used before this scheduler starts decay. default is 2.')
+    parser.add_argument('--warmup-begin-lr', type=float, default=0.0001,
+                        help='if using warmup, the learning rate from which it starts warming up.')
+    parser.add_argument('--step-epochs', type=str, default='3,4',
+                        help='The list of steps to schedule a change.')
+    parser.add_argument('--factor', type=float, default=0.1,
+                        help='The factor to change the learning rate.')
+    parser.add_argument('--pwr', type=int, default=2,
+                        help='power of the decay term as a function of the current number of updates.')
+
     parser.add_argument('--wd', type=float, default=0.0005,
                         help='Weight decay, default is 5e-4')
+    parser.add_argument('--momentum', type=float, default=0.9,
+                        help='SGD momentum, default is 0.9')
+
     parser.add_argument('--log-interval', type=int, default=100,
                         help='Logging mini-batch interval. Default is 100.')
     parser.add_argument('--save-prefix', type=str, default='',
@@ -84,6 +94,7 @@ def parse_args():
     parser.add_argument('--val-interval', type=int, default=1,
                         help='Epoch interval for validation, increase the number will reduce the '
                              'training time if validation is slow.')
+
     parser.add_argument('--seed', type=int, default=233,
                         help='Random seed to be fixed.')
     parser.add_argument('--num-samples', type=int, default=-1,
@@ -106,56 +117,55 @@ def parse_args():
                         help='Use MXNet Horovod for distributed training. Must be run with OpenMPI. '
                              '--gpus is ignored when using --horovod.')
 
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
-def get_dataset(dataset, args):
-    if dataset.lower() == 'voc':
-        train_dataset = gdata.VOCDetection(
-            splits=[(2007, 'trainval'), (2012, 'trainval')])
-        val_dataset = gdata.VOCDetection(
-            splits=[(2007, 'test')])
-        val_metric = VOC07MApMetric(iou_thresh=0.5, class_names=val_dataset.classes)
-    elif dataset.lower() == 'coco':
-        train_dataset = gdata.COCODetection(splits='instances_train2017', use_crowd=False)
-        val_dataset = gdata.COCODetection(splits='instances_val2017', skip_empty=False)
-        val_metric = COCODetectionMetric(
-            val_dataset, args.save_prefix + '_eval', cleanup=True,
-            data_shape=(args.data_shape, args.data_shape))
-    elif dataset.lower() == 'dji':
-        train_dataset = rmai.DJIROCODetection()
-        val_dataset = rmai.DJIROCODetection(
-            splits=[('north', 'test')])
-        val_metric = VOC07MApMetric(iou_thresh=0.5, class_names=val_dataset.classes)
+def get_dataset(args):
+    # Get dataset.
+    if args.dataset.lower() == 'dji':
+        train_set = rmai.DJIROCODetection(
+            splits=[('central', 'trainval')]
+        )
+
+        val_set = rmai.DJIROCODetection(
+            splits=[('south', 'test')])  # ('central', 'test'), ('final', 'test'), ('north', 'test')
+
+        val_metric = VOC07MApMetric(iou_thresh=0.5, class_names=val_set.classes)
     else:
-        raise NotImplementedError('Dataset: {} not implemented.'.format(dataset))
-    if args.num_samples < 0:
-        args.num_samples = len(train_dataset)
+        raise NotImplementedError('Dataset: {} not implemented.'.format(args.dataset))
+
     if args.mixup:
         from gluoncv.data import MixupDetection
-        train_dataset = MixupDetection(train_dataset)
-    return train_dataset, val_dataset, val_metric
+        train_set = MixupDetection(train_set)
+
+    return train_set, val_set, val_metric
 
 
-def get_dataloader(net, train_dataset, val_dataset, data_shape, batch_size, num_workers, args):
-    """Get dataloader."""
-    width, height = data_shape, data_shape
-    batchify_fn = Tuple(*([Stack() for _ in range(6)] + [Pad(axis=0, pad_val=-1) for _ in
-                                                         range(1)]))  # stack image, all targets generated
+def get_dataloader(net, train_set, val_set, batch_size, args):
+    # Get dataloader.
+    width, height = args.data_shape, args.data_shape
+
+    # stack image, all targets generated
+    batchify_fn = Tuple(*([Stack() for _ in range(6)] + [Pad(axis=0, pad_val=-1) for _ in range(1)]))
+
     if args.no_random_shape:
         train_loader = gluon.data.DataLoader(
-            train_dataset.transform(YOLO3DefaultTrainTransform(width, height, net, mixup=args.mixup)),
-            batch_size, True, batchify_fn=batchify_fn, last_batch='rollover', num_workers=num_workers)
+            train_set.transform(YOLO3DefaultTrainTransform(width, height, net, mixup=args.mixup)),
+            batch_size=batch_size, shuffle=True, batchify_fn=batchify_fn,
+            last_batch='rollover', num_workers=args.num_workers, pin_memory=False)
     else:
         transform_fns = [YOLO3DefaultTrainTransform(x * 32, x * 32, net, mixup=args.mixup) for x in range(10, 20)]
         train_loader = RandomTransformDataLoader(
-            transform_fns, train_dataset, batch_size=batch_size, interval=10, last_batch='rollover',
-            shuffle=True, batchify_fn=batchify_fn, num_workers=num_workers)
+            transform_fns, train_set, interval=10,
+            batch_size=batch_size, shuffle=True, batchify_fn=batchify_fn,
+            last_batch='rollover', num_workers=args.num_workers, pin_memory=False)
+
     val_batchify_fn = Tuple(Stack(), Pad(pad_val=-1))
     val_loader = gluon.data.DataLoader(
-        val_dataset.transform(YOLO3DefaultValTransform(width, height)),
-        batch_size, False, batchify_fn=val_batchify_fn, last_batch='keep', num_workers=num_workers)
+        val_set.transform(YOLO3DefaultValTransform(width, height)),
+        batch_size=batch_size, shuffle=True, batchify_fn=val_batchify_fn,
+        last_batch='keep', num_workers=args.num_workers, pin_memory=False)
+
     return train_loader, val_loader
 
 
@@ -203,7 +213,7 @@ def validate(net, val_data, ctx, eval_metric):
     return eval_metric.get()
 
 
-def train(net, train_data, val_data, eval_metric, ctx, args):
+def train(net, train_dloader, val_data, eval_metric, ctx, args):
     """Training pipeline"""
     net.collect_params().reset_ctx(ctx)
     if args.no_wd:
@@ -213,21 +223,24 @@ def train(net, train_data, val_data, eval_metric, ctx, args):
     if args.label_smooth:
         net._target_generator._label_smooth = True
 
-    if args.lr_decay_period > 0:
-        lr_decay_epoch = list(range(args.lr_decay_period, args.epochs, args.lr_decay_period))
+    # learn rate scheduler.
+    num_batches = len(train_dloader)
+    step = [int(i) * num_batches for i in args.step_epochs.split(',')]
+    warmup_steps = args.warmup_epochs * num_batches
+
+    if args.lr_mode == 'step':
+        lr_scheduler = mx.lr_scheduler.MultiFactorScheduler(
+            step, args.factor, args.base_lr, warmup_steps, args.warmup_begin_lr)
+
+    elif args.lr_mode == 'poly':
+        lr_scheduler = mx.lr_scheduler.PolyScheduler(
+            args.max_update, args.base_lr, args.pwr, args.final_lr, warmup_steps, args.warmup_begin_lr)
+
+    elif args.lr_mode == 'cosine':
+        lr_scheduler = mx.lr_scheduler.CosineScheduler(
+            args.max_update, args.base_lr, args.final_lr, warmup_steps, args.warmup_begin_lr)
     else:
-        lr_decay_epoch = [int(i) for i in args.lr_decay_epoch.split(',')]
-    lr_decay_epoch = [e - args.warmup_epochs for e in lr_decay_epoch]
-    num_batches = args.num_samples // args.batch_size
-    lr_scheduler = LRSequential([
-        LRScheduler('linear', base_lr=0, target_lr=args.lr,
-                    nepochs=args.warmup_epochs, iters_per_epoch=num_batches),
-        LRScheduler(args.lr_mode, base_lr=args.lr,
-                    nepochs=args.epochs - args.warmup_epochs,
-                    iters_per_epoch=num_batches,
-                    step_epoch=lr_decay_epoch,
-                    step_factor=args.lr_decay, power=2),
-    ])
+        raise NotImplementedError('lr-mode: {} not implemented.'.format(args.lr_mode))
 
     if args.horovod:
         hvd.broadcast_parameters(net.collect_params(), root_rank=0)
@@ -237,15 +250,11 @@ def train(net, train_data, val_data, eval_metric, ctx, args):
     else:
         trainer = gluon.Trainer(
             net.collect_params(), 'sgd',
-            {'wd': args.wd, 'momentum': args.momentum, 'lr_scheduler': lr_scheduler},
+            {'multi_precision': True, 'wd': args.wd, 'momentum': args.momentum, 'lr_scheduler': lr_scheduler},
             kvstore='local', update_on_kvstore=(False if args.amp else None))
 
     if args.amp:
         amp.init_trainer(trainer)
-
-    # targets
-    sigmoid_ce = gluon.loss.SigmoidBinaryCrossEntropyLoss(from_sigmoid=False)
-    l1_loss = gluon.loss.L1Loss()
 
     # metrics
     obj_metrics = mx.metric.Loss('ObjLoss')
@@ -266,23 +275,13 @@ def train(net, train_data, val_data, eval_metric, ctx, args):
     logger.info(args)
     logger.info('Start training from [Epoch {}]'.format(args.start_epoch))
     best_map = [0]
-    for epoch in range(args.start_epoch, args.epochs):
-        if args.mixup:
-            try:
-                train_data._dataset.set_mixup(np.random.beta, 1.5, 1.5)
-            except AttributeError:
-                train_data._dataset._data.set_mixup(np.random.beta, 1.5, 1.5)
-            if epoch >= args.epochs - args.no_mixup_epochs:
-                try:
-                    train_data._dataset.set_mixup(None)
-                except AttributeError:
-                    train_data._dataset._data.set_mixup(None)
 
+    for epoch in range(args.start_epoch, args.epochs):
         tic = time.time()
         btic = time.time()
         mx.nd.waitall()
         net.hybridize()
-        for i, batch in enumerate(train_data):
+        for i, batch in enumerate(train_dloader):
             data = gluon.utils.split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
             # objectness, center_targets, scale_targets, weights, class_targets
             fixed_targets = [gluon.utils.split_and_load(batch[it], ctx_list=ctx, batch_axis=0) for it in range(1, 6)]
@@ -363,33 +362,38 @@ if __name__ == '__main__':
         ctx = ctx if ctx else [mx.cpu()]
 
     # network
-    if args.dataset == 'dji':
-        net_name = '_'.join(('yolo3', args.network, 'voc'))
-    else:
-        net_name = '_'.join(('yolo3', args.network, args.dataset))
-    args.save_prefix += net_name
+    net_name = '_'.join(('yolo3', args.network, args.pretrain_dataset))
+    args.save_prefix += net_name + '_' + args.dataset
+
     # use sync bn if specified
     if args.syncbn and len(ctx) > 1:
-        net = get_model(net_name, pretrained_base=True, norm_layer=gluon.contrib.nn.SyncBatchNorm,
-                        norm_kwargs={'num_devices': len(ctx)})
-        async_net = get_model(net_name, pretrained_base=False)  # used by cpu worker
+        # TODO: Try use more combination.
+        network = get_model(net_name,
+                            pretrained=True,
+                            norm_layer=gluon.contrib.nn.SyncBatchNorm,
+                            norm_kwargs={'num_devices': len(ctx)})
+        async_net = get_model(net_name, pretrained=False)  # Used by CPU worker.
     else:
-        net = get_model(net_name, pretrained_base=True)
-        async_net = net
+        network = get_model(net_name, pretrained=True)
+        async_net = network
     if args.resume.strip():
-        net.load_parameters(args.resume.strip())
+        network.load_parameters(args.resume.strip())
         async_net.load_parameters(args.resume.strip())
     else:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            net.initialize()
+            network.initialize()
             async_net.initialize()
+
+    train_dataset, val_dataset, val_metric = get_dataset(args)
+    network.reset_class(train_dataset.classes)
+    # network.cast(args.dtype)
 
     # training data
     batch_size = (args.batch_size // hvd.size()) if args.horovod else args.batch_size
-    train_dataset, val_dataset, eval_metric = get_dataset(args.dataset, args)
-    train_data, val_data = get_dataloader(
-        async_net, train_dataset, val_dataset, args.data_shape, batch_size, args.num_workers, args)
+    train_dataloader, val_dataloader = get_dataloader(async_net, train_dataset, val_dataset, batch_size, args)
 
     # training
-    train(net, train_data, val_data, eval_metric, ctx, args)
+    train(network, train_dataloader, val_dataloader, val_metric, ctx, args)
+
+    # TODO: Export to onnx.
