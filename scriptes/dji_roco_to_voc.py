@@ -59,8 +59,10 @@ def process_subfolder(dir_path, d):
             raise (RuntimeError, 'Unmatched label: {} & {}'.format(image_list[i], annotation_list[i]))
     print('[{}]Pass.'.format(d))
 
+    name_list = []
     print('[{}]Resize Image...'.format(d))
-    for image in image_list:
+    print('[{}]Check annotation...'.format(d))
+    for image, annotation in zip(image_list, annotation_list):
         image_path = os.path.join(image_dst_path, image)
         with Image.open(image_path) as im:
             target_width = im.width / im.height * args.out_size
@@ -69,20 +71,29 @@ def process_subfolder(dir_path, d):
                     im.resize((int(target_width), args.out_size)).save(image_path)
                 except OSError:
                     print('[{}][Data Corrupted] Can not resize {}. '.format(d, image))
-    print('[{}]Done.'.format(d))
 
-    name_list = []
-    print('[{}]Check annotation...'.format(d))
-    for annotation in annotation_list:
         annotation_path = os.path.join(annotation_dst_path, annotation)
         tree = ETree.parse(annotation_path)
         root = tree.getroot()
+        width = root.find('size').find('width')
+        height = root.find('size').find('height')
+
         if root.find('object') is None:
             print('[{}][Annotation Dropped] No object found in {}. '.format(d, annotation))
         else:
+            for obj in root.iter('object'):
+                bndbox = obj.find('bndbox')
+                bndbox.find('xmin').text = str(float(bndbox.findtext('xmin')) / float(width.text) * target_width)
+                bndbox.find('ymin').text = str(float(bndbox.findtext('ymin')) / float(height.text) * args.out_size)
+                bndbox.find('xmax').text = str(float(bndbox.findtext('xmax')) / float(width.text) * target_width)
+                bndbox.find('ymax').text = str(float(bndbox.findtext('ymax')) / float(height.text) * args.out_size)
             name_list.append(annotation.split('.')[0])
 
+        width.text = str(int(target_width))
+        height.text = str(int(args.out_size))
+
         tree.write(annotation_path)
+    print('[{}]Done.'.format(d))
     print('[{}]Done.'.format(d))
 
     random.shuffle(name_list)
