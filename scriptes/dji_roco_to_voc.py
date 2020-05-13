@@ -19,8 +19,8 @@ def parse_args():
     parser.add_argument('--split-ratio', type=float, default=0.8,
                         help='Traing set size : test set size.')
 
-    parser.add_argument('--out-size', type=int, default=720,
-                        help='Output image height. support 360, 480, 720, 1080')
+    parser.add_argument('--out-size', type=int, default=360,
+                        help='Output image height. support 360, 480, 720')
 
     return parser.parse_args()
 
@@ -71,6 +71,7 @@ def process_subfolder(dir_path, d):
                     im.resize((int(target_width), args.out_size)).save(image_path)
                 except OSError:
                     print('[{}][Data Corrupted] Can not resize {}. '.format(d, image))
+                    continue
 
         annotation_path = os.path.join(annotation_dst_path, annotation)
         tree = ETree.parse(annotation_path)
@@ -165,9 +166,8 @@ if __name__ == '__main__':
         if not os.path.isdir(dir_path):
             continue
 
-        process_list.append(Process(target=process_subfolder, args=(dir_path, d)))
-
-    for process in process_list:
+        process = Process(target=process_subfolder, args=(dir_path, d))
+        process_list.append(process)
         process.start()
 
     for process in process_list:
