@@ -17,7 +17,7 @@ def parse_args():
                         help='dataset directory on disk')
 
     parser.add_argument('--split-ratio', type=float, default=0.8,
-                        help='Traing set size : test set size.')
+                        help='Training set size :  dataset size.')
 
     parser.add_argument('--out-size', type=int, default=360,
                         help='Output image height. support 360, 480, 720')
@@ -25,43 +25,41 @@ def parse_args():
     return parser.parse_args()
 
 
-def process_subfolder(dir_path, d):
-    print('[{}]Processing...'.format(d))
-    print('[{}]Rename image -> JPEGImages.'.format(d))
-    image_src_path = os.path.join(dir_path, 'image')
-    image_dst_path = os.path.join(dir_path, 'JPEGImages')
+def to_voc(floder_path, floder_name):
+    print('[{}]Processing...'.format(floder_name))
+    print('[{}]Rename image -> JPEGImages.'.format(floder_name))
+    image_src_path = os.path.join(floder_path, 'image')
+    image_dst_path = os.path.join(floder_path, 'JPEGImages')
 
     if not os.path.exists(image_dst_path):
         os.rename(image_src_path, image_dst_path)
 
-    print('[{}]Rename image_annotation -> Annotations.'.format(d))
-    annotation_src_path = os.path.join(dir_path, 'image_annotation')
-    annotation_dst_path = os.path.join(dir_path, 'Annotations')
+    print('[{}]Rename image_annotation -> Annotations.'.format(floder_name))
+    annotation_src_path = os.path.join(floder_path, 'image_annotation')
+    annotation_dst_path = os.path.join(floder_path, 'Annotations')
 
     if not os.path.exists(annotation_dst_path):
         os.rename(annotation_src_path, annotation_dst_path)
 
-    print('[{}]Load list.'.format(d))
+    print('[{}]Load list.'.format(floder_name))
     image_list = os.listdir(image_dst_path)
     annotation_list = os.listdir(annotation_dst_path)
 
-    print('[{}]Check pairing...'.format(d))
+    print('[{}]Check pairing...'.format(floder_name))
     image_list.sort()
     annotation_list.sort()
 
     if not len(image_list) == len(annotation_list):
-        raise RuntimeError('[{}]Images and annotations should have the same size.'.format(d))
+        raise RuntimeError('[{}]Images and annotations should have the same size.'.format(floder_name))
 
     for i in range(len(image_list)):
-        if image_list[i].split('.')[0] == annotation_list[i].split('.')[0]:
-            continue
-        else:
+        if image_list[i].split('.')[0] != annotation_list[i].split('.')[0]:
             raise (RuntimeError, 'Unmatched label: {} & {}'.format(image_list[i], annotation_list[i]))
-    print('[{}]Pass.'.format(d))
+    print('[{}]Pass.'.format(floder_name))
 
     name_list = []
-    print('[{}]Resize Image...'.format(d))
-    print('[{}]Check annotation...'.format(d))
+    print('[{}]Resize Image...'.format(floder_name))
+    print('[{}]Check annotation...'.format(floder_name))
     for image, annotation in zip(image_list, annotation_list):
         image_path = os.path.join(image_dst_path, image)
         with Image.open(image_path) as im:
@@ -70,7 +68,7 @@ def process_subfolder(dir_path, d):
                 try:
                     im.resize((int(target_width), args.out_size)).save(image_path)
                 except OSError:
-                    print('[{}][Data Corrupted] Can not resize {}. '.format(d, image))
+                    print('[{}][Data Corrupted] Can not resize {}. '.format(floder_name, image))
                     continue
 
         annotation_path = os.path.join(annotation_dst_path, annotation)
@@ -78,36 +76,43 @@ def process_subfolder(dir_path, d):
         root = tree.getroot()
         width = root.find('size').find('width')
         height = root.find('size').find('height')
+        float_width = float(width.text)
+        float_height = float(height.text)
 
         if root.find('object') is None:
-            print('[{}][Annotation Dropped] No object found in {}. '.format(d, annotation))
+            print('[{}][Annotation Dropped] No object found in {}. '.format(floder_name, annotation))
         else:
             for obj in root.iter('object'):
                 bndbox = obj.find('bndbox')
-                bndbox.find('xmin').text = str(float(bndbox.findtext('xmin')) / float(width.text) * target_width)
-                bndbox.find('ymin').text = str(float(bndbox.findtext('ymin')) / float(height.text) * args.out_size)
-                bndbox.find('xmax').text = str(float(bndbox.findtext('xmax')) / float(width.text) * target_width)
-                bndbox.find('ymax').text = str(float(bndbox.findtext('ymax')) / float(height.text) * args.out_size)
-            name_list.append(annotation.split('.')[0])
+
+                xmin = float(bndbox.findtext('xmin')) / float_width * target_width
+                ymin = float(bndbox.findtext('ymin')) / float_height * args.out_size
+                xmax = float(bndbox.findtext('xmax')) / float_width * target_width
+                ymax = float(bndbox.findtext('ymax')) / float_height * args.out_size
+
+                bndbox.find('xmin').text = str(min(max(xmin, 0), float_width - 1))
+                bndbox.find('ymin').text = str(min(max(ymin, 0), float_height - 1))
+                bndbox.find('xmax').text = str(min(max(xmax, xmin), float_width))
+                bndbox.find('ymax').text = str(min(max(ymax, ymin), float_height))
+
+            name_list.append('.'.join(annotation.split('.')[:-1]))
 
         width.text = str(int(target_width))
         height.text = str(int(args.out_size))
 
         tree.write(annotation_path)
-    print('[{}]Done.'.format(d))
-    print('[{}]Done.'.format(d))
+    print('[{}]All Done.'.format(floder_name))
 
     random.shuffle(name_list)
 
-    split_ratio = args.split_ratio
-    split_index = math.floor(len(name_list) * split_ratio)
+    split_index = math.floor(len(name_list) * args.split_ratio)
     train_list = name_list[:split_index]
     test_list = name_list[split_index:]
-    print('[{}]Training set size: {}.'.format(d, len(train_list)))
-    print('[{}]Test set size: {}.'.format(d, len(test_list)))
+    print('[{}]Training set size: {}.'.format(floder_name, len(train_list)))
+    print('[{}]Test set size: {}.'.format(floder_name, len(test_list)))
 
-    print('[{}]Create dir for pairing.'.format(d))
-    imagesets_path = os.path.join(dir_path, 'ImageSets')
+    print('[{}]Create dir for pairing.'.format(floder_name))
+    imagesets_path = os.path.join(floder_path, 'ImageSets')
     if not os.path.exists(imagesets_path):
         os.mkdir(imagesets_path)
 
@@ -115,7 +120,7 @@ def process_subfolder(dir_path, d):
     if not os.path.exists(imagesets_main_path):
         os.mkdir(imagesets_main_path)
 
-    print('[{}]Write pairing to file.'.format(d))
+    print('[{}]Write pairing to file.'.format(floder_name))
     with open(os.path.join(imagesets_main_path, 'trainval.txt'), 'w+') as f:
         for name in train_list:
             f.write(name + '\n')
@@ -124,7 +129,7 @@ def process_subfolder(dir_path, d):
         for name in test_list:
             f.write(name + '\n')
 
-    print('[{}]Completed.'.format(d))
+    print('[{}]Completed.'.format(floder_name))
     print()
 
 
@@ -161,12 +166,12 @@ if __name__ == '__main__':
     dir_list = os.listdir(path)
 
     process_list = []
-    for d in dir_list:
-        dir_path = os.path.join(path, d)
-        if not os.path.isdir(dir_path):
+    for sub_folder in dir_list:
+        sub_folder_path = os.path.join(path, sub_folder)
+        if not os.path.isdir(sub_folder_path):
             continue
 
-        process = Process(target=process_subfolder, args=(dir_path, d))
+        process = Process(target=to_voc, args=(sub_folder_path, sub_folder))
         process_list.append(process)
         process.start()
 
