@@ -1,0 +1,6 @@
+train: ../DJI ROCO/train
+val: ../DJI ROCO/val
+
+nc: 4
+name: ['armor', 'base', 'watcher', 'car']
+
