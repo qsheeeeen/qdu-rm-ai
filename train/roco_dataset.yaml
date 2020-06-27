@@ -1,6 +1,8 @@
-train: ../DJI ROCO/train
-val: ../DJI ROCO/val
+train: ../roco/train.txt
+val: ../roco/val.txt
+test: ../roco/test.txt
+
 
 nc: 4
-name: ['armor', 'base', 'watcher', 'car']
+names: ['armor', 'base', 'watcher', 'car']
 
