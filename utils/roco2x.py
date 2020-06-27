@@ -14,6 +14,18 @@ YOLO5_IMAGE_FOLDER = 'images'
 ORIGIN_LABEL_FOLDER = 'image_annotation'
 VOC_LABEL_FOLDER = 'Annotations'
 YOLO5_LABEL_FOLDER = 'labels'
+CLASSES = ['armor', 'base', 'watcher', 'car']
+
+
+def split_list(source_list, split_ratio):
+    split_index1 = math.floor(len(source_list) * split_ratio[0] / sum(split_ratio))
+    split_index2 = math.floor(len(source_list) * sum(split_ratio[:2]) / sum(split_ratio))
+
+    train = source_list[:split_index1]
+    test = source_list[split_index1:split_index2]
+    val = source_list[split_index2:]
+
+    return train, test, val
 
 
 def parse_args():
@@ -25,10 +37,10 @@ def parse_args():
                         help='dataset directory on disk')
 
     parser.add_argument('--target', type=str, default='yolov5',
-                        help='Output format. support voc, yolov5, coco')
+                        help='Output format. support voc, yolov5')
 
-    parser.add_argument('--split-ratio', type=float, default=0.8,
-                        help='Training set size :  dataset size.')
+    parser.add_argument('--split-ratio', nargs='+', type=int, default=[7, 2, 1],
+                        help='train : test : val.')
 
     parser.add_argument('--out-size', type=int, default=360,
                         help='Output image height. support 360, 480, 720')
@@ -109,11 +121,11 @@ def to_voc(folder_path, folder_name):
 
     random.shuffle(name_list)
 
-    split_index = math.floor(len(name_list) * args.split_ratio)
-    train_list = name_list[:split_index]
-    test_list = name_list[split_index:]
+    train_list, test_list, val_list = split_list(name_list, args.split_ratio)
+
     print('[{}]Training set size: {}.'.format(folder_name, len(train_list)))
     print('[{}]Test set size: {}.'.format(folder_name, len(test_list)))
+    print('[{}]Val set size: {}.'.format(folder_name, len(val_list)))
 
     print('[{}]Create dir for pairing.'.format(folder_name))
     imagesets_path = os.path.join(folder_path, 'ImageSets')
@@ -133,11 +145,14 @@ def to_voc(folder_path, folder_name):
         for name in test_list:
             f.write(name + '\n')
 
+    with open(os.path.join(imagesets_main_path, 'val.txt'), 'w+') as f:
+        for name in val_list:
+            f.write(name + '\n')
+
     print('[{}]Completed.'.format(folder_name))
     print()
 
 
-CLASSES = ['armor', 'base', 'watcher', 'car']
 
 
 def to_yolov5(folder_path, folder_name):
@@ -163,6 +178,10 @@ def to_yolov5(folder_path, folder_name):
 
     name_list = resize_data(image_dst_path, annotation_src_path)
 
+    with open(os.path.join(folder_path, 'name_list.txt'), 'w+') as f:
+        for n in name_list:
+            f.write(n + '\n')
+
     for annotation in name_list:
         annotation_path = os.path.join(annotation_src_path, annotation + '.xml')
         tree = ETree.parse(annotation_path)
@@ -179,8 +198,8 @@ def to_yolov5(folder_path, folder_name):
                     xmax = float(bndbox.findtext('xmax'))
                     ymax = float(bndbox.findtext('ymax'))
 
-                    x = xmin / width
-                    y = ymin / height
+                    x = (xmin + xmax) / 2.0 / width
+                    y = (ymin + ymax) / 2.0 / height
                     w = (xmax - xmin) / width
                     h = (ymax - ymin) / height
 
@@ -191,54 +210,37 @@ def to_yolov5(folder_path, folder_name):
                         f.write(' '.join([str(class_index), str(x), str(y), str(w), str(h)]) + '\n')
                     except ValueError:
                         pass
-    #                 TODO: ADD symble link.
 
     print('[{}]Completed.'.format(folder_name))
 
 
-def to_yolov5_prepare(dataset_dir):
-    dirs = [
-        os.path.join(dataset_dir, 'train'),
-        os.path.join(dataset_dir, 'val'),
-        os.path.join(dataset_dir, 'test'),
-    ]
-
-    for d in dirs:
-        if not os.path.exists(d):
-            os.mkdir(d)
-
-    with open('roco.yaml', 'w+') as f:
-        f.write('train: {}\n'.format(dirs[0]))
-        f.write('val: {}\n'.format(dirs[1]))
-        f.write('nc: {}\n'.format(len(CLASSES)))
-        f.write('name: {}\n'.format(CLASSES))
-
-
 if __name__ == '__main__':
+    converted = False
     args = parse_args()
     print('Start conversion...')
     dataset_path = os.path.expanduser(args.dji_roco_dir)
 
     s_list = [
-        os.path.join(dataset_path, 'robomaster_Central China Regional Competition'),
-        os.path.join(dataset_path, 'robomaster_Final Tournament'),
-        os.path.join(dataset_path, 'robomaster_North China Regional Competition'),
-        os.path.join(dataset_path, 'robomaster_South China Regional Competition'),
+        'robomaster_Central China Regional Competition',
+        'robomaster_Final Tournament',
+        'robomaster_North China Regional Competition',
+        'robomaster_South China Regional Competition',
     ]
 
     d_list = [
-        os.path.join(dataset_path, 'central'),
-        os.path.join(dataset_path, 'final'),
-        os.path.join(dataset_path, 'north'),
-        os.path.join(dataset_path, 'south'),
+        'central',
+        'final',
+        'north',
+        'south',
     ]
 
     if os.path.isdir(dataset_path):
         if all([os.path.isdir(group_path) for group_path in s_list]):
             for s, d in zip(s_list, d_list):
-                os.rename(s, d)
+                os.rename(os.path.join(dataset_path, s), os.path.join(dataset_path, d))
 
-        elif all([os.path.isdir(path) for path in d_list]):
+        elif all([os.path.isdir(os.path.join(dataset_path, path)) for path in d_list]):
+            converted = True
             print('Converted. Do it again.')
 
         else:
@@ -248,7 +250,6 @@ if __name__ == '__main__':
 
     if args.target == 'yolov5':
         target = to_yolov5
-        to_yolov5_prepare(dataset_path)
     elif args.target == 'voc':
         target = to_voc
     else:
@@ -257,11 +258,9 @@ if __name__ == '__main__':
     data_path_list = os.listdir(dataset_path)
 
     process_list = []
-    for sub_folder in data_path_list:
-        sub_folder_path = os.path.join(dataset_path, sub_folder)
-        if not os.path.isdir(sub_folder_path) or sub_folder in ['train', 'val', 'test']:
-            continue
 
+    for sub_folder in d_list if converted else s_list:
+        sub_folder_path = os.path.join(dataset_path, sub_folder)
         process = Process(target=target, args=(sub_folder_path, sub_folder))
 
         process_list.append(process)
@@ -269,5 +268,26 @@ if __name__ == '__main__':
 
     for process in process_list:
         process.join()
+
+    if args.target == 'yolov5':
+        sum_list = []
+        for sub_folder in d_list:
+            sub_folder_path = os.path.join(dataset_path, sub_folder)
+
+            with open(os.path.join(sub_folder_path, 'name_list.txt')) as f:
+                for line in f.readlines():
+                    line = line.replace('\n', '.jpg\n')
+                    sum_list.append(os.path.join('.', sub_folder, YOLO5_IMAGE_FOLDER, line))
+
+        train_list, test_list, val_list = split_list(sum_list, args.split_ratio)
+
+        with open(os.path.join(dataset_path, 'train.txt'), 'w+') as f:
+            f.writelines(train_list)
+
+        with open(os.path.join(dataset_path, 'val.txt'), 'w+') as f:
+            f.writelines(test_list)
+
+        with open(os.path.join(dataset_path, 'test.txt'), 'w+') as f:
+            f.writelines(val_list)
 
     print('Converted.')
