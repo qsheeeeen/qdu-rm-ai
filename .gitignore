@@ -133,3 +133,6 @@ dmypy.json
 
 # Runtime
 dask-worker-space/
+
+# VS Code
+.vscode/

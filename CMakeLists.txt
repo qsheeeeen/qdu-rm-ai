@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(qdu_rm_ai)
+project(qdu_rm_ai
+  DESCRIPTION "AI for Robomaster"
+  VERSION 0.1.0
+  LANGUAGES CXX
+)
+
+if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
+    message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there.")
+endif()
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
