@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(behavior)
+project(camera)
 
 #---------------------------------------------------------------------------------------
 # Options
@@ -17,14 +17,6 @@ file(GLOB ${PROJECT_NAME}_SOURCES
 )
 
 add_library(${PROJECT_NAME} OBJECT EXCLUDE_FROM_ALL ${${PROJECT_NAME}_SOURCES})
-
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-target_link_libraries(${PROJECT_NAME} BT::behaviortree_cpp_v3)
-
-add_dependencies(${PROJECT_NAME} camera)
-add_dependencies(${PROJECT_NAME} com)
-add_dependencies(${PROJECT_NAME} vision)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}

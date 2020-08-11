@@ -14,7 +14,7 @@ file(GLOB ${PROJECT_NAME}_SOURCES
 )
 
 add_executable(${PROJECT_NAME}
-    ${PROJECT_NAME}_SOURCES
+    ${${PROJECT_NAME}_SOURCES}
     $<TARGET_OBJECTS:behavior>
     $<TARGET_OBJECTS:vision>
 )

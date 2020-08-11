@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(qdu_rm_ai VERSION 0.1.0)
+project(qdu_rm_ai)
 
 #---------------------------------------------------------------------------------------
 # Options
@@ -15,6 +15,8 @@ set_property(CACHE APPLICATION PROPERTY STRINGS ${APPLICATION_LIST})
 #---------------------------------------------------------------------------------------
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/behavior)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/camera)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/com)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vision)
 
 #---------------------------------------------------------------------------------------
