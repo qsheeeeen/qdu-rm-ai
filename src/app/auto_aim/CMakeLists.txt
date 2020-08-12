@@ -9,17 +9,17 @@ project(auto_aim)
 # Target
 #---------------------------------------------------------------------------------------
 
-file(GLOB ${PROJECT_NAME}_SOURCES
-    "${CMAKE_CURRENT_LIST_DIR}/*.cpp"
-)
+add_executable(${PROJECT_NAME} main.cpp)
 
-add_executable(${PROJECT_NAME}
-    ${${PROJECT_NAME}_SOURCES}
-    $<TARGET_OBJECTS:behavior>
-    $<TARGET_OBJECTS:vision>
+target_link_libraries(${PROJECT_NAME} PUBLIC
+    behavior
+    vision
+    behaviortree_cpp_v3
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:$<TARGET_PROPERTY:behavior,INTERFACE_INCLUDE_DIRECTORIES>>
+    $<BUILD_INTERFACE:$<TARGET_PROPERTY:camera,INTERFACE_INCLUDE_DIRECTORIES>>
+    $<BUILD_INTERFACE:$<TARGET_PROPERTY:com,INTERFACE_INCLUDE_DIRECTORIES>>
     $<BUILD_INTERFACE:$<TARGET_PROPERTY:vision,INTERFACE_INCLUDE_DIRECTORIES>>
 )
