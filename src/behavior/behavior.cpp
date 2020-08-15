@@ -11,12 +11,14 @@ static const char *xml_text = R"(
 
  <root main_tree_to_execute = "MainTree" >
      <BehaviorTree ID="MainTree">
-        <Sequence name="root_sequence">
-            <ApproachObject name="approach1"/>
-            <ApproachObject name="approach2"/>
-            <ApproachObject name="approach3"/>
-            <ApproachObject name="approach4"/>
-        </Sequence>
+        <Fallback name="root_sequence">
+            <LowHP name="low_hp"/>
+            <Sequence name="fight">
+                <EnamyVisable name="enamy_visable"/>
+                <Track name="track"/>
+                <Attack name="attack"/>
+            </Sequence>
+        </Fallback>
      </BehaviorTree>
  </root>
  
@@ -29,7 +31,11 @@ void RunTestTree()
     std::cout << "Run test tree." << std::endl;
 
     BehaviorTreeFactory factory;
-    factory.registerNodeType<ApproachObject>("ApproachObject");
+    factory.registerNodeType<Action::Attack>("Attack");
+    factory.registerNodeType<Action::Track>("Track");
+    factory.registerNodeType<Condition::EnamyVisable>("EnamyVisable");
+    factory.registerNodeType<Condition::LowHP>("LowHP");
+    factory.registerNodeType<Condition::UnderAttack>("UnderAttack");
 
     auto tree = factory.createTreeFromText(xml_text);
 
