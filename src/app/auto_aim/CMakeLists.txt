@@ -14,6 +14,7 @@ add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} PUBLIC
     behavior
     vision
+    camera
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -22,3 +23,5 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:$<TARGET_PROPERTY:com,INTERFACE_INCLUDE_DIRECTORIES>>
     $<BUILD_INTERFACE:$<TARGET_PROPERTY:vision,INTERFACE_INCLUDE_DIRECTORIES>>
 )
+
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
