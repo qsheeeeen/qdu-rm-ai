@@ -1,17 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(qdu_rm_ai
-  DESCRIPTION "AI for Robomaster"
-  VERSION 0.1.0
-  LANGUAGES CXX
-)
-
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-if (CMAKE_COMPILER_IS_GNUCC)
-    target_compile_options(main PRIVATE "-Wall -Wextra")
-endif()
+project(qdu_rm_ai_node)
 
 if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
     message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there.")
