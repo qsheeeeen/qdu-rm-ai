@@ -26,9 +26,9 @@ static const char *xml_text = R"(
 
 using namespace BT;
 
-void RunTestTree()
+void TestTree()
 {
-    std::cout << "Run test tree." << std::endl;
+    std::cout << "Run TestTree." << std::endl;
 
     BehaviorTreeFactory factory;
     factory.registerNodeType<Action::Attack>("Attack");
@@ -40,4 +40,6 @@ void RunTestTree()
     auto tree = factory.createTreeFromText(xml_text);
 
     tree.tickRoot();
+    
+    std::cout << "Finish TestTree." << std::endl;
 }
