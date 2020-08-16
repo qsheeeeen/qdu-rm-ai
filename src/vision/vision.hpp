@@ -2,7 +2,6 @@
 
 void TestOpenCV();
 void TestVideoWrite(void);
-void TestOpenCVGraph(void);
 
 class ObjectDetector
 {
