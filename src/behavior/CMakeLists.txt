@@ -18,10 +18,10 @@ file(GLOB ${PROJECT_NAME}_SOURCES
 
 add_library(${PROJECT_NAME} STATIC ${${PROJECT_NAME}_SOURCES})
 
-target_link_libraries(${PROJECT_NAME} behaviortree_cpp_v3)
+target_link_libraries(${PROJECT_NAME} PRIVATE behaviortree_cpp_v3)
 
 add_dependencies(${PROJECT_NAME} camera)
-add_dependencies(${PROJECT_NAME} com)
+add_dependencies(${PROJECT_NAME} robot)
 add_dependencies(${PROJECT_NAME} vision)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
