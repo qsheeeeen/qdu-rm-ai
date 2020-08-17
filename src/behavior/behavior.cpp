@@ -4,10 +4,79 @@
 
 #include "behaviortree_cpp_v3/behavior_tree.h"
 #include "behaviortree_cpp_v3/bt_factory.h"
-
 #include "node.hpp"
 
-static const char *xml_text = R"(
+static const char *const xml_tree_test = R"(
+
+ <root main_tree_to_execute = "MainTree" >
+     <BehaviorTree ID="MainTree">
+        <Fallback name="root_sequence">
+            <LowHP name="low_hp"/>
+            <Sequence name="fight">
+                <EnamyVisable name="enamy_visable"/>
+                <Track name="track"/>
+                <Attack name="attack"/>
+            </Sequence>
+        </Fallback>
+     </BehaviorTree>
+ </root>
+ 
+ )";
+
+static const char *const xml_tree_full_auto = R"(
+
+ <root main_tree_to_execute = "MainTree" >
+     <BehaviorTree ID="MainTree">
+        <Fallback name="root_sequence">
+            
+            <Fallback name="when under attack">
+                <Fallback name="when under attack">
+                    
+                    <NoAmmo name="no_ammo"/>
+
+                    <Sequence name="fight_back">
+                        <LowHP name="low_hp"/>
+                        <Dodge name="dodge"/>
+                    </Sequence>
+                    
+                </Fallback>
+
+                    <UnderAttack name="under_attack"/>
+                    <Dodge name="dodge"/>
+            </Fallback>
+
+            <Sequence name="fight_back">
+                <LowHP name="low_hp"/>
+                <Dodge name="dodge"/>
+                <Track name="track"/>
+                <Attack name="attack"/>
+            </Sequence>
+
+                <LowHP name="low_hp"/>
+                <Track name="track"/>
+                <Attack name="attack"/>
+            
+
+            <Sequence name="fight_back">
+                <LowHP name="low_hp"/>
+                <EnamyVisable name="enamy_visable"/>
+                <Track name="track"/>
+                <Attack name="attack"/>
+            </Sequence>
+
+            <Sequence name="fight">
+                <EnamyVisable name="enamy_visable"/>
+                <Track name="track"/>
+                <Attack name="attack"/>
+            </Sequence>
+
+        </Fallback>
+     </BehaviorTree>
+ </root>
+ 
+ )";
+
+static const char *const xml_tree_auto_aim = R"(
 
  <root main_tree_to_execute = "MainTree" >
      <BehaviorTree ID="MainTree">
@@ -26,20 +95,16 @@ static const char *xml_text = R"(
 
 using namespace BT;
 
-void TestTree()
-{
-    std::cout << "Run TestTree." << std::endl;
+void TestTree() {
+  std::cout << "Run TestTree." << std::endl;
 
-    BehaviorTreeFactory factory;
-    factory.registerNodeType<Action::Attack>("Attack");
-    factory.registerNodeType<Action::Track>("Track");
-    factory.registerNodeType<Condition::EnamyVisable>("EnamyVisable");
-    factory.registerNodeType<Condition::LowHP>("LowHP");
-    factory.registerNodeType<Condition::UnderAttack>("UnderAttack");
+  BehaviorTreeFactory factory;
 
-    auto tree = factory.createTreeFromText(xml_text);
+  RegisterNode(factory);
 
-    tree.tickRoot();
-    
-    std::cout << "Finish TestTree." << std::endl;
+  auto tree = factory.createTreeFromText(xml_tree_test);
+
+  tree.tickRoot();
+
+  std::cout << "Finish TestTree." << std::endl;
 }

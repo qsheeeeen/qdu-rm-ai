@@ -1,24 +1,23 @@
 #include <iostream>
 
 #include "behavior.hpp"
-#include "vision.hpp"
 #include "camera.hpp"
+#include "vision.hpp"
 
-int main(int argc, char const *argv[])
-{
-    (void)argc;
-    (void)argv;
-    std::cout << "Auto aimer started." << std::endl;
+int main(int argc, char const *argv[]) {
+  (void)argc;
+  (void)argv;
+  std::cout << "Auto aimer started." << std::endl;
 
-    // Test only. TOOD: Remove.
-    auto cam = Camera(0);
+  // Test only. TOOD: Remove.
+  auto cam = Camera(0);
 
-    TestTree();
-    TestOpenCV();
-    TestVideoWrite();
+  TestTree();
+  TestOpenCV();
+  TestVideoWrite();
 
-    // Init behavior.
-    // Run true tree.
+  // Init behavior.
+  // Run true tree.
 
-    return 0;
+  return 0;
 }
