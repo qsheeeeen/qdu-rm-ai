@@ -1,10 +1,12 @@
 #pragma once
 
+#include "MvCameraControl.h"
 #include "opencv2/opencv.hpp"
 
 class Camera {
  private:
-  cv::VideoCapture cam;
+  //  OpenCV
+  cv::VideoCapture video_cap;
   cv::Mat frame_in;
   cv::Mat hist_in;
   cv::Mat hist_target;
@@ -17,6 +19,15 @@ class Camera {
   float gamma = 1.;
   cv::Mat lut;
 
+  //  MVC SDK
+  unsigned int payload_size = 0;
+  MV_CC_DEVICE_INFO *mv_dev_info;
+  MV_CC_DEVICE_INFO_LIST mv_dev_list;
+  MVCC_INTVALUE init_val;
+  void *camera_handle = nullptr;
+
+  void PrintDeviceInfo();
+
   void CreateLUT();
   void AppyLUT();
 
@@ -27,8 +38,9 @@ class Camera {
   void MatchTargetHist();
 
  public:
-  Camera(int index);
+  Camera(unsigned int index);
   ~Camera();
+  void *GetCameraHandle();
   bool Capture();
   void Preprocess();
   void CalcTargetHist();
