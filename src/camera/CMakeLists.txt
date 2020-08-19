@@ -19,7 +19,6 @@ file(GLOB ${PROJECT_NAME}_SOURCES
 add_library(${PROJECT_NAME} STATIC ${${PROJECT_NAME}_SOURCES})
 
 target_link_libraries(${PROJECT_NAME}
-    ${OpenCV_LIBS}
     MvCameraControl
 )
 
