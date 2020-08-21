@@ -1,8 +1,20 @@
 #include "robot.hpp"
 
-Robot::Robot() {}
+#include <fstream>
 
-Robot::~Robot() {}
+void Robot::WorkThread() {
+    
+}
+
+Robot::Robot(std::string dev_path) {
+  dev = std::ofstream(dev_path);
+  continue_parse_ = true;
+  parse_thread_ = std::thread(&Robot::WorkThread, this);
+}
+
+Robot::~Robot() {
+    dev.close();
+}
 
 bool Robot::Connect() {}
 bool Robot::Disconnect() {}

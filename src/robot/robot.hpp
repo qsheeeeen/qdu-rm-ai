@@ -1,11 +1,16 @@
 #pragma once
 
+#include <thread>
+
 class Robot {
  private:
-  float place_holder;
+  std::fstream dev;
+  bool continue_parse_ = false;
+  std::thread parse_thread_;
 
+  void WorkThread();
  public:
-  Robot();
+  Robot(std::string dev_path);
   ~Robot();
 
   bool Connect();
