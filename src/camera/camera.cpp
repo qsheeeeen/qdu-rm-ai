@@ -25,12 +25,13 @@ void Camera::WorkThread() {
         printf("Free Image Buffer fail! err [0x%x]\n", err);
       }
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 }
 
 void Camera::PrintDeviceInfo() {
   if (NULL == mv_dev_info_) {
-    std::cout << "The Pointer of mv_dev_info_ is NULL!" << std::endl;
+    std::cout << "The Pointer of mv_dev_info_ is NULL!\n" << std::endl;
     return;
   }
   if (mv_dev_info_->nTLayerType == MV_USB_DEVICE) {
