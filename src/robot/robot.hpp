@@ -19,11 +19,11 @@ class Robot {
   bool continue_parse_ = false;
   std::thread parse_thread_;
   std::queue<command_holder_t> commandq_;
-  std::mutex commandq_mutex;
+  std::mutex commandq_mutex_;
 
-  char recv_buff_[sizeof(recv_holder_t)];
-  void WorkThread();
-  void Parse();
+  recv_holder_t status_;
+  void ComThread();
+  void CommandThread();
 
  public:
   Robot(const std::string &dev_path);

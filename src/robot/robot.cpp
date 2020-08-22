@@ -2,23 +2,21 @@
 
 #include <iostream>
 
-void Robot::WorkThread() {
+void Robot::ComThread() {
   while (continue_parse_) {
-    dev_.read(recv_buff_, sizeof(recv_holder_t));
-    Parse();
-    commandq_mutex.lock();
+    dev_.read((char*)&status_, sizeof(recv_holder_t));
+
+    commandq_mutex_.lock();
     if (!commandq_.empty()) {
       dev_.write((char*)&commandq_.front(), sizeof(recv_holder_t));
       commandq_.pop();
     }
-    commandq_mutex.unlock();
+    commandq_mutex_.unlock();
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 }
 
-void ParseThread();
-
-void Robot::Parse() {}
+void Robot::CommandThread() {}
 
 Robot::Robot(const std::string &dev_path) {
   std::cout << "Create Robot." << std::endl;
@@ -27,7 +25,7 @@ Robot::Robot(const std::string &dev_path) {
   if (!dev_.is_open()) throw std::runtime_error("Can't open Robot device.");
 
   continue_parse_ = true;
-  parse_thread_ = std::thread(&Robot::WorkThread, this);
+  parse_thread_ = std::thread(&Robot::ComThread, this);
 }
 
 Robot::~Robot() {
