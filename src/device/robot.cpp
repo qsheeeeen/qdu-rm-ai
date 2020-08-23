@@ -1,7 +1,5 @@
 #include "robot.hpp"
 
-#include <iostream>
-
 #include "spdlog/spdlog.h"
 
 void Robot::ComThread() {
