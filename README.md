@@ -8,6 +8,8 @@
 
   - Install MVS SDK from [HIKROBOT](https://www.hikrobotics.com/service/soft.htm). Follow the instructions in INSTALL.
 
+  - Install MVS SDK from [spdlog](https://github.com/gabime/spdlog). Follow the instructions in README.
+
 - Build code.
 
   ```cmd
@@ -16,7 +18,7 @@
   mkdir build
   cd build
   cmake ..
-  make -j14
+  make -j
   ```
 
 ## Reminder

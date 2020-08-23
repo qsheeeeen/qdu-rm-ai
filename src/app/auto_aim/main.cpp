@@ -3,13 +3,15 @@
 #include "behavior.hpp"
 #include "camera.hpp"
 #include "robot.hpp"
+#include "spdlog/spdlog.h"
 #include "vision.hpp"
 
 int main(int argc, char const* argv[]) {
   (void)argc;
   (void)argv;
 
-  std::cout << "Auto aimer started." << std::endl;
+  spdlog::set_level(spdlog::level::trace);  // Set specific logger's log level
+  spdlog::info("Running Auto Aim.");
 
   Robot bot("/home/qs/virtual_robot.txt");
   Camera cam(0);

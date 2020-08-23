@@ -9,13 +9,16 @@ project(auto_aim)
 # Target
 #---------------------------------------------------------------------------------------
 
+find_package(spdlog REQUIRED)
+
 add_executable(${PROJECT_NAME} main.cpp)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC
+target_link_libraries(${PROJECT_NAME} PRIVATE
     behavior
     vision
     camera
     robot
+    spdlog::spdlog
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
