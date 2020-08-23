@@ -4,12 +4,12 @@
 
 - Install dependency
 
-  - Install [BehavoirTree.CPP](https://github.com/BehaviorTree/BehaviorTree.CPP). Follow the instructions in README.
+  - Install [BehavoirTree.CPP](https://github.com/BehaviorTree/BehaviorTree.CPP).
 
   - Install MVS SDK from [HIKROBOT](https://www.hikrobotics.com/service/soft.htm). Follow the instructions in INSTALL.
 
-  - Install MVS SDK from [spdlog](https://github.com/gabime/spdlog). Follow the instructions in README.
-
+  - Install [spdlog](https://github.com/gabime/spdlog).
+  
 - Build code.
 
   ```cmd
