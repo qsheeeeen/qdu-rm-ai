@@ -69,18 +69,18 @@ Camera::Camera(unsigned int index) {
       spdlog::info("[device {d}]: ", i);
       mv_dev_info_ = mv_dev_list_.pDeviceInfo[i];
       if (mv_dev_info_ == nullptr) {
-        spdlog::error(err_string.str());
+        spdlog::error("[Camera] Error Reading mv_dev_info_");
         throw std::runtime_error("[Camera] Error Reading mv_dev_info_");
       } else
         PrintDeviceInfo();
     }
   } else {
-    spdlog::error(err_string.str());
+    spdlog::error("[Camera] Find No Devices!");
     throw std::runtime_error("[Camera] Find No Devices!");
   }
 
   if (index >= mv_dev_list_.nDeviceNum) {
-    spdlog::error(err_string.str());
+    spdlog::error("[Camera] Intput error!");
     throw std::runtime_error("[Camera] Intput error!");
   }
   err = MV_CC_CreateHandle(&camera_handle_, mv_dev_list_.pDeviceInfo[index]);
