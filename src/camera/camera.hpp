@@ -1,6 +1,7 @@
 #pragma once
 
 #include <thread>
+
 #include "MvCameraControl.h"
 
 class Camera {
