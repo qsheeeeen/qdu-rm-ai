@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 typedef enum {
   kBR9600,
   KBR115200,
@@ -10,9 +12,13 @@ class Serial {
   int dev_;
 
  public:
-  Serial(int index);
+  Serial();
+  Serial(const std::string &dev_path);
   ~Serial();
+  void Open(const std::string &dev_path);
+  bool IsOpen();
   bool Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br);
-  void Trans(char buff[], int len);
-  void Recv(char buff[], int len);
+  ssize_t Trans(char buff[], int len);
+  ssize_t Recv(char buff[], int len);
+  int Close();
 };
