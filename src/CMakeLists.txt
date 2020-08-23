@@ -9,10 +9,6 @@ project(qdu_rm_ai
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
-    message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there.")
-endif()
-
 #---------------------------------------------------------------------------------------
 # Options
 #---------------------------------------------------------------------------------------
@@ -21,12 +17,6 @@ endif()
 set(APPLICATION_LIST auto_aim full_auto)
 set(APPLICATION auto_aim CACHE STRING "Default Application is auto_aim")
 set_property(CACHE APPLICATION PROPERTY STRINGS ${APPLICATION_LIST})
-
-
-# Allow switching of camera API
-set(CAMERA_API_LIST OPENCV MVS)
-set(CAMERA_API auto_aim CACHE STRING "Default camera API is OPENCV")
-set_property(CACHE CAMERA_API PROPERTY STRINGS ${APPLICATION_LIST})
 
 #---------------------------------------------------------------------------------------
 # General Components
