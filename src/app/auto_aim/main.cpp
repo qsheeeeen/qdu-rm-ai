@@ -13,7 +13,7 @@ int main(int argc, char const* argv[]) {
   spdlog::set_level(spdlog::level::trace);
   spdlog::warn("*****Running Auto Aim.*****");
 
-  Robot bot("/home/qs/virtual_robot.txt");
+  Robot bot("/home/qs/virtual_robot");
   Camera cam(0);
 
   // Test only. TOOD: Remove.

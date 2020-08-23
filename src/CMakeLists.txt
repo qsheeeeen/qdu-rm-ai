@@ -23,8 +23,7 @@ set_property(CACHE APPLICATION PROPERTY STRINGS ${APPLICATION_LIST})
 #---------------------------------------------------------------------------------------
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/behavior)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/camera)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/robot)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/device)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vision)
 
 #---------------------------------------------------------------------------------------

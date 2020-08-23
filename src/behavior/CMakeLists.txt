@@ -19,14 +19,15 @@ file(GLOB ${PROJECT_NAME}_SOURCES
 
 add_library(${PROJECT_NAME} STATIC ${${PROJECT_NAME}_SOURCES})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE 
+target_link_libraries(${PROJECT_NAME} PUBLIC 
     behaviortree_cpp_v3
     spdlog::spdlog
 )
 
-add_dependencies(${PROJECT_NAME} camera)
-add_dependencies(${PROJECT_NAME} robot)
-add_dependencies(${PROJECT_NAME} vision)
+add_dependencies(${PROJECT_NAME} 
+    vision
+    device
+)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
