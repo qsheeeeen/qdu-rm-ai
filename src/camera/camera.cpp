@@ -17,16 +17,16 @@ void Camera::WorkThread() {
   while (continue_capture_) {
     err = MV_CC_GetImageBuffer(camera_handle_, &frame_out, 1000);
     if (err == MV_OK) {
-      printf("Get One Frame: Width[%d], Height[%d], nFrameNum[%d]\n",
-             frame_out.stFrameInfo.nWidth, frame_out.stFrameInfo.nHeight,
-             frame_out.stFrameInfo.nFrameNum);
+      spdlog::info("Get One Frame: Width{d}, Height{d}, nFrameNum{d}\n",
+                   frame_out.stFrameInfo.nWidth, frame_out.stFrameInfo.nHeight,
+                   frame_out.stFrameInfo.nFrameNum);
     } else {
-      printf("No data[0x%x]\n", err);
+      spdlog::error("GetImageBuffer fail! err:{x}\n", err);
     }
     if (NULL != frame_out.pBufAddr) {
       err = MV_CC_FreeImageBuffer(camera_handle_, &frame_out);
       if (err != MV_OK) {
-        printf("Free Image Buffer fail! err [0x%x]\n", err);
+        spdlog::error("FreeImageBuffer fail! err:{x}\n", err);
       }
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -36,7 +36,7 @@ void Camera::WorkThread() {
 
 void Camera::PrintDeviceInfo() {
   if (NULL == mv_dev_info_) {
-    spdlog::debug("[Camera] The Pointer of mv_dev_info_ is NULL!\n");
+    spdlog::warn("[Camera] The Pointer of mv_dev_info_ is NULL!\n");
     return;
   }
   if (mv_dev_info_->nTLayerType == MV_USB_DEVICE) {
@@ -46,7 +46,7 @@ void Camera::PrintDeviceInfo() {
         mv_dev_info_->SpecialInfo.stUsb3VInfo.chSerialNumber,
         mv_dev_info_->SpecialInfo.stUsb3VInfo.nDeviceNumber);
   } else {
-    spdlog::info("[Camera] Not support.");
+    spdlog::warn("[Camera] Not support.");
   }
 }
 
@@ -67,7 +67,7 @@ Camera::Camera(unsigned int index) {
 
   if (mv_dev_list_.nDeviceNum > 0) {
     for (unsigned int i = 0; i < mv_dev_list_.nDeviceNum; i++) {
-      std::cout << "[device %d]: " << i << std::endl;
+      spdlog::info("[device {d}]: ", i );
       mv_dev_info_ = mv_dev_list_.pDeviceInfo[i];
       if (mv_dev_info_ == nullptr) {
         spdlog::error(err_string.str());
@@ -139,14 +139,14 @@ Camera::~Camera() {
   capture_thread_.join();
 
   err = MV_CC_StopGrabbing(camera_handle_);
-  if (err != MV_OK) spdlog::error("[Camera] StopGrabbing fail! err:{0:x}", err);
+  if (err != MV_OK) spdlog::error("[Camera] StopGrabbing fail! err:{x}", err);
 
   err = MV_CC_CloseDevice(camera_handle_);
-  if (err != MV_OK) spdlog::error("[Camera] ClosDevice fail! err:{0:x}", err);
+  if (err != MV_OK) spdlog::error("[Camera] ClosDevice fail! err:{x}", err);
 
   err = MV_CC_DestroyHandle(camera_handle_);
   if (err != MV_OK)
-    spdlog::error("[Camera] DestroyHandle fail! err:{0:x}", err);
+    spdlog::error("[Camera] DestroyHandle fail! err:{x}", err);
 
   spdlog::debug("[Camera] Destried.");
 }
