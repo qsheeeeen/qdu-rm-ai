@@ -66,7 +66,7 @@ Camera::Camera(unsigned int index) {
 
   if (mv_dev_list_.nDeviceNum > 0) {
     for (unsigned int i = 0; i < mv_dev_list_.nDeviceNum; i++) {
-      spdlog::info("[device {d}]: ", i );
+      spdlog::info("[device {d}]: ", i);
       mv_dev_info_ = mv_dev_list_.pDeviceInfo[i];
       if (mv_dev_info_ == nullptr) {
         spdlog::error(err_string.str());
@@ -144,8 +144,7 @@ Camera::~Camera() {
   if (err != MV_OK) spdlog::error("[Camera] ClosDevice fail! err:{x}", err);
 
   err = MV_CC_DestroyHandle(camera_handle_);
-  if (err != MV_OK)
-    spdlog::error("[Camera] DestroyHandle fail! err:{x}", err);
+  if (err != MV_OK) spdlog::error("[Camera] DestroyHandle fail! err:{x}", err);
 
   spdlog::debug("[Camera] Destried.");
 }
