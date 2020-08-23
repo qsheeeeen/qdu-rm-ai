@@ -6,11 +6,11 @@ void Robot::ComThread() {
   spdlog::debug("[Robot][ComThread] Running.");
 
   while (continue_parse_) {
-    dev_.read((char *)&status_, sizeof(recv_holder_t));
+    com_.Recv((char *)&status_, sizeof(RecvHolder));
 
     commandq_mutex_.lock();
     if (!commandq_.empty()) {
-      dev_.write((char *)&commandq_.front(), sizeof(recv_holder_t));
+      com_.Trans((char *)&commandq_.front(), sizeof(RecvHolder));
       commandq_.pop();
     }
     commandq_mutex_.unlock();
@@ -29,8 +29,8 @@ void Robot::CommandThread() {
 Robot::Robot(const std::string &dev_path) {
   spdlog::debug("[Robot] Creating.");
 
-  dev_.open(dev_path, std::ios::binary);
-  if (!dev_.is_open()) {
+  com_.Open(dev_path);
+  if (!com_.IsOpen()) {
     spdlog::error("[Robot] Can't open Robot device.");
     throw std::runtime_error("[Robot] Can't open Robot device.");
   }
@@ -43,6 +43,6 @@ Robot::Robot(const std::string &dev_path) {
 
 Robot::~Robot() {
   spdlog::debug("[Robot] Destroying.");
-  dev_.close();
+  com_.Close();
   spdlog::debug("[Robot] Destried.");
 }

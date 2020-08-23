@@ -5,23 +5,25 @@
 #include <queue>
 #include <thread>
 
-typedef struct {
-  float holder;
-} recv_holder_t;
+#include "serial.hpp"
 
 typedef struct {
   float holder;
-} command_holder_t;
+} RecvHolder;
+
+typedef struct {
+  float holder;
+} CommandHolder;
 
 class Robot {
  private:
-  std::fstream dev_;
+  Serial com_;
   bool continue_parse_ = false;
   std::thread parse_thread_;
-  std::queue<command_holder_t> commandq_;
+  std::queue<CommandHolder> commandq_;
   std::mutex commandq_mutex_;
 
-  recv_holder_t status_;
+  RecvHolder status_;
   void ComThread();
   void CommandThread();
 

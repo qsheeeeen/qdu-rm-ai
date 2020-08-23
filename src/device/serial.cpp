@@ -8,17 +8,19 @@
 
 #include "spdlog/spdlog.h"
 
-Serial::Serial(int index) {
+Serial::Serial() {
+  spdlog::debug("[Serial] Creating.");
+  dev_ = -1;
+  spdlog::debug("[Serial] Created.");
+}
+
+Serial::Serial(const std::string &dev_path) {
   spdlog::debug("[Serial] Creating.");
 
-  spdlog::debug("[Serial] Open {d}", index);
+  dev_ = open(dev_path.c_str(), O_RDWR);
 
-  dev_ = open("/dev/ttyUSB0", O_RDWR);
-
-  if (dev_ < 0) {
-    spdlog::error("[Serial] Can't open Serial device.");
-    throw std::runtime_error("[Serial] Can't open Serial device.");
-  }
+  if (dev_ < 0) spdlog::error("[Serial] Can't open Serial device.");
+  else Config(false, false, false, KBR115200);
 
   spdlog::debug("[Serial] Created.");
 }
@@ -28,6 +30,14 @@ Serial::~Serial() {
   close(dev_);
   spdlog::debug("[Serial] Destried.");
 }
+
+void Serial::Open(const std::string &dev_path) {
+  dev_ = open(dev_path.c_str(), O_RDWR);
+
+  if (dev_ < 0) spdlog::error("[Serial] Can't open Serial device.");
+}
+
+bool Serial::IsOpen() { return (dev_ > 0); }
 
 bool Serial::Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br) {
   struct termios tty_cfg;
@@ -77,6 +87,8 @@ bool Serial::Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br) {
   return true;
 }
 
-void Serial::Trans(char buff[], int len) { write(dev_, buff, len); }
+ssize_t Serial::Trans(char buff[], int len) { return write(dev_, buff, len); }
 
-void Serial::Recv(char buff[], int len) { read(dev_, buff, len); }
+ssize_t Serial::Recv(char buff[], int len) { return read(dev_, buff, len); }
+
+int Serial::Close() { return close(dev_); }
