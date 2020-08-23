@@ -56,3 +56,5 @@ dkms.conf
 
 # CMake
 build/
+
+logs/
