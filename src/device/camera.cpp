@@ -8,7 +8,7 @@
 #include "spdlog/spdlog.h"
 
 void Camera::WorkThread() {
-  spdlog::debug("[Camera][WorkThread] Running.");
+  spdlog::debug("[Camera] [WorkThread] Running.");
 
   int err = MV_OK;
   MV_FRAME_OUT frame_out;
@@ -30,7 +30,7 @@ void Camera::WorkThread() {
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
-  spdlog::debug("[Camera][WorkThread] Running.");
+  spdlog::debug("[Camera] [WorkThread] Running.");
 }
 
 void Camera::PrintDeviceInfo() {
@@ -58,7 +58,7 @@ Camera::Camera(unsigned int index) {
   std::memset(&mv_dev_list_, 0, sizeof(MV_CC_DEVICE_INFO_LIST));
   err = MV_CC_EnumDevices(MV_GIGE_DEVICE | MV_USB_DEVICE, &mv_dev_list_);
   if (err != MV_OK) {
-    err_string << "[Camera] Enum Devices fail! err 0x" << std::hex << err
+    err_string << "[Camera] EnumDevices fail! err 0x" << std::hex << err
                << std::endl;
     spdlog::error(err_string.str());
     throw std::runtime_error(err_string.str());
@@ -66,7 +66,7 @@ Camera::Camera(unsigned int index) {
 
   if (mv_dev_list_.nDeviceNum > 0) {
     for (unsigned int i = 0; i < mv_dev_list_.nDeviceNum; i++) {
-      spdlog::info("[device {d}]: ", i);
+      spdlog::info("[Camera] Device {d} slected.", i);
       mv_dev_info_ = mv_dev_list_.pDeviceInfo[i];
       if (mv_dev_info_ == nullptr) {
         spdlog::error("[Camera] Error Reading mv_dev_info_");
@@ -80,26 +80,30 @@ Camera::Camera(unsigned int index) {
   }
 
   if (index >= mv_dev_list_.nDeviceNum) {
-    spdlog::error("[Camera] Intput error!");
-    throw std::runtime_error("[Camera] Intput error!");
+    spdlog::error("[Camera] Intput index:{} >= nDeviceNum:{} !", index,
+                  mv_dev_list_.nDeviceNum);
+    throw std::range_error("[Camera] Index range error!");
   }
+
   err = MV_CC_CreateHandle(&camera_handle_, mv_dev_list_.pDeviceInfo[index]);
   if (err != MV_OK) {
-    err_string << "[Camera] Create Handle fail! err:0x" << std::hex << err
+    err_string << "[Camera] CreateHandle fail! err:0x" << std::hex << err
                << std::endl;
     spdlog::error(err_string.str());
     throw std::runtime_error(err_string.str());
   }
+
   err = MV_CC_OpenDevice(camera_handle_);
   if (err != MV_OK) {
-    err_string << "[Camera] Open Device fail! err:0x" << std::hex << err
+    err_string << "[Camera] OpenDevice fail! err:0x" << std::hex << err
                << std::endl;
     spdlog::error(err_string.str());
     throw std::runtime_error(err_string.str());
   }
+
   err = MV_CC_SetEnumValue(camera_handle_, "TriggerMode", 0);
   if (err != MV_OK) {
-    err_string << "[Camera] Set Trigger Mode fail! err:0x" << std::hex << err
+    err_string << "[Camera] SetTrigger Mode fail! err:0x" << std::hex << err
                << std::endl;
     spdlog::error(err_string.str());
     throw std::runtime_error(err_string.str());
@@ -108,7 +112,7 @@ Camera::Camera(unsigned int index) {
   memset(&init_val_, 0, sizeof(MVCC_INTVALUE));
   err = MV_CC_GetIntValue(camera_handle_, "PayloadSize", &init_val_);
   if (err != MV_OK) {
-    err_string << "[Camera] Get PayloadSize fail! err:0x" << std::hex << err
+    err_string << "[Camera] GetPayloadSize fail! err:0x" << std::hex << err
                << std::endl;
     spdlog::error(err_string.str());
     throw std::runtime_error(err_string.str());
@@ -116,7 +120,7 @@ Camera::Camera(unsigned int index) {
 
   err = MV_CC_StartGrabbing(camera_handle_);
   if (err != MV_OK) {
-    err_string << "[Camera] Start Grabbing fail! err:0x" << std::hex << err
+    err_string << "[Camera] StartGrabbing fail! err:0x" << std::hex << err
                << std::endl;
     spdlog::error(err_string.str());
     throw std::runtime_error(err_string.str());
