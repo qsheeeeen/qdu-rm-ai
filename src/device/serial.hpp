@@ -17,7 +17,7 @@ class Serial {
   ~Serial();
   void Open(const std::string &dev_path);
   bool IsOpen();
-  bool Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br);
+  bool Config(bool parity=false, bool stop_bit=false, bool flow_ctrl=false, BaudRate br=KBR115200);
   ssize_t Trans(char buff[], int len);
   ssize_t Recv(char buff[], int len);
   int Close();

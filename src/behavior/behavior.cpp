@@ -5,6 +5,7 @@
 #include "behaviortree_cpp_v3/behavior_tree.h"
 #include "behaviortree_cpp_v3/bt_factory.h"
 #include "node.hpp"
+#include "spdlog/spdlog.h"
 
 static const char *const xml_tree_test = R"(
 
@@ -96,7 +97,7 @@ static const char *const xml_tree_auto_aim = R"(
 using namespace BT;
 
 void TestTree() {
-  std::cout << "Run TestTree." << std::endl;
+  SPDLOG_INFO("Run TestTree.");
 
   BehaviorTreeFactory factory;
 
@@ -106,5 +107,5 @@ void TestTree() {
 
   tree.tickRoot();
 
-  std::cout << "Finish TestTree." << std::endl;
+  SPDLOG_INFO("Finish TestTree.");
 }

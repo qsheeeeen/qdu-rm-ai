@@ -19,21 +19,20 @@ int main(int argc, char const* argv[]) {
   spdlog::sinks_init_list sink_list = {console_sink, file_sink};
 
   spdlog::set_default_logger(
-      std::make_shared<spdlog::logger>("console & file", sink_list));
+      std::make_shared<spdlog::logger>("default", sink_list));
 
   spdlog::flush_on(spdlog::level::debug);
   spdlog::set_level(spdlog::level::trace);
 
-  spdlog::warn("***** Running Auto Aim. *****");
-
-  Robot bot("/home/qs/virtual_robot");
-  Camera cam(0);
+  SPDLOG_WARN("***** Running Auto Aim. *****");
 
   // Test only. TOOD: Remove.
   TestTree();
   TestOpenCV();
   TestVideoWrite();
 
+  Robot bot("/home/qs/virtual_robot");
+  Camera cam(0);
   // Init behavior.
   // Run true tree.
 

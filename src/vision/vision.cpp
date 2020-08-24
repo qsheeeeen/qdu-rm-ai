@@ -2,20 +2,15 @@
 
 #include "opencv2/opencv.hpp"
 
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
+#include "spdlog/spdlog.h"
+
 using namespace cv;
 using namespace std;
 
-#if 0
-void Logger::log(Severity severity, const char *msg)
-{
-    // suppress info-level messages
-    if (severity != Severity::kINFO)
-        std::cout << msg << std::endl;
-}
-#endif
-
 void TestOpenCV(void) {
-  cout << "Test OpenCV." << endl;
+  SPDLOG_INFO("Test OpenCV.");
+
   Mat img;
   img = imread("/home/qs/test.jpg", IMREAD_COLOR);
   if (img.empty()) {
@@ -25,16 +20,16 @@ void TestOpenCV(void) {
   cvtColor(img, img, COLOR_BGR2GRAY);
   imwrite("/home/qs/test_result.jpg", img);
 
-  cout << "Finish TestOpenCV." << endl;
+  SPDLOG_INFO("Finish TestOpenCV.");
 }
 
 void TestVideoWrite(void) {
-  cout << "Test TestVideoWrite." << endl;
+  SPDLOG_INFO("Test TestVideoWrite.");
   const string source = "/home/qs/test.mp4";  // the source file name
 
   VideoCapture inputVideo(source);  // Open input
   if (!inputVideo.isOpened()) {
-    cout << "Could not open the input video: " << source << endl;
+    SPDLOG_ERROR("Could not open the input video: {}.", source);
     return;
   }
 
@@ -67,17 +62,8 @@ void TestVideoWrite(void) {
     outputVideo << res;
   }
 
-  cout << "Finish TestVideoWrite." << endl;
+  SPDLOG_INFO("Finish TestVideoWrite.");
 }
-
-#if 0
-void log(Severity severity, const char* msg) override
-{
-    // suppress info-level messages
-    if (severity != Severity::kINFO)
-        std::cout << msg << std::endl;
-}
-#endif
 
 ObjectDetector::ObjectDetector(/* args */) {}
 
