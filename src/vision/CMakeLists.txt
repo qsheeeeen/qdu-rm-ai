@@ -11,6 +11,7 @@ project(vision)
 #---------------------------------------------------------------------------------------
 
 find_package(OpenCV REQUIRED) 
+find_package(spdlog REQUIRED)
 
 file(GLOB ${PROJECT_NAME}_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
@@ -18,7 +19,10 @@ file(GLOB ${PROJECT_NAME}_SOURCES
 
 add_library(${PROJECT_NAME} STATIC ${${PROJECT_NAME}_SOURCES})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME} PUBLIC 
+    ${OpenCV_LIBS}
+    spdlog::spdlog
+)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}

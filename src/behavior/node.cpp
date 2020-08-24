@@ -1,31 +1,35 @@
 #include "node.hpp"
 
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
+
+#include "spdlog/spdlog.h"
+
 namespace Action {
 
 Track::Track(const std::string& name) : BT::SyncActionNode(name, {}) {
-  std::cout << "Creat Action::Track node: " << this->name() << std::endl;
+  SPDLOG_DEBUG("[Action::Track] Create: {}.", name);
 }
 
 BT::NodeStatus Track::tick() {
-  std::cout << this->name() << ": Tracking." << std::endl;
+  SPDLOG_DEBUG("[Action::Track] {} ticking.", this->name());
   return BT::NodeStatus::SUCCESS;
 }
 
 Attack::Attack(const std::string& name) : BT::SyncActionNode(name, {}) {
-  std::cout << "Creat Action::Attack node: " << this->name() << std::endl;
+  SPDLOG_DEBUG("[Action::Attack] Create: {}.", name);
 }
 
 BT::NodeStatus Attack::tick() {
-  std::cout << this->name() << ": Attacking." << std::endl;
+  SPDLOG_DEBUG("[Action::Attack] {} ticking.", this->name());
   return BT::NodeStatus::SUCCESS;
 }
 
 Dodge::Dodge(const std::string& name) : BT::SyncActionNode(name, {}) {
-  std::cout << "Creat Action::Dodge node: " << this->name() << std::endl;
+  SPDLOG_DEBUG("[Action::Dodge] Create: {}.", name);
 }
 
 BT::NodeStatus Dodge::tick() {
-  std::cout << this->name() << ": Dodgeing." << std::endl;
+  SPDLOG_DEBUG("[Action::Dodge] {} ticking.", this->name());
   return BT::NodeStatus::SUCCESS;
 }
 
@@ -35,41 +39,39 @@ namespace Condition {
 
 EnamyVisable::EnamyVisable(const std::string& name)
     : BT::ConditionNode(name, {}) {
-  std::cout << "Creat Condition::EnamyVisable node: " << this->name()
-            << std::endl;
+  SPDLOG_DEBUG("[Condition::EnamyVisable] Create: {}.", name);
 }
 
 BT::NodeStatus EnamyVisable::tick() {
-  std::cout << this->name() << ": Check EnamyVisable." << std::endl;
+  SPDLOG_DEBUG("[Condition::EnamyVisable] {} ticking.", this->name());
   return BT::NodeStatus::SUCCESS;
 }
 
 LowHP::LowHP(const std::string& name) : BT::ConditionNode(name, {}) {
-  std::cout << "Creat Condition::LowHP node: " << this->name() << std::endl;
+  SPDLOG_DEBUG("[Condition::LowHP] Create: {}.", name);
 }
 
 BT::NodeStatus LowHP::tick() {
-  std::cout << this->name() << ": Check LowHP." << std::endl;
+  SPDLOG_DEBUG("[Condition::LowHP] {} ticking.", this->name());
   return BT::NodeStatus::FAILURE;
 }
 
 UnderAttack::UnderAttack(const std::string& name)
     : BT::ConditionNode(name, {}) {
-  std::cout << "Creat Condition::UnderAttack node: " << this->name()
-            << std::endl;
+  SPDLOG_DEBUG("[Condition::LowHP] Create: {}.", name);
 }
 
 BT::NodeStatus UnderAttack::tick() {
-  std::cout << this->name() << ": Check UnderAttack." << std::endl;
+  SPDLOG_DEBUG("[Condition::LowHP] {} ticking.", this->name());
   return BT::NodeStatus::SUCCESS;
 }
 
 NoAmmo::NoAmmo(const std::string& name) : BT::ConditionNode(name, {}) {
-  std::cout << "Creat Condition::NoAmmo node: " << this->name() << std::endl;
+  SPDLOG_DEBUG("[Condition::NoAmmo] Create: {}.", name);
 }
 
 BT::NodeStatus NoAmmo::tick() {
-  std::cout << this->name() << ": Check NoAmmo." << std::endl;
+  SPDLOG_DEBUG("[Condition::LowHP] {} ticking.", this->name());
   return BT::NodeStatus::SUCCESS;
 }
 }  // namespace Condition

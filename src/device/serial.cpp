@@ -6,35 +6,36 @@
 #include <termios.h>
 #include <unistd.h>
 
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
 #include "spdlog/spdlog.h"
 
 Serial::Serial() {
-  spdlog::debug("[Serial] Creating.");
+  SPDLOG_DEBUG("[Serial] Creating.");
   dev_ = -1;
-  spdlog::debug("[Serial] Created.");
+  SPDLOG_DEBUG("[Serial] Created.");
 }
 
 Serial::Serial(const std::string &dev_path) {
-  spdlog::debug("[Serial] Creating.");
+  SPDLOG_DEBUG("[Serial] Creating.");
 
   dev_ = open(dev_path.c_str(), O_RDWR);
 
-  if (dev_ < 0) spdlog::error("[Serial] Can't open Serial device.");
+  if (dev_ < 0) SPDLOG_ERROR("[Serial] Can't open Serial device.");
   else Config(false, false, false, KBR115200);
 
-  spdlog::debug("[Serial] Created.");
+  SPDLOG_DEBUG("[Serial] Created.");
 }
 
 Serial::~Serial() {
-  spdlog::debug("[Serial] Destroying.");
+  SPDLOG_DEBUG("[Serial] Destroying.");
   close(dev_);
-  spdlog::debug("[Serial] Destried.");
+  SPDLOG_DEBUG("[Serial] Destried.");
 }
 
 void Serial::Open(const std::string &dev_path) {
   dev_ = open(dev_path.c_str(), O_RDWR);
 
-  if (dev_ < 0) spdlog::error("[Serial] Can't open Serial device.");
+  if (dev_ < 0) SPDLOG_ERROR("[Serial] Can't open Serial device.");
 }
 
 bool Serial::IsOpen() { return (dev_ > 0); }
@@ -42,11 +43,11 @@ bool Serial::IsOpen() { return (dev_ > 0); }
 bool Serial::Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br) {
   struct termios tty_cfg;
 
-  spdlog::debug("parity={}, stop_bit={}, flow_ctrl={}, br={}", parity, stop_bit,
+  SPDLOG_DEBUG("parity={}, stop_bit={}, flow_ctrl={}, br={}", parity, stop_bit,
                 flow_ctrl, br);
 
   if (tcgetattr(dev_, &tty_cfg)) {
-    spdlog::error("[Serial] Error {d} from tcgetattr {s}.", errno,
+    SPDLOG_ERROR("[Serial] Error {} from tcgetattr {}.", errno,
                   strerror(errno));
     return false;
   }
@@ -80,7 +81,7 @@ bool Serial::Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br) {
   }
 
   if (tcsetattr(dev_, TCSANOW, &tty_cfg) != 0) {
-    spdlog::error("[Serial] Error {d} from tcsetattr: {s}\n", errno,
+    SPDLOG_ERROR("[Serial] Error {d} from tcsetattr: {s}\n", errno,
                   strerror(errno));
     return false;
   }
