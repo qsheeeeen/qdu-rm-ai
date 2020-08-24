@@ -3,7 +3,7 @@
 #include "spdlog/spdlog.h"
 
 void Robot::ComThread() {
-  spdlog::debug("[Robot][ComThread] Running.");
+  spdlog::debug("[Robot] [ComThread] Running.");
 
   while (continue_parse_) {
     com_.Recv((char *)&status_, sizeof(RecvHolder));
@@ -17,13 +17,13 @@ void Robot::ComThread() {
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
-  spdlog::debug("[Robot][ComThread] Stoped.");
+  spdlog::debug("[Robot] [ComThread] Stoped.");
 }
 
 void Robot::CommandThread() {
-  spdlog::debug("[Robot][CommandThread] Running.");
+  spdlog::debug("[Robot] [CommandThread] Running.");
 
-  spdlog::debug("[Robot][CommandThread] Stoped.");
+  spdlog::debug("[Robot] [CommandThread] Stoped.");
 }
 
 Robot::Robot(const std::string &dev_path) {
