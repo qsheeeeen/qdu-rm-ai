@@ -51,11 +51,10 @@ void Camera::PrintDeviceInfo() {
   }
 }
 
-Camera::Camera(unsigned int index) {
+void Camera::Prepare() {
   int err = MV_OK;
   std::string err_msg;
-
-  SPDLOG_DEBUG("[Camera] Creating.");
+  SPDLOG_DEBUG("[Camera] Prepare.");
 
   std::memset(&mv_dev_list_, 0, sizeof(MV_CC_DEVICE_INFO_LIST));
   err = MV_CC_EnumDevices(MV_GIGE_DEVICE | MV_USB_DEVICE, &mv_dev_list_);
@@ -79,6 +78,32 @@ Camera::Camera(unsigned int index) {
     SPDLOG_ERROR("[Camera] Find No Devices!");
     throw std::runtime_error("[Camera] Find No Devices!");
   }
+}
+
+Camera::Camera() {
+  SPDLOG_DEBUG("[Camera] Creating.");
+  Prepare();
+  SPDLOG_DEBUG("[Camera] Created.");
+}
+
+Camera::Camera(unsigned int index) {
+  SPDLOG_DEBUG("[Camera] Creating.");
+  Prepare();
+  Open(index);
+  SPDLOG_DEBUG("[Camera] Created.");
+}
+
+Camera::~Camera() {
+  SPDLOG_DEBUG("[Camera] Destroying.");
+  Close();
+  SPDLOG_DEBUG("[Camera] Destried.");
+}
+
+void Camera::Open(unsigned int index) {
+  int err = MV_OK;
+  std::string err_msg;
+
+  SPDLOG_DEBUG("[Camera] Open index:{}.", index);
 
   if (index >= mv_dev_list_.nDeviceNum) {
     SPDLOG_ERROR("[Camera] Intput index:{} >= nDeviceNum:{} !", index,
@@ -102,7 +127,7 @@ Camera::Camera(unsigned int index) {
 
   err = MV_CC_SetEnumValue(camera_handle_, "TriggerMode", 0);
   if (err != MV_OK) {
-    err_msg ="[Camera] SetTrigger Mode fail! err: " + std::to_string(err);
+    err_msg = "[Camera] SetTrigger Mode fail! err: " + std::to_string(err);
     SPDLOG_ERROR(err_msg);
     throw std::runtime_error(err_msg);
   }
@@ -124,28 +149,37 @@ Camera::Camera(unsigned int index) {
 
   continue_capture_ = true;
   capture_thread_ = std::thread(&Camera::WorkThread, this);
-
-  SPDLOG_DEBUG("[Camera] Created.");
 }
 
-Camera::~Camera() {
-  int err = MV_OK;
+bool Camera::GetFrame(void* output) { return false; }
 
-  SPDLOG_DEBUG("[Camera] Destroying.");
+int Camera::Close() {
+  int err = MV_OK;
+  std::string err_msg;
+
+  SPDLOG_DEBUG("[Camera] Close.");
 
   continue_capture_ = false;
   capture_thread_.join();
 
   err = MV_CC_StopGrabbing(camera_handle_);
-  if (err != MV_OK) SPDLOG_ERROR("[Camera] StopGrabbing fail! err:{x}", err);
+  if (err != MV_OK) {
+    SPDLOG_ERROR("[Camera] StopGrabbing fail! err:{x}", err);
+    return err;
+  }
 
   err = MV_CC_CloseDevice(camera_handle_);
-  if (err != MV_OK) SPDLOG_ERROR("[Camera] ClosDevice fail! err:{x}", err);
+  if (err != MV_OK) {
+    SPDLOG_ERROR("[Camera] ClosDevice fail! err:{x}", err);
+    return err;
+  }
 
   err = MV_CC_DestroyHandle(camera_handle_);
-  if (err != MV_OK) SPDLOG_ERROR("[Camera] DestroyHandle fail! err:{x}", err);
+  if (err != MV_OK) {
+    SPDLOG_ERROR("[Camera] DestroyHandle fail! err:{x}", err);
+    return err;
+  }
 
-  SPDLOG_DEBUG("[Camera] Destried.");
+  SPDLOG_DEBUG("[Camera] Closed.");
+  return MV_OK;
 }
-
-bool Camera::GetFrame(void* output) { return false; }
