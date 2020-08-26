@@ -2,20 +2,27 @@
 
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
 
+#include "robot.hpp"
 #include "spdlog/spdlog.h"
 
 namespace Action {
 
-Track::Track(const std::string& name) : BT::SyncActionNode(name, {}) {
+Track::Track(const std::string& name, const BT::NodeConfiguration& node_cfg)
+    : BT::SyncActionNode(name, node_cfg) {
   SPDLOG_DEBUG("[Action::Track] Create: {}.", name);
 }
 
 BT::NodeStatus Track::tick() {
   SPDLOG_DEBUG("[Action::Track] {} ticking.", this->name());
-  return BT::NodeStatus::SUCCESS;
+  return BT::NodeStatus::SUCCESS; 
 }
 
-Attack::Attack(const std::string& name) : BT::SyncActionNode(name, {}) {
+BT::PortsList Track::providedPorts() {
+  return {BT::OutputPort<std::string>("text")};
+}
+
+Attack::Attack(const std::string& name, const BT::NodeConfiguration& node_cfg)
+    : BT::SyncActionNode(name, node_cfg) {
   SPDLOG_DEBUG("[Action::Attack] Create: {}.", name);
 }
 
@@ -24,7 +31,12 @@ BT::NodeStatus Attack::tick() {
   return BT::NodeStatus::SUCCESS;
 }
 
-Dodge::Dodge(const std::string& name) : BT::SyncActionNode(name, {}) {
+BT::PortsList Attack::providedPorts() {
+  return {BT::OutputPort<std::string>("text")};
+}
+
+Dodge::Dodge(const std::string& name, const BT::NodeConfiguration& node_cfg)
+    : BT::SyncActionNode(name, node_cfg) {
   SPDLOG_DEBUG("[Action::Dodge] Create: {}.", name);
 }
 
@@ -33,11 +45,16 @@ BT::NodeStatus Dodge::tick() {
   return BT::NodeStatus::SUCCESS;
 }
 
+BT::PortsList Dodge::providedPorts() {
+  return {BT::OutputPort<std::string>("text")};
+}
+
 }  // namespace Action
 
 namespace Condition {
 
-EnamyVisable::EnamyVisable(const std::string& name)
+EnamyVisable::EnamyVisable(const std::string& name,
+                           const BT::NodeConfiguration& node_cfg)
     : BT::ConditionNode(name, {}) {
   SPDLOG_DEBUG("[Condition::EnamyVisable] Create: {}.", name);
 }
@@ -47,7 +64,12 @@ BT::NodeStatus EnamyVisable::tick() {
   return BT::NodeStatus::SUCCESS;
 }
 
-LowHP::LowHP(const std::string& name) : BT::ConditionNode(name, {}) {
+BT::PortsList EnamyVisable::providedPorts() {
+  return {BT::OutputPort<std::string>("text")};
+}
+
+LowHP::LowHP(const std::string& name, const BT::NodeConfiguration& node_cfg)
+    : BT::ConditionNode(name, {}) {
   SPDLOG_DEBUG("[Condition::LowHP] Create: {}.", name);
 }
 
@@ -56,7 +78,12 @@ BT::NodeStatus LowHP::tick() {
   return BT::NodeStatus::FAILURE;
 }
 
-UnderAttack::UnderAttack(const std::string& name)
+BT::PortsList LowHP::providedPorts() {
+  return {BT::OutputPort<std::string>("text")};
+}
+
+UnderAttack::UnderAttack(const std::string& name,
+                         const BT::NodeConfiguration& node_cfg)
     : BT::ConditionNode(name, {}) {
   SPDLOG_DEBUG("[Condition::LowHP] Create: {}.", name);
 }
@@ -66,7 +93,12 @@ BT::NodeStatus UnderAttack::tick() {
   return BT::NodeStatus::SUCCESS;
 }
 
-NoAmmo::NoAmmo(const std::string& name) : BT::ConditionNode(name, {}) {
+BT::PortsList UnderAttack::providedPorts() {
+  return {BT::OutputPort<std::string>("text")};
+}
+
+NoAmmo::NoAmmo(const std::string& name, const BT::NodeConfiguration& node_cfg)
+    : BT::ConditionNode(name, {}) {
   SPDLOG_DEBUG("[Condition::NoAmmo] Create: {}.", name);
 }
 
@@ -74,6 +106,11 @@ BT::NodeStatus NoAmmo::tick() {
   SPDLOG_DEBUG("[Condition::LowHP] {} ticking.", this->name());
   return BT::NodeStatus::SUCCESS;
 }
+
+BT::PortsList NoAmmo::providedPorts() {
+  return {BT::OutputPort<std::string>("text")};
+}
+
 }  // namespace Condition
 
 void RegisterNode(BT::BehaviorTreeFactory& factory) {
