@@ -153,8 +153,6 @@ def to_voc(folder_path, folder_name):
     print()
 
 
-
-
 def to_yolov5(folder_path, folder_name):
     print('[{}]Processing...'.format(folder_name))
 
@@ -278,6 +276,8 @@ if __name__ == '__main__':
                 for line in f.readlines():
                     line = line.replace('\n', '.jpg\n')
                     sum_list.append(os.path.join('.', sub_folder, YOLO5_IMAGE_FOLDER, line))
+
+        random.shuffle(sum_list)
 
         train_list, test_list, val_list = split_list(sum_list, args.split_ratio)
 
