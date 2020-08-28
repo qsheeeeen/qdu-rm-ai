@@ -1,13 +1,9 @@
 #!/bin/bash
-cd ../yolov5 || exit
+cd ../third_party/yolov5 || exit
 
 # DJI
-python3 train.py --data ../train/roco_dataset.yaml --img-size 853 480 --cfg ../train/roco_model.yaml
+python3 train.py --batch 32 --data ../../utils/dataset.yaml --img-size 608 608 --cfg ../../utils/model.yaml --cache-images
 
-# BCCD
-# python3 train.py --data ../BCCD/data.yaml --cache-images --img-size 416 416 --cfg ../BCCD/model.yaml
+python3 models/export.py --weights runs/exp0/best.pt --img 608 --batch 1
 
-# COCO
-# python3 train.py --data data/coco.yaml
-
-cd ../train || exit
+cd ../../utils || exit
