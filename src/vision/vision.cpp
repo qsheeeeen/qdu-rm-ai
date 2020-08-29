@@ -14,7 +14,7 @@ void TestOpenCV(void) {
   Mat img;
   img = imread("/home/qs/test.jpg", IMREAD_COLOR);
   if (img.empty()) {
-    cout << "Error opening image." << endl;
+    SPDLOG_ERROR("Error opening image.");
     return;
   }
   cvtColor(img, img, COLOR_BGR2GRAY);
@@ -42,7 +42,7 @@ void TestVideoWrite(void) {
                    inputVideo.get(CAP_PROP_FPS), video_size, true);
 
   if (!outputVideo.isOpened()) {
-    cout << "Could not open the output video for write: " << source << endl;
+    SPDLOG_ERROR("Could not open the output video for write: {}",source );
     return;
   }
 
