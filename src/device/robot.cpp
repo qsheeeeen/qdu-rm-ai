@@ -33,8 +33,8 @@ Robot::Robot(const std::string &dev_path) {
   com_.Open(dev_path);
   com_.Config();
   if (!com_.IsOpen()) {
-    SPDLOG_ERROR("[Robot] Can't open Robot device.");
-    throw std::runtime_error("[Robot] Can't open Robot device.");
+    SPDLOG_ERROR("[Robot] Can't open device.");
+    throw std::runtime_error("[Robot] Can't open device.");
   }
 
   continue_parse_ = true;
