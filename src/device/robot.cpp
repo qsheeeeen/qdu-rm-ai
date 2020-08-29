@@ -28,7 +28,7 @@ void Robot::CommandThread() {
 }
 
 Robot::Robot(const std::string &dev_path) {
-  SPDLOG_DEBUG("[Robot] Creating.");
+  SPDLOG_DEBUG("[Robot] Constructing.");
 
   com_.Open(dev_path);
   com_.Config();
@@ -40,11 +40,11 @@ Robot::Robot(const std::string &dev_path) {
   continue_parse_ = true;
   parse_thread_ = std::thread(&Robot::ComThread, this);
 
-  SPDLOG_DEBUG("[Robot] Created.");
+  SPDLOG_DEBUG("[Robot] Constructed.");
 }
 
 Robot::~Robot() {
-  SPDLOG_DEBUG("[Robot] Destroying.");
+  SPDLOG_DEBUG("[Robot] Destructing.");
   com_.Close();
-  SPDLOG_DEBUG("[Robot] Destried.");
+  SPDLOG_DEBUG("[Robot] Destructed.");
 }

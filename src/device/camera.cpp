@@ -81,22 +81,22 @@ void Camera::Prepare() {
 }
 
 Camera::Camera() {
-  SPDLOG_DEBUG("[Camera] Creating.");
+  SPDLOG_DEBUG("[Camera] Constructing.");
   Prepare();
-  SPDLOG_DEBUG("[Camera] Created.");
+  SPDLOG_DEBUG("[Camera] Constructed.");
 }
 
 Camera::Camera(unsigned int index) {
-  SPDLOG_DEBUG("[Camera] Creating.");
+  SPDLOG_DEBUG("[Camera] Constructing.");
   Prepare();
   Open(index);
-  SPDLOG_DEBUG("[Camera] Created.");
+  SPDLOG_DEBUG("[Camera] Constructed.");
 }
 
 Camera::~Camera() {
-  SPDLOG_DEBUG("[Camera] Destroying.");
+  SPDLOG_DEBUG("[Camera] Destructing.");
   Close();
-  SPDLOG_DEBUG("[Camera] Destried.");
+  SPDLOG_DEBUG("[Camera] Destructed.");
 }
 
 void Camera::Open(unsigned int index) {
