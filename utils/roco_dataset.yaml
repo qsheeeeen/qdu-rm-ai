@@ -1,8 +1,0 @@
-train: ../roco/train.txt
-val: ../roco/val.txt
-test: ../roco/test.txt
-
-
-nc: 4
-names: ['armor', 'base', 'watcher', 'car']
-
