@@ -25,10 +25,15 @@ target_link_libraries(${PROJECT_NAME}
     spdlog::spdlog
 )
 
-target_link_directories(${PROJECT_NAME} PUBLIC
-    /opt/MVS/lib/64/
-    /opt/MVS/lib/aarch64/
-)
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+    target_link_directories(${PROJECT_NAME} PUBLIC 
+        /opt/MVS/lib/aarch64/
+    )
+else()
+    target_link_directories(${PROJECT_NAME} PUBLIC
+        /opt/MVS/lib/64/
+    )
+endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
