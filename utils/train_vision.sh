@@ -10,4 +10,6 @@ python3 train.py --batch 32 --data ../../utils/dataset.yaml --img-size 608 608 -
 export PYTHONPATH="$PWD"
 python3 models/export.py --weights runs/exp0/weights/best.pt --img 608 --batch 1
 
+cp runs/exp0/weights/best.onnx ../../
+
 cd ../../utils || exit
