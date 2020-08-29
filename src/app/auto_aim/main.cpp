@@ -7,6 +7,7 @@
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 #include "vision.hpp"
+#include "obj_detector.hpp"
 
 int main(int argc, char const* argv[]) {
   (void)argc;
@@ -31,7 +32,7 @@ int main(int argc, char const* argv[]) {
   TestOpenCV();
   TestVideoWrite();
 
-  Robot bot("/home/qs/virtual_robot");
+  Robot bot("/dev/qs/ttyS0");
   Camera cam(0);
   // Init behavior.
   // Run true tree.

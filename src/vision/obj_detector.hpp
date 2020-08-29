@@ -1,36 +1,77 @@
 #pragma once
 
-class ObjectDetector {
- private:
+#include <memory>
+#include <string>
+
+#include "camera.hpp"
+#include "spdlog/spdlog.h"
+
+class InferDeleter {
+ public:
+  template <typename T>
+  void operator()(T *obj) const {
+    if (obj) {
+      SPDLOG_DEBUG("[InferDeleter] destroy.");
+      obj->destroy();
+    }
+  }
+};
+
+class TRTLogger {
+ public:
+  TRTLogger() = default;
+  ~TRTLogger() = default;
 #if 0
-
-  samplesCommon::OnnxSampleParams mParams;  //!< The parameters for the sample.
-
-  nvinfer1::Dims mInputDims;   //!< The dimensions of the input to the network.
-  nvinfer1::Dims mOutputDims;  //!< The dimensions of the output to the network.
-  int mNumber{0};              //!< The number to classify
-
-  std::shared_ptr<nvinfer1::ICudaEngine>
-      mEngine;  //!< The TensorRT engine used to run the network
-
-  //!
-  //! \brief Parses an ONNX model for MNIST and creates a TensorRT network
-  //!
-  bool constructNetwork(SampleUniquePtr<nvinfer1::IBuilder> &builder,
-                        SampleUniquePtr<nvinfer1::INetworkDefinition> &network,
-                        SampleUniquePtr<nvinfer1::IBuilderConfig> &config,
-                        SampleUniquePtr<nvonnxparser::IParser> &parser);
-
-  //!
-  //! \brief Reads the input  and stores the result in a managed buffer
-  //!
-  bool processInput(const samplesCommon::BufferManager &buffers);
-
-  //!
-  //! \brief Classifies digits and verify result
-  //!
-  bool verifyOutput(const samplesCommon::BufferManager &buffers);
+  void log(Severity severity, const char* msg) {
+    if (severity == kINTERNAL_ERROR) {
+      spdlog::error(msg);
+    } else if (severity == kERROR) {
+      spdlog::error(msg);
+    } else if (severity == kWARNING) {
+      spdlog::error(msg);
+    } else if (severity == kINFO) {
+      spdlog::error(msg);
+    } else if (severity == kVERBOSE) {
+      spdlog::error(msg);
+    }
+  }
 #endif
+};
+
+class ObjectDetector {
+  template <typename T>
+  using UniquePtr = std::unique_ptr<T, InferDeleter>;
+
+ private:
+  std::string input_tensor_name;
+  std::string output_tensor_names;
+  std::string onnx_file_path;
+  std::string engine_path;
+
+  int use_dla_core;
+  bool use_fp16;
+  bool use_int8;
+  bool allow_gpu_fallback;
+
+  Camera camera;
+
+  TRTLogger logger;
+
+#if 0
+  nvinfer1::Dims dim_in;
+  nvinfer1::Dims dim_out;
+  int num_class{0};
+
+  std::shared_ptr<nvinfer1::ICudaEngine> engine;
+  bool ProcessInput(const samplesCommon::BufferManager &buffers);
+  bool Preprocesse(const samplesCommon::BufferManager &buffers);
+#endif
+
+  bool CreateEngine();
+  bool LoadEngine();
+  bool SaveEngine();
+  bool CreateContex();
+
  public:
   ObjectDetector();
   ~ObjectDetector();
