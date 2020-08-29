@@ -15,7 +15,7 @@ int main(int argc, char const* argv[]) {
 
   auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
   auto file_sink =
-      std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/log.txt", true);
+      std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/auto_aim.log", true);
 
   spdlog::sinks_init_list sink_list = {console_sink, file_sink};
 
@@ -32,8 +32,9 @@ int main(int argc, char const* argv[]) {
   TestOpenCV();
   TestVideoWrite();
 
+  ObjectDetector detector(0);
   Robot bot("/dev/qs/ttyS0");
-  Camera cam(0);
+
   // Init behavior.
   // Run true tree.
 
