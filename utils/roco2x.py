@@ -42,7 +42,7 @@ def parse_args():
     parser.add_argument('--split-ratio', nargs='+', type=int, default=[7, 2, 1],
                         help='train : test : val.')
 
-    parser.add_argument('--out-size', type=int, default=360,
+    parser.add_argument('--out-height', type=int, default=1080,
                         help='Output image height. support 360, 480, 720')
 
     parser.add_argument('--seed', type=int, default=123,
@@ -59,10 +59,10 @@ def resize_data(image_folder, annotation_folder):
     for image, annotation in zip(image_list, annotation_list):
         image_path = os.path.join(image_folder, image)
         with Image.open(image_path) as im:
-            target_width = im.width / im.height * args.out_size
-            if im.height != args.out_size:
+            target_width = im.width / im.height * args.out_height
+            if im.height != args.out_height:
                 try:
-                    im.resize((int(target_width), args.out_size)).save(image_path)
+                    im.resize((int(target_width), args.out_height)).save(image_path)
                 except OSError:
                     print('[Data Corrupted] Can not resize {}. '.format(image))
                     continue
@@ -82,9 +82,9 @@ def resize_data(image_folder, annotation_folder):
                 bndbox = obj.find('bndbox')
 
                 xmin = float(bndbox.findtext('xmin')) / float_width * target_width
-                ymin = float(bndbox.findtext('ymin')) / float_height * args.out_size
+                ymin = float(bndbox.findtext('ymin')) / float_height * args.out_height
                 xmax = float(bndbox.findtext('xmax')) / float_width * target_width
-                ymax = float(bndbox.findtext('ymax')) / float_height * args.out_size
+                ymax = float(bndbox.findtext('ymax')) / float_height * args.out_height
 
                 bndbox.find('xmin').text = str(min(max(xmin, 0), float_width - 1))
                 bndbox.find('ymin').text = str(min(max(ymin, 0), float_height - 1))
@@ -94,7 +94,7 @@ def resize_data(image_folder, annotation_folder):
             name_list.append('.'.join(annotation.split('.')[:-1]))
 
         width.text = str(int(target_width))
-        height.text = str(int(args.out_size))
+        height.text = str(int(args.out_height))
 
         tree.write(annotation_path)
 
@@ -151,8 +151,6 @@ def to_voc(folder_path, folder_name):
 
     print('[{}]Completed.'.format(folder_name))
     print()
-
-
 
 
 def to_yolov5(folder_path, folder_name):
@@ -235,7 +233,7 @@ if __name__ == '__main__':
     ]
 
     if os.path.isdir(dataset_path):
-        if all([os.path.isdir(group_path) for group_path in s_list]):
+        if all([os.path.isdir(os.path.join(dataset_path, path)) for path in s_list]):
             for s, d in zip(s_list, d_list):
                 os.rename(os.path.join(dataset_path, s), os.path.join(dataset_path, d))
 
@@ -259,7 +257,7 @@ if __name__ == '__main__':
 
     process_list = []
 
-    for sub_folder in d_list if converted else s_list:
+    for sub_folder in d_list:
         sub_folder_path = os.path.join(dataset_path, sub_folder)
         process = Process(target=target, args=(sub_folder_path, sub_folder))
 
@@ -278,6 +276,8 @@ if __name__ == '__main__':
                 for line in f.readlines():
                     line = line.replace('\n', '.jpg\n')
                     sum_list.append(os.path.join('.', sub_folder, YOLO5_IMAGE_FOLDER, line))
+
+        random.shuffle(sum_list)
 
         train_list, test_list, val_list = split_list(sum_list, args.split_ratio)
 
