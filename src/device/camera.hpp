@@ -15,10 +15,14 @@ class Camera {
 
   void WorkThread();
   void PrintDeviceInfo();
+  void Prepare();
 
  public:
+  Camera();
   Camera(unsigned int index);
   ~Camera();
 
+  void Open(unsigned int index);
   bool GetFrame(void *output);
+  int Close();
 };
