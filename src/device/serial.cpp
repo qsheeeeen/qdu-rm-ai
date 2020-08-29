@@ -21,7 +21,7 @@ Serial::Serial(const std::string &dev_path) {
   dev_ = open(dev_path.c_str(), O_RDWR);
 
   if (dev_ < 0) SPDLOG_ERROR("[Serial] Can't open Serial device.");
-  else Config(false, false, false, KBR115200);
+  else Config(false, false, false, BaudRate::KBR115200);
 
   SPDLOG_DEBUG("[Serial] Created.");
 }
@@ -43,11 +43,11 @@ bool Serial::IsOpen() { return (dev_ > 0); }
 bool Serial::Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br) {
   struct termios tty_cfg;
 
-  SPDLOG_DEBUG("parity={}, stop_bit={}, flow_ctrl={}, br={}", parity, stop_bit,
+  SPDLOG_DEBUG("[Serial] parity={}, stop_bit={}, flow_ctrl={}, br={}", parity, stop_bit,
                 flow_ctrl, br);
 
   if (tcgetattr(dev_, &tty_cfg)) {
-    SPDLOG_ERROR("[Serial] Error {} from tcgetattr {}.", errno,
+    SPDLOG_ERROR("[Serial] Error {} from tcgetattr: {}.", errno,
                   strerror(errno));
     return false;
   }
@@ -70,11 +70,11 @@ bool Serial::Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br) {
     tty_cfg.c_cflag &= ~CRTSCTS;
 
   switch (br) {
-    case kBR9600:
+    case BaudRate::kBR9600:
       cfsetispeed(&tty_cfg, B9600);
       cfsetospeed(&tty_cfg, B9600);
       break;
-    case KBR115200:
+    case BaudRate::KBR115200:
       cfsetispeed(&tty_cfg, B115200);
       cfsetospeed(&tty_cfg, B115200);
       break;
@@ -88,8 +88,8 @@ bool Serial::Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br) {
   return true;
 }
 
-ssize_t Serial::Trans(char buff[], int len) { return write(dev_, buff, len); }
+ssize_t Serial::Trans(const void* buff, size_t len) { return write(dev_, buff, len); }
 
-ssize_t Serial::Recv(char buff[], int len) { return read(dev_, buff, len); }
+ssize_t Serial::Recv(void* buff, size_t len) { return read(dev_, buff, len); }
 
 int Serial::Close() { return close(dev_); }
