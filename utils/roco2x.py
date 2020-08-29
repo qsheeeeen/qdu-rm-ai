@@ -5,6 +5,7 @@ import random
 import xml.etree.ElementTree as ETree
 from multiprocessing import Process
 
+import yaml
 from PIL import Image
 
 ORIGIN_IMAGE_FOLDER = 'image'
@@ -281,13 +282,30 @@ if __name__ == '__main__':
 
         train_list, test_list, val_list = split_list(sum_list, args.split_ratio)
 
-        with open(os.path.join(dataset_path, 'train.txt'), 'w+') as f:
+        train_file_path = os.path.join(dataset_path, 'train.txt')
+        val_file_path = os.path.join(dataset_path, 'val.txt')
+        test_file_path = os.path.join(dataset_path, 'test.txt')
+
+        with open(train_file_path, 'w+') as f:
             f.writelines(train_list)
 
-        with open(os.path.join(dataset_path, 'val.txt'), 'w+') as f:
+        with open(val_file_path, 'w+') as f:
             f.writelines(test_list)
 
-        with open(os.path.join(dataset_path, 'test.txt'), 'w+') as f:
+        with open(test_file_path, 'w+') as f:
             f.writelines(val_list)
+
+        yaml_out = {
+            "train": train_file_path,
+            "val": val_file_path,
+            "test": test_file_path,
+
+            "nc": len(CLASSES),
+            "names": CLASSES,
+        }
+
+        with open('dataset.yaml', 'w+') as f:
+            yaml.dump(yaml_out, f)
+            print(yaml.dump(yaml_out))
 
     print('Converted.')
