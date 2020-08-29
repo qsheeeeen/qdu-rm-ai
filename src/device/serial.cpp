@@ -10,26 +10,26 @@
 #include "spdlog/spdlog.h"
 
 Serial::Serial() {
-  SPDLOG_DEBUG("[Serial] Creating.");
+  SPDLOG_DEBUG("[Serial] Constructing.");
   dev_ = -1;
-  SPDLOG_DEBUG("[Serial] Created.");
+  SPDLOG_DEBUG("[Serial] Constructed.");
 }
 
 Serial::Serial(const std::string &dev_path) {
-  SPDLOG_DEBUG("[Serial] Creating.");
+  SPDLOG_DEBUG("[Serial] Constructing.");
 
   dev_ = open(dev_path.c_str(), O_RDWR);
 
   if (dev_ < 0) SPDLOG_ERROR("[Serial] Can't open Serial device.");
   else Config(false, false, false, BaudRate::KBR115200);
 
-  SPDLOG_DEBUG("[Serial] Created.");
+  SPDLOG_DEBUG("[Serial] Constructed.");
 }
 
 Serial::~Serial() {
-  SPDLOG_DEBUG("[Serial] Destroying.");
+  SPDLOG_DEBUG("[Serial] Destructing.");
   close(dev_);
-  SPDLOG_DEBUG("[Serial] Destried.");
+  SPDLOG_DEBUG("[Serial] Destructed.");
 }
 
 void Serial::Open(const std::string &dev_path) {
