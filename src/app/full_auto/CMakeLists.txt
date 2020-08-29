@@ -9,14 +9,19 @@ project(full_auto)
 # Target
 #---------------------------------------------------------------------------------------
 
+find_package(spdlog REQUIRED)
+
 add_executable(${PROJECT_NAME} main.cpp)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC
+target_link_libraries(${PROJECT_NAME} PRIVATE
     behavior
     vision
+    device
+    spdlog::spdlog
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC
-    $<BUILD_INTERFACE:$<TARGET_PROPERTY:behavior,INTERFACE_INCLUDE_DIRECTORIES>>
-    $<BUILD_INTERFACE:$<TARGET_PROPERTY:vision,INTERFACE_INCLUDE_DIRECTORIES>>
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
