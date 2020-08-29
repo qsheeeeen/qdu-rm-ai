@@ -13,11 +13,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Options
 #---------------------------------------------------------------------------------------
 
-# Allow switching of Applications
-set(APPLICATION_LIST auto_aim full_auto)
-set(APPLICATION auto_aim CACHE STRING "Default Application is auto_aim")
-set_property(CACHE APPLICATION PROPERTY STRINGS ${APPLICATION_LIST})
-
 #---------------------------------------------------------------------------------------
 # General Components
 #---------------------------------------------------------------------------------------
@@ -30,4 +25,5 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vision)
 # Applications
 #---------------------------------------------------------------------------------------
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app/${APPLICATION})
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app/auto_aim)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app/full_auto)
