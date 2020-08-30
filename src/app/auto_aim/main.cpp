@@ -33,10 +33,9 @@ int main(int argc, char const* argv[]) {
   TestVideoWrite();
 
   ObjectDetector detector(0);
-  Robot bot("/dev/qs/ttyS0");
+  Robot bot("/dev/tty");
 
   // Init behavior.
   // Run true tree.
-
-  return 0;
+  exit(0);
 }
