@@ -2,7 +2,9 @@
 
 #include <NvOnnxParser.h>
 
+#include <fstream>
 #include <stdexcept>
+#include <vector>
 
 #include "cuda_runtime_api.h"
 
@@ -69,6 +71,8 @@ bool ObjectDetector::CreateEngine() {
   } else
     SPDLOG_DEBUG("[ObjectDetector] createInferBuilder OK.");
 
+  builder->setMaxBatchSize(1);
+
   const auto explicit_batch =
       1U << static_cast<uint32_t>(
           NetworkDefinitionCreationFlag::kEXPLICIT_BATCH);
@@ -88,6 +92,8 @@ bool ObjectDetector::CreateEngine() {
   } else
     SPDLOG_DEBUG("[ObjectDetector] createBuilderConfig OK.");
 
+  config->setMaxWorkspaceSize(1 << 30);
+
   auto parser = UniquePtr<nvonnxparser::IParser>(
       nvonnxparser::createParser(*network, logger));
   if (!parser) {
@@ -104,14 +110,6 @@ bool ObjectDetector::CreateEngine() {
   } else
     SPDLOG_DEBUG("[ObjectDetector] parseFromFile OK.");
 
-  dim_in = network->getInput(0)->getDimensions();
-  dim_out = network->getOutput(0)->getDimensions();
-
-  SPDLOG_INFO("dim_out: {d}, dim_in: {d}.", dim_in.nbDims, dim_out.nbDims);
-
-  builder->setMaxBatchSize(1);
-  config->setMaxWorkspaceSize(1 << 30);
-
   auto profile = builder->createOptimizationProfile();
   profile->setDimensions(network->getInput(0)->getName(),
                          OptProfileSelector::kMIN, Dims4{1, 3, 608, 608});
@@ -120,6 +118,12 @@ bool ObjectDetector::CreateEngine() {
   profile->setDimensions(network->getInput(0)->getName(),
                          OptProfileSelector::kMAX, Dims4{1, 3, 608, 608});
   config->addOptimizationProfile(profile);
+
+  dim_in = network->getInput(0)->getDimensions();
+  dim_out = network->getOutput(0)->getDimensions();
+
+  SPDLOG_INFO("[ObjectDetector] dim_in: {}, dim_out: {}.", dim_in.nbDims,
+              dim_out.nbDims);
 
   if (use_fp16) config->setFlag(BuilderFlag::kFP16);
 
@@ -156,13 +160,27 @@ bool ObjectDetector::CreateEngine() {
 
 bool ObjectDetector::LoadEngine() {
   SPDLOG_DEBUG("[ObjectDetector] LoadEngine.");
-  // std::string buffer = readBuffer(engine_path);
-  // if (buffer.size()) {
-  //   auto runtime = UniquePtr<IRuntime>(createInferRuntime(logger));
-  //   engine = std::shared_ptr<nvinfer1::ICudaEngine>(
-  //       runtime->deserializeCudaEngine(buffer.data(), buffer.size(),
-  //       nullptr));
-  // }
+
+  std::vector<char> engine_bin;
+  std::ifstream engine_file(engine_path, std::ios::binary);
+
+  if (engine_file.good()) {
+    engine_file.seekg(0, engine_file.end);
+    engine_bin.resize(engine_file.tellg());
+    engine_file.seekg(0, engine_file.beg);
+    engine_file.read(engine_bin.data(), engine_bin.size());
+    engine_file.close();
+  } else {
+    SPDLOG_ERROR("[ObjectDetector] LoadEngine Fail. Could not open file.");
+    return false;
+  }
+
+  auto runtime = UniquePtr<IRuntime>(createInferRuntime(logger));
+
+  engine = std::shared_ptr<ICudaEngine>(
+      runtime->deserializeCudaEngine(engine_bin.data(), engine_bin.size()),
+      InferDeleter());
+
   if (!engine) {
     SPDLOG_ERROR("[ObjectDetector] LoadEngine Fail.");
     return false;
@@ -173,13 +191,21 @@ bool ObjectDetector::LoadEngine() {
 
 bool ObjectDetector::SaveEngine() {
   SPDLOG_ERROR("[ObjectDetector] SaveEngine.");
+
   if (engine) {
-    auto engine_plan = UniquePtr<IHostMemory>(engine->serialize());
-    // writeBuffer(engine_plan->data(), engine_plan->size(), engine_path);
+    auto engine_serialized = UniquePtr<IHostMemory>(engine->serialize());
+    std::ofstream engine_file(engine_path, std::ios::binary);
+    if (!engine_file) {
+      SPDLOG_ERROR("[ObjectDetector] SaveEngine Fail. Could not open file.");
+      return false;
+    }
+    engine_file.write(reinterpret_cast<const char *>(engine_serialized->data()),
+                      engine_serialized->size());
+
     SPDLOG_DEBUG("[ObjectDetector] SaveEngine OK.");
     return true;
   }
-  SPDLOG_ERROR("[ObjectDetector] SaveEngine Fail.");
+  SPDLOG_ERROR("[ObjectDetector] SaveEngine Fail. No engine.");
   return false;
 }
 
@@ -199,7 +225,10 @@ ObjectDetector::ObjectDetector(int index) {
   onnx_file_path = "./best.onnx";
   engine_path = onnx_file_path + ".engine";
   // camera.Open(0);
-  if (!LoadEngine()) CreateEngine();
+  if (!LoadEngine()) {
+    CreateEngine();
+    SaveEngine();
+  }
   CreateContex();
   SPDLOG_DEBUG("[ObjectDetector] Constructed.");
 }
