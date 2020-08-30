@@ -14,6 +14,9 @@ find_package(OpenCV REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(CUDA REQUIRED)
 
+message("-- CUDA version: ${CUDA_VERSION}")
+message("-- OpenCV version: ${OpenCV_VERSION}")
+
 file(GLOB ${PROJECT_NAME}_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
 )
@@ -30,6 +33,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     spdlog::spdlog
     nvinfer
     nvonnxparser
+    cudart
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

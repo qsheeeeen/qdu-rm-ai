@@ -9,6 +9,8 @@ project(qdu_rm_ai
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+message("-- System arch:  ${CMAKE_SYSTEM_PROCESSOR}")
+
 #---------------------------------------------------------------------------------------
 # Options
 #---------------------------------------------------------------------------------------
