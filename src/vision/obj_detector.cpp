@@ -4,9 +4,9 @@
 
 #include <fstream>
 #include <stdexcept>
-#include <vector>
 
 #include "cuda_runtime_api.h"
+#include "opencv2/opencv.hpp"
 
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
 #include "spdlog/spdlog.h"
@@ -15,9 +15,9 @@
 using namespace nvinfer1;
 
 template <typename T>
-void InferDeleter::operator()(T *obj) const {
+void TRTDeleter::operator()(T *obj) const {
   if (obj) {
-    SPDLOG_DEBUG("[InferDeleter] destroy.");
+    SPDLOG_DEBUG("[TRTDeleter] destroy.");
     obj->destroy();
   }
 }
@@ -119,36 +119,23 @@ bool ObjectDetector::CreateEngine() {
                          OptProfileSelector::kMAX, Dims4{1, 3, 608, 608});
   config->addOptimizationProfile(profile);
 
-  dim_in = network->getInput(0)->getDimensions();
-  dim_out = network->getOutput(0)->getDimensions();
-
-  SPDLOG_INFO("[ObjectDetector] dim_in: {}, dim_out: {}.", dim_in.nbDims,
-              dim_out.nbDims);
-
-  if (use_fp16) config->setFlag(BuilderFlag::kFP16);
-
-  if (use_int8) {
-    config->setFlag(BuilderFlag::kINT8);
-    // setAllTensorScales(network.get(), 127.0f, 127.0f);
-  }
+  if (builder->platformHasFastFp16()) config->setFlag(BuilderFlag::kFP16);
+  if (builder->platformHasFastInt8()) config->setFlag(BuilderFlag::kINT8);
 
   if (builder->getNbDLACores() == 0)
-    SPDLOG_WARN("The platform that doesn't have any DLA cores");
+    SPDLOG_WARN("[ObjectDetector] The platform doesn't have any DLA cores.");
   else {
-    config->setFlag(BuilderFlag::kGPU_FALLBACK);
-
-    if (!config->getFlag(BuilderFlag::kINT8) && builder->platformHasFastFp16())
-      config->setFlag(BuilderFlag::kFP16);
-
+    SPDLOG_INFO("[ObjectDetector] Using DLA core 0.");
     config->setDefaultDeviceType(DeviceType::kDLA);
     config->setDLACore(0);
     config->setFlag(BuilderFlag::kSTRICT_TYPES);
+    config->setFlag(BuilderFlag::kGPU_FALLBACK);
   }
 
   SPDLOG_INFO("[ObjectDetector] CreateEngine, please wait for a while...");
 
   engine = std::shared_ptr<ICudaEngine>(
-      builder->buildEngineWithConfig(*network, *config), InferDeleter());
+      builder->buildEngineWithConfig(*network, *config), TRTDeleter());
 
   if (!engine) {
     SPDLOG_ERROR("[ObjectDetector] CreateEngine Fail.");
@@ -179,7 +166,7 @@ bool ObjectDetector::LoadEngine() {
 
   engine = std::shared_ptr<ICudaEngine>(
       runtime->deserializeCudaEngine(engine_bin.data(), engine_bin.size()),
-      InferDeleter());
+      TRTDeleter());
 
   if (!engine) {
     SPDLOG_ERROR("[ObjectDetector] LoadEngine Fail.");
@@ -211,7 +198,8 @@ bool ObjectDetector::SaveEngine() {
 
 bool ObjectDetector::CreateContex() {
   SPDLOG_DEBUG("[ObjectDetector] CreateContex.");
-  auto context = UniquePtr<IExecutionContext>(engine->createExecutionContext());
+  context = std::shared_ptr<IExecutionContext>(engine->createExecutionContext(),
+                                               TRTDeleter());
   if (!context) {
     SPDLOG_ERROR("[ObjectDetector] CreateContex Fail.");
     return false;
@@ -220,34 +208,77 @@ bool ObjectDetector::CreateContex() {
   return true;
 }
 
-ObjectDetector::ObjectDetector(int index) {
+bool ObjectDetector::InitMemory() {
+  for (int i = 0; i < engine->getNbBindings(); i++) {
+    Dims dim = engine->getBindingDimensions(i);
+
+    size_t volume = 1;
+    for (int j = 0; j < dim.nbDims; j++) volume *= dim.d[j];
+    nvinfer1::DataType type = engine->getBindingDataType(i);
+    switch (type) {
+      case DataType::kFLOAT:
+        volume *= sizeof(float);
+        break;
+
+      default:
+        SPDLOG_ERROR("[ObjectDetector] Do not support input type: {}", type);
+        throw std::runtime_error("[ObjectDetector] Unsupported input type");
+        break;
+    }
+
+    void *device_memory;
+    cudaMalloc(&device_memory, volume);
+    bindings.push_back(device_memory);
+
+    if (engine->bindingIsInput(i)) idx_in = i;
+    idx_out = engine->getBindingIndex("output");
+    SPDLOG_DEBUG("[ObjectDetector] Binding {} : {}", i,
+                 engine->getBindingName(i));
+  }
+  return true;
+}
+
+ObjectDetector::ObjectDetector() {
   SPDLOG_DEBUG("[ObjectDetector] Constructing.");
   onnx_file_path = "./best.onnx";
   engine_path = onnx_file_path + ".engine";
-  // camera.Open(0);
+
+  // camera.Open(index);
   if (!LoadEngine()) {
     CreateEngine();
     SaveEngine();
   }
   CreateContex();
+  InitMemory();
   SPDLOG_DEBUG("[ObjectDetector] Constructed.");
 }
 
 ObjectDetector::~ObjectDetector() {
   SPDLOG_DEBUG("[ObjectDetector] Destructing.");
+
+  for (std::vector<void *>::iterator it = bindings.begin();
+       it != bindings.end(); ++it)
+    cudaFree(*it);
+
   // camera.Close();
   SPDLOG_DEBUG("[ObjectDetector] Destructed.");
 }
 
 bool ObjectDetector::Infer() {
-  // CHECK(cudaMemcpyAsync(buffers[inputIndex], input,
-  //                       batchSize * 3 * INPUT_H * INPUT_W * sizeof(float),
-  //                       cudaMemcpyHostToDevice, stream));
-  // context.enqueue(batchSize, buffers, stream, nullptr);
-  // CHECK(cudaMemcpyAsync(output, buffers[outputIndex],
-  //                       batchSize * OUTPUT_SIZE * sizeof(float),
-  //                       cudaMemcpyDeviceToHost, stream));
-  // cudaStreamSynchronize(stream);
+  SPDLOG_DEBUG("[ObjectDetector] Infer.");
+  cv::Mat image = cv::imread("./image/test.jpg");
+  cv::resize(image, image, cv::Size(608, 608));
+
+  std::vector<float> output;
+  output.resize(10000);
+
+  cudaMemcpy(bindings.at(idx_in), image.data, 608 * 608 * 3 * sizeof(float),
+             cudaMemcpyHostToDevice);
+  context->executeV2(bindings.data());
+  cudaMemcpy(output.data(), bindings.at(idx_out), 10000,
+             cudaMemcpyDeviceToHost);
+
+  SPDLOG_DEBUG("[ObjectDetector] Infered.");
   return true;
 }
 

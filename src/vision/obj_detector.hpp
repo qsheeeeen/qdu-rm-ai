@@ -5,10 +5,11 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "camera.hpp"
 
-class InferDeleter {
+class TRTDeleter {
  public:
   template <typename T>
   void operator()(T *obj) const;
@@ -25,7 +26,7 @@ class TRTLogger : public nvinfer1::ILogger {
 
 class ObjectDetector {
   template <typename T>
-  using UniquePtr = std::unique_ptr<T, InferDeleter>;
+  using UniquePtr = std::unique_ptr<T, TRTDeleter>;
 
  private:
   std::string input_tensor_name;
@@ -33,18 +34,17 @@ class ObjectDetector {
   std::string onnx_file_path;
   std::string engine_path;
 
-  bool use_fp16;
-  bool use_int8;
-
   // Camera camera;
 
   TRTLogger logger;
 
-  nvinfer1::Dims dim_in;
-  nvinfer1::Dims dim_out;
-  int num_class{0};
-
   std::shared_ptr<nvinfer1::ICudaEngine> engine;
+  std::shared_ptr<nvinfer1::IExecutionContext> context;
+
+  std::vector<void *> bindings;
+  int idx_in;
+  int idx_out;
+
   bool ProcessInput();
   bool Preprocesse();
 
@@ -52,10 +52,10 @@ class ObjectDetector {
   bool LoadEngine();
   bool SaveEngine();
   bool CreateContex();
+  bool InitMemory();
 
  public:
-  ObjectDetector(int index);
+  ObjectDetector();
   ~ObjectDetector();
-  bool Build();
   bool Infer();
 };
