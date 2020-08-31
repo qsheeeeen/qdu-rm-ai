@@ -4,6 +4,6 @@ names:
 - watcher
 - car
 nc: 4
-test: /home/qs/Dataset/DJI ROCO/test.txt
-train: /home/qs/Dataset/DJI ROCO/train.txt
-val: /home/qs/Dataset/DJI ROCO/val.txt
+test: /home/qs/DJI ROCO/test.txt
+train: /home/qs/DJI ROCO/train.txt
+val: /home/qs/DJI ROCO/val.txt
