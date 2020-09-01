@@ -24,28 +24,39 @@ class TRTLogger : public nvinfer1::ILogger {
   int GetVerbosity();
 };
 
-class ObjectDetector {
+class Object {
+ private:
+  float x_center_, y_center_, width_, height_;
+
+ public:
+  Object(x_center, y_center, width, height);
+  ~Object = default;
+  cv::Point Center();
+  cv:Rect Rect();
+};
+
+class Detector {
   template <typename T>
   using UniquePtr = std::unique_ptr<T, TRTDeleter>;
 
  private:
-  std::string input_tensor_name;
-  std::string output_tensor_names;
-  std::string onnx_file_path;
-  std::string engine_path;
+  std::string onnx_file_path_;
+  std::string engine_path_;
 
-  // Camera camera;
+  TRTLogger logger_;
 
-  TRTLogger logger;
+  std::shared_ptr<nvinfer1::ICudaEngine> engine_;
+  std::shared_ptr<nvinfer1::IExecutionContext> context_;
 
-  std::shared_ptr<nvinfer1::ICudaEngine> engine;
-  std::shared_ptr<nvinfer1::IExecutionContext> context;
+  float conf_thres_, iou_thres_;
+  int num_classes_, agnostic_;
 
-  std::vector<void *> bindings;
-  int idx_in;
-  int idx_out;
+  std::vector<void *> bindings_;
+  int idx_in_;
+  int idx_out_;
 
-  bool ProcessInput();
+  Camera camera_;
+
   bool Preprocesse();
 
   bool CreateEngine();
@@ -53,9 +64,11 @@ class ObjectDetector {
   bool SaveEngine();
   bool CreateContex();
   bool InitMemory();
+  bool NonMaxSuppression();
 
  public:
-  ObjectDetector();
-  ~ObjectDetector();
+  Detector();
+  ~Detector();
+  bool TestInfer();
   bool Infer();
 };
