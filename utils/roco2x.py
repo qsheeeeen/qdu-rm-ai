@@ -220,7 +220,7 @@ if __name__ == "__main__":
     for region_folder in DES_LIST:
         region_folder_path = os.path.join(dataset_root, region_folder)
 
-        with open(os.path.join(region_folder_path, "name_list.txt"), "w+") as f:
+        with open(os.path.join(region_folder_path, "name_list.txt"), "r") as f:
             for line in f.readlines():
                 line = line.replace("\n", ".jpg\n")
                 sum_list.append(
