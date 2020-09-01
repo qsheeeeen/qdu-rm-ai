@@ -84,7 +84,7 @@ void Camera::Prepare() {
   }
 
   if (mv_dev_list_.nDeviceNum > 0) {
-    for (unsigned int i = 0; i < mv_dev_list_.nDeviceNum; i++) {
+    for (unsigned int i = 0; i < mv_dev_list_.nDeviceNum; ++i) {
       SPDLOG_INFO("[Camera] Device {d} slected.", i);
       MV_CC_DEVICE_INFO *dev_info = mv_dev_list_.pDeviceInfo[i];
       if (dev_info == nullptr) {
