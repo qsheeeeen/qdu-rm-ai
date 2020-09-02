@@ -13,15 +13,17 @@ class Camera {
   bool continue_capture_ = false;
   std::thread capture_thread_;
 
-  cv::Mat image(608, 608, CV_32FC3);
+  unsigned int out_h_, out_w_;
+
+  cv::Mat image;
 
   void WorkThread();
   void PrintDeviceInfo(MV_CC_DEVICE_INFO *mv_dev_info);
   void Prepare();
 
  public:
-  Camera();
-  Camera(unsigned int index);
+  Camera(unsigned int out_h, unsigned int out_w);
+  Camera(unsigned int index, unsigned int out_h, unsigned int out_w);
   ~Camera();
 
   void Open(unsigned int index);

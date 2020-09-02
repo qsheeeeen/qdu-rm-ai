@@ -22,7 +22,7 @@ void Camera::WorkThread() {
     }
     err = MV_CC_GetImageBuffer(camera_handle_, &frame_out, 1000);
     if (err == MV_OK) {
-      width = frame_out.stFrameInfo.nWidth, ;
+      width = frame_out.stFrameInfo.nWidth;
       height = frame_out.stFrameInfo.nHeight;
       num_frame = frame_out.stFrameInfo.nFrameNum;
       SPDLOG_DEBUG(
@@ -30,14 +30,11 @@ void Camera::WorkThread() {
           "nFrameNum{d}\n",
           width, height, num_frame);
 
-      cv2::Mat raw(cv2::Size(width, height), CV_8UC3, frame_out.pBufAddr);
+      cv::Mat raw(cv::Size(width, height), CV_8UC3, frame_out.pBufAddr);
 
-      const int crop_size = 608;
-      const int offset_w = (raw.cols - crop_size) / 2;
-      const int offset_h = (raw.rows - crop_size) / 2;
-      const cv::Rect roi(offset_w, offset_h, crop_size, crop_size);
-      raw = raw(roi);
-      raw.convertTo(image);
+      const int offset_h = (raw.rows - raw.cols) / 2;
+      const cv::Rect roi(offset_h, 0, raw.cols, raw.cols);
+      cv::resize(image, raw(roi), cv::Size(out_h_, out_w_));
 
     } else {
       SPDLOG_ERROR("[Camera] [WorkThread] GetImageBuffer fail! err:{x}\n", err);
@@ -99,13 +96,15 @@ void Camera::Prepare() {
   }
 }
 
-Camera::Camera() {
+Camera::Camera(unsigned int out_h, unsigned int out_w)
+    : out_h_(out_h), out_w_(out_w) {
   SPDLOG_DEBUG("[Camera] Constructing.");
   Prepare();
   SPDLOG_DEBUG("[Camera] Constructed.");
 }
 
-Camera::Camera(unsigned int index) {
+Camera::Camera(unsigned int index, unsigned int out_h, unsigned int out_w)
+    : out_h_(out_h), out_w_(out_w) {
   SPDLOG_DEBUG("[Camera] Constructing.");
   Prepare();
   Open(index);
@@ -162,7 +161,7 @@ void Camera::Open(unsigned int index) {
   capture_thread_ = std::thread(&Camera::WorkThread, this);
 }
 
-bool Camera::GetFrame(void* output) { return false; }
+bool Camera::GetFrame(void *output) { return false; }
 
 int Camera::Close() {
   int err = MV_OK;
