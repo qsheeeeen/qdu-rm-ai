@@ -24,15 +24,17 @@ class TRTLogger : public nvinfer1::ILogger {
   int GetVerbosity();
 };
 
-class Object {
- private:
-  float x_center_, y_center_, width_, height_;
+struct BBox {
+  float x_ctr;
+  float y_ctr;
+  float w;
+  float h;
+};
 
- public:
-  Object(x_center, y_center, width, height);
-  ~Object = default;
-  cv::Point Center();
-  cv:Rect Rect();
+struct alignas(float) Detection {
+  struct BBox bbox;
+  float conf;  // bbox_conf * cls_conf
+  float class_id;
 };
 
 class Detector {
@@ -45,30 +47,28 @@ class Detector {
 
   TRTLogger logger_;
 
-  std::shared_ptr<nvinfer1::ICudaEngine> engine_;
-  std::shared_ptr<nvinfer1::IExecutionContext> context_;
+  UniquePtr<nvinfer1::ICudaEngine> engine_;
+  UniquePtr<nvinfer1::IExecutionContext> context_;
 
-  float conf_thres_, iou_thres_;
+  float conf_thres_, nms_thres_, neighbor_thresh_;
   int num_classes_, agnostic_;
 
   std::vector<void *> bindings_;
+  std::vector<size_t> bingings_size_;
   int idx_in_;
   int idx_out_;
 
   Camera camera_;
-
-  bool Preprocesse();
 
   bool CreateEngine();
   bool LoadEngine();
   bool SaveEngine();
   bool CreateContex();
   bool InitMemory();
-  bool NonMaxSuppression();
 
  public:
   Detector();
   ~Detector();
   bool TestInfer();
-  bool Infer();
+  std::vector<Detection> Infer();
 };
