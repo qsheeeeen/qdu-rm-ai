@@ -1,14 +1,14 @@
 
 #include "detector.hpp"
 
-// #include <NvOnnxParser.h>
+#include <NvOnnxParser.h>
 
 #include <fstream>
 #include <map>
 #include <stdexcept>
 #include <vector>
 
-// #include "cuda_runtime_api.h"
+#include "cuda_runtime_api.h"
 #include "opencv2/opencv.hpp"
 
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
@@ -318,9 +318,9 @@ bool Detector::TestInfer() {
              cudaMemcpyDeviceToHost);
 
   auto dets = ProcessOutput(output.data(), conf_thres_);
-  dets = NonMaxSuppression(dets, 0.5, neighbor_thresh_, conf_thres_);
+  auto final = NonMaxSuppression(dets, 0.5, neighbor_thresh_, conf_thres_);
 
-  for (auto it = dets.begin(); it != dets.end(); ++it) {
+  for (auto it = final.begin(); it != final.end(); ++it) {
     const cv::Point org(it->bbox.x_ctr - it->bbox.w / 2,
                   it->bbox.y_ctr - it->bbox.h / 2);
     const cv::Size s(it->bbox.w, it->bbox.h);
@@ -338,12 +338,14 @@ bool Detector::TestInfer() {
 std::vector<Detection> Detector::Infer() {
   SPDLOG_DEBUG("[Detector] Infer.");
 
+  std::vector<float> output(bingings_size_.at(idx_out_) / sizeof(float));
   // Get frame from camera_.
   // preprocessing image.
   // Do infer.
-  auto det = ProcessOutput(scr, conf_thres_);
-  det = NonMaxSuppression(det, 0.5, conf_thres_, nms_thresh);
+
+  auto dets = ProcessOutput(output.data(), conf_thres_);
+  auto final = NonMaxSuppression(dets, 0.5, neighbor_thresh_, conf_thres_);
 
   SPDLOG_DEBUG("[Detector] Infered.");
-  return det;
+  return final;
 }
