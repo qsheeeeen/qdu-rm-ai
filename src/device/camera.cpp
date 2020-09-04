@@ -9,48 +9,6 @@
 
 #include "spdlog/spdlog.h"
 
-void Camera::WorkThread() {
-  SPDLOG_DEBUG("[Camera] [WorkThread] Running.");
-  unsigned short width, height, num_frame;
-  int err = MV_OK;
-  MV_FRAME_OUT frame_out;
-  std::memset(&frame_out, 0, sizeof(MV_FRAME_OUT));
-  while (continue_capture_) {
-    if (!MV_CC_IsDeviceConnected(camera_handle_)) {
-      SPDLOG_ERROR("[Camera] [WorkThread] Camera disconnected.");
-      break;
-    }
-    err = MV_CC_GetImageBuffer(camera_handle_, &frame_out, 1000);
-    if (err == MV_OK) {
-      width = frame_out.stFrameInfo.nWidth;
-      height = frame_out.stFrameInfo.nHeight;
-      num_frame = frame_out.stFrameInfo.nFrameNum;
-      SPDLOG_DEBUG(
-          "[Camera] [WorkThread] Get One Frame: Width{d}, Height{d}, "
-          "nFrameNum{d}\n",
-          width, height, num_frame);
-
-      cv::Mat raw(cv::Size(width, height), CV_8UC3, frame_out.pBufAddr);
-
-      const int offset_h = (raw.rows - raw.cols) / 2;
-      const cv::Rect roi(offset_h, 0, raw.cols, raw.cols);
-      cv::resize(image, raw(roi), cv::Size(out_h_, out_w_));
-
-    } else {
-      SPDLOG_ERROR("[Camera] [WorkThread] GetImageBuffer fail! err:{x}\n", err);
-    }
-    if (NULL != frame_out.pBufAddr) {
-      err = MV_CC_FreeImageBuffer(camera_handle_, &frame_out);
-      if (err != MV_OK) {
-        SPDLOG_ERROR("[Camera] [WorkThread] FreeImageBuffer fail! err:{x}\n",
-                     err);
-      }
-    }
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-  }
-  SPDLOG_DEBUG("[Camera] [WorkThread] Running.");
-}
-
 void Camera::PrintDeviceInfo(MV_CC_DEVICE_INFO *mv_dev_info) {
   if (nullptr == mv_dev_info) {
     SPDLOG_ERROR("[Camera] The Pointer of mv_dev_info is nullptr!\n");
@@ -117,7 +75,7 @@ Camera::~Camera() {
   SPDLOG_DEBUG("[Camera] Destructed.");
 }
 
-void Camera::Open(unsigned int index) {
+int Camera::Open(unsigned int index) {
   int err = MV_OK;
   std::string err_msg;
 
@@ -126,51 +84,104 @@ void Camera::Open(unsigned int index) {
   if (index >= mv_dev_list_.nDeviceNum) {
     SPDLOG_ERROR("[Camera] Intput index:{} >= nDeviceNum:{} !", index,
                  mv_dev_list_.nDeviceNum);
-    throw std::range_error("[Camera] Index range error!");
+    return MV_E_UNKNOW;
   }
 
   err = MV_CC_CreateHandle(&camera_handle_, mv_dev_list_.pDeviceInfo[index]);
   if (err != MV_OK) {
-    err_msg = "[Camera] CreateHandle fail! err: " + std::to_string(err);
-    SPDLOG_ERROR(err_msg);
-    throw std::runtime_error(err_msg);
+    SPDLOG_ERROR("[Camera] CreateHandle fail! err: {}", err);
+    return err;
   }
 
   err = MV_CC_OpenDevice(camera_handle_);
   if (err != MV_OK) {
-    err_msg = "[Camera] OpenDevice fail! err: " + std::to_string(err);
-    SPDLOG_ERROR(err_msg);
-    throw std::runtime_error(err_msg);
+    SPDLOG_ERROR("[Camera] OpenDevice fail! err: {}", err);
+    return err;
   }
 
   err = MV_CC_SetEnumValue(camera_handle_, "TriggerMode", 0);
   if (err != MV_OK) {
-    err_msg = "[Camera] SetTrigger Mode fail! err: " + std::to_string(err);
-    SPDLOG_ERROR(err_msg);
-    throw std::runtime_error(err_msg);
+    SPDLOG_ERROR("[Camera] SetTrigger fail! err: {}", err);
+    return err;
   }
 
   err = MV_CC_StartGrabbing(camera_handle_);
   if (err != MV_OK) {
-    err_msg = "[Camera] StartGrabbing fail! err: " + std::to_string(err);
-    SPDLOG_ERROR(err_msg);
-    throw std::runtime_error(err_msg);
+    SPDLOG_ERROR("[Camera] StartGrabbing fail! err: {}", err);
+    return err;
   }
-
-  continue_capture_ = true;
-  capture_thread_ = std::thread(&Camera::WorkThread, this);
+  return MV_OK;
 }
 
-bool Camera::GetFrame(void *output) { return false; }
+cv::Mat Camera::GetFrame() {
+  int err = MV_OK;
+  MV_FRAME_OUT frame_out = {};
+
+  cv::Mat image;
+
+  if (!MV_CC_IsDeviceConnected(camera_handle_)) {
+    SPDLOG_ERROR("[Camera] Camera disconnected.");
+    goto finally;
+  }
+  err = MV_CC_GetImageBuffer(camera_handle_, &frame_out, 10);
+  if (err == MV_OK) {
+    size_t rgb_size =
+        frame_out.stFrameInfo.nWidth * frame_out.stFrameInfo.nHeight * 4 + 2048;
+
+    std::vector<unsigned char> raw_rgb(rgb_size);
+
+    MV_CC_PIXEL_CONVERT_PARAM cvt_param{
+        .nWidth = frame_out.stFrameInfo.nWidth,
+        .nHeight = frame_out.stFrameInfo.nHeight,
+
+        .enSrcPixelType = frame_out.stFrameInfo.enPixelType,
+        .pSrcData = frame_out.pBufAddr,
+        .nSrcDataLen = frame_out.stFrameInfo.nFrameLen,
+
+        .enDstPixelType = PixelType_Gvsp_RGB8_Packed,
+        .pDstBuffer = raw_rgb.data(),
+        .nDstBufferSize = static_cast<unsigned int>(rgb_size),
+    };
+
+    SPDLOG_DEBUG(
+        "[Camera] Get One Frame: Width{d}, Height{d}, "
+        "nFrameNum{d}\n",
+        frame_out.stFrameInfo.nWidth, frame_out.stFrameInfo.nHeight,
+        frame_out.stFrameInfo.nFrameNum);
+
+    err = MV_CC_ConvertPixelType(camera_handle_, &cvt_param);
+    if (MV_OK != err) {
+      SPDLOG_ERROR("[Camera] ConvertPixelType fail! err:{x}\n", err);
+      goto finally;
+    }
+
+    cv::Mat raw(
+        cv::Size(frame_out.stFrameInfo.nWidth, frame_out.stFrameInfo.nHeight),
+        CV_8UC3, raw_rgb.data());
+
+    const int offset_h = (raw.rows - raw.cols) / 2;
+    const cv::Rect roi(offset_h, 0, raw.cols, raw.cols);
+    cv::resize(raw(roi), image, cv::Size(out_h_, out_w_));
+
+  } else {
+    SPDLOG_ERROR("[Camera] GetImageBuffer fail! err:{x}\n", err);
+  }
+
+finally:
+  if (NULL != frame_out.pBufAddr) {
+    err = MV_CC_FreeImageBuffer(camera_handle_, &frame_out);
+    if (err != MV_OK) {
+      SPDLOG_ERROR("[Camera] FreeImageBuffer fail! err:{x}\n", err);
+    }
+  }
+  return image;
+}
 
 int Camera::Close() {
   int err = MV_OK;
   std::string err_msg;
 
   SPDLOG_DEBUG("[Camera] Close.");
-
-  continue_capture_ = false;
-  capture_thread_.join();
 
   err = MV_CC_StopGrabbing(camera_handle_);
   if (err != MV_OK) {
