@@ -9,31 +9,37 @@
 #include <vector>
 
 #include "cuda_runtime_api.h"
-#include "opencv2/opencv.hpp"
+#include "opencv2/core/mat.hpp"
 
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
 #include "spdlog/spdlog.h"
 
 using namespace nvinfer1;
 
+cv::Mat Preprocess(cv::Mat raw) {
+  cv::Mat image;
+  raw.convertTo(image, CV_32FC3, 1.0 / 255.0, 0);
+  return image;
+}
+
 static float IOU(const BBox &bbox1, const BBox &bbox2) {
   const float left =
       std::max(bbox1.x_ctr - bbox1.w / 2.f, bbox2.x_ctr - bbox2.w / 2.f);
   const float right =
       std::min(bbox1.x_ctr + bbox1.w / 2.f, bbox2.x_ctr + bbox2.w / 2.f);
-  const float bottom =
-      std::max(bbox1.y_ctr - bbox1.h / 2.f, bbox2.y_ctr - bbox2.h / 2.f);
   const float top =
+      std::max(bbox1.y_ctr - bbox1.h / 2.f, bbox2.y_ctr - bbox2.h / 2.f);
+  const float bottom =
       std::min(bbox1.y_ctr + bbox1.h / 2.f, bbox2.y_ctr + bbox2.h / 2.f);
 
-  if (bottom > top || left > right) return 0.0f;
+  if (top > bottom || left > right) return 0.0f;
 
   const float inter_box_s = (right - left) * (bottom - top);
   return inter_box_s / (bbox1.w * bbox1.h + bbox2.w * bbox2.h - inter_box_s);
 }
 
-static std::vector<Detection> ProcessOutput(const float *prob,
-                                            float conf_thresh) {
+static std::vector<Detection> PostProcess(const float *prob,
+                                          float conf_thresh) {
   int range = prob[0] < 1000 ? prob[0] : 1000;
   std::vector<Detection> dets(&prob[1], &prob[range - 1]);
   dets.erase(std::remove_if(dets.begin(), dets.end(),
@@ -78,8 +84,6 @@ static std::vector<Detection> NonMaxSuppression(
   }
   return out;
 }
-
-static void Preprocesse() { raw.convertTo(image, 1.0 / 255.0, 0); }
 
 template <typename T>
 void TRTDeleter::operator()(T *obj) const {
@@ -317,16 +321,17 @@ bool Detector::TestInfer() {
   cudaMemcpy(output.data(), bindings_.at(idx_out_), bingings_size_.at(idx_out_),
              cudaMemcpyDeviceToHost);
 
-  auto dets = ProcessOutput(output.data(), conf_thres_);
+  auto dets = PostProcess(output.data(), conf_thres_);
   auto final = NonMaxSuppression(dets, 0.5, neighbor_thresh_, conf_thres_);
 
   for (auto it = final.begin(); it != final.end(); ++it) {
     const cv::Point org(it->bbox.x_ctr - it->bbox.w / 2,
-                  it->bbox.y_ctr - it->bbox.h / 2);
+                        it->bbox.y_ctr - it->bbox.h / 2);
     const cv::Size s(it->bbox.w, it->bbox.h);
     const cv::Rect roi(org, s);
     cv::rectangle(image, roi, cv::Scalar(0, 255, 0));
-    cv::putText(image, std::to_string(it->class_id), org);
+    cv::putText(image, std::to_string(it->class_id), org,
+                cv::FONT_HERSHEY_SCRIPT_SIMPLEX, 2.0, cv::Scalar(0, 255, 0));
   }
 
   cv::imwrite("./image/result/test_tensorrt.jpg", image);
@@ -339,11 +344,16 @@ std::vector<Detection> Detector::Infer() {
   SPDLOG_DEBUG("[Detector] Infer.");
 
   std::vector<float> output(bingings_size_.at(idx_out_) / sizeof(float));
-  // Get frame from camera_.
-  // preprocessing image.
-  // Do infer.
+  auto raw = camera_.GetFrame();
+  auto image = Preprocess(raw);
 
-  auto dets = ProcessOutput(output.data(), conf_thres_);
+  cudaMemcpy(bindings_.at(idx_in_), image.data, bingings_size_.at(idx_in_),
+             cudaMemcpyHostToDevice);
+  context_->executeV2(bindings_.data());
+  cudaMemcpy(output.data(), bindings_.at(idx_out_), bingings_size_.at(idx_out_),
+             cudaMemcpyDeviceToHost);
+
+  auto dets = PostProcess(output.data(), conf_thres_);
   auto final = NonMaxSuppression(dets, 0.5, neighbor_thresh_, conf_thres_);
 
   SPDLOG_DEBUG("[Detector] Infered.");
