@@ -2,7 +2,7 @@
 
 #include "behavior.hpp"
 #include "camera.hpp"
-#include "obj_detector.hpp"
+#include "detector.hpp"
 #include "robot.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -32,7 +32,8 @@ int main(int argc, char const* argv[]) {
   TestOpenCV();
   TestVideoWrite();
 
-  ObjectDetector detector;
+  Detector detector;
+  detector.TestInfer();
   detector.Infer();
   Robot bot("/dev/tty");
 
