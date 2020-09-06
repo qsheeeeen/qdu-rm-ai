@@ -12,13 +12,13 @@ void TestOpenCV(void) {
   SPDLOG_INFO("Test OpenCV.");
 
   Mat img;
-  img = imread("/home/qs/test.jpg", IMREAD_COLOR);
+  img = imread("./image/test.jpg", IMREAD_COLOR);
   if (img.empty()) {
     SPDLOG_ERROR("Error opening image.");
     return;
   }
   cvtColor(img, img, COLOR_BGR2GRAY);
-  imwrite("/home/qs/test_result.jpg", img);
+  imwrite("./image/test_opencv.jpg", img);
 
   SPDLOG_INFO("Finish TestOpenCV.");
 }
