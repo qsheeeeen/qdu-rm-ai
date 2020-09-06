@@ -31,6 +31,6 @@ export PYTHONPATH="$PWD"
 python3 models/export.py --weights runs/exp0/weights/best.pt --img 608 --batch 1
 
 # Copy ONNX file to target location.
-cp runs/exp0/weights/best.onnx ../../
+cp runs/exp0/weights/best.onnx ../../mid/
 
 cd ../../utils || exit
