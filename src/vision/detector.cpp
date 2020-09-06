@@ -3,13 +3,14 @@
 
 #include <NvOnnxParser.h>
 
+#include <algorithm>
 #include <fstream>
 #include <map>
 #include <stdexcept>
 #include <vector>
 
 #include "cuda_runtime_api.h"
-#include "opencv2/core/mat.hpp"
+#include "opencv2/opencv.hpp"
 
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
 #include "spdlog/spdlog.h"
@@ -19,70 +20,48 @@ using namespace nvinfer1;
 cv::Mat Preprocess(cv::Mat raw) {
   cv::Mat image;
   raw.convertTo(image, CV_32FC3, 1.0 / 255.0, 0);
+  // NHWC to NCHW
   return image;
 }
 
-static float IOU(const BBox &bbox1, const BBox &bbox2) {
+static float IOU(const Detection &det1, const Detection &det2) {
   const float left =
-      std::max(bbox1.x_ctr - bbox1.w / 2.f, bbox2.x_ctr - bbox2.w / 2.f);
+      std::max(det1.x_ctr - det1.w / 2.f, det2.x_ctr - det2.w / 2.f);
   const float right =
-      std::min(bbox1.x_ctr + bbox1.w / 2.f, bbox2.x_ctr + bbox2.w / 2.f);
+      std::min(det1.x_ctr + det1.w / 2.f, det2.x_ctr + det2.w / 2.f);
   const float top =
-      std::max(bbox1.y_ctr - bbox1.h / 2.f, bbox2.y_ctr - bbox2.h / 2.f);
+      std::max(det1.y_ctr - det1.h / 2.f, det2.y_ctr - det2.h / 2.f);
   const float bottom =
-      std::min(bbox1.y_ctr + bbox1.h / 2.f, bbox2.y_ctr + bbox2.h / 2.f);
+      std::min(det1.y_ctr + det1.h / 2.f, det2.y_ctr + det2.h / 2.f);
 
   if (top > bottom || left > right) return 0.0f;
 
   const float inter_box_s = (right - left) * (bottom - top);
-  return inter_box_s / (bbox1.w * bbox1.h + bbox2.w * bbox2.h - inter_box_s);
+  return inter_box_s / (det1.w * det1.h + det2.w * det2.h - inter_box_s);
 }
 
-static std::vector<Detection> PostProcess(const float *prob,
-                                          float conf_thresh) {
-  int range = prob[0] < 1000 ? prob[0] : 1000;
-  std::vector<Detection> dets(&prob[1], &prob[range - 1]);
-  dets.erase(std::remove_if(dets.begin(), dets.end(),
-                            [conf_thresh](const Detection &d) {
-                              return (d.conf < conf_thresh);
-                            }),
-             dets.end());
-  return dets;
-}
+void NonMaxSuppression(std::vector<Detection> &dets, float nms_thresh) {
+  if (dets.empty()) return;
 
-static std::vector<Detection> NonMaxSuppression(
-    const std::vector<Detection> &dets, float ovr_thresh, float neighbor_thresh,
-    float score_thresh) {
-  std::vector<Detection> out;
+  std::vector<Detection> keep;
 
-  std::multimap<float, size_t> scores_idxs;
-  for (size_t i = 0; i < dets.size(); ++i)
-    scores_idxs.insert(std::pair<float, size_t>(dets.at(i).conf, i));
+  std::sort(dets.begin(), dets.end(),
+            [](const Detection &det1, const Detection &det2) {
+              return det1.conf < det2.conf;
+            });
 
-  while (!scores_idxs.empty()) {
-    auto last_scores_idxs = --scores_idxs.end();
-    const auto det = dets[last_scores_idxs->second];
+  while (!dets.empty()) {
+    auto highest = dets.back();
+    keep.push_back(highest);
+    dets.pop_back();
 
-    int num_neigbors = 0;
-    float score_sum = det.conf;
-
-    scores_idxs.erase(last_scores_idxs);
-
-    for (auto it = scores_idxs.begin(); it != scores_idxs.end();) {
-      const auto det2 = dets[it->second];
-
-      if (IOU(det.bbox, det2.bbox) > ovr_thresh) {
-        score_sum += it->first;
-        it = scores_idxs.erase(it);
-        ++num_neigbors;
-      } else {
-        ++it;
+    for (auto it = dets.begin(); it != dets.end(); ++it) {
+      if (IOU(highest, *it) > nms_thresh) {
+        dets.erase(it);
       }
     }
-    if (num_neigbors >= neighbor_thresh && score_sum >= score_thresh)
-      out.push_back(det);
   }
-  return out;
+  dets = keep;
 }
 
 template <typename T>
@@ -109,6 +88,32 @@ void TRTLogger::log(Severity severity, const char *msg) {
 
 int TRTLogger::GetVerbosity() { return (int)Severity::kVERBOSE; }
 
+std::vector<Detection> Detector::PostProcess(std::vector<float> prob) {
+  std::vector<Detection> dets;
+
+  for (auto it = prob.begin(); it != prob.end(); it += dim_out_.d[4]) {
+    if (*(it + 4) > conf_thresh_) {
+      auto max_conf = std::max_element(it + 4, it + dim_out_.d[4]);
+      auto class_id = std::distance(it + 4, max_conf);
+
+      Detection det {
+        *it,
+        *(it + 1),
+        *(it + 2),
+        *(it + 3),
+        *max_conf **(it + 4),
+        static_cast<float>(class_id),
+      };
+      dets.push_back(det);
+    }
+  }
+  // [4] obj conf
+  // [5] [6] [7] [8] class_conf
+  // [5] [6] [7] [8] *= [4] conf = obj_conf * cls_conf;
+  // [0] [1] [2] [3] = x_ctr y_ctr w h
+  return dets;
+}
+
 bool Detector::CreateEngine() {
   SPDLOG_DEBUG("[Detector] CreateEngine.");
 
@@ -125,7 +130,8 @@ bool Detector::CreateEngine() {
       1U << static_cast<uint32_t>(
           NetworkDefinitionCreationFlag::kEXPLICIT_BATCH);
 
-  auto network = UniquePtr<INetworkDefinition>(builder->c(explicit_batch));
+  auto network =
+      UniquePtr<INetworkDefinition>(builder->createNetworkV2(explicit_batch));
   if (!network) {
     SPDLOG_ERROR("[Detector] createNetworkV2 Fail.");
     return false;
@@ -167,7 +173,7 @@ bool Detector::CreateEngine() {
   config->addOptimizationProfile(profile);
 
   if (builder->platformHasFastFp16()) config->setFlag(BuilderFlag::kFP16);
-  if (builder->platformHasFastInt8()) config->setFlag(BuilderFlag::kINT8);
+  // if (builder->platformHasFastInt8()) config->setFlag(BuilderFlag::kINT8);
 
   if (builder->getNbDLACores() == 0)
     SPDLOG_WARN("[Detector] The platform doesn't have any DLA cores.");
@@ -256,6 +262,9 @@ bool Detector::CreateContex() {
 bool Detector::InitMemory() {
   idx_in_ = engine_->getBindingIndex("images");
   idx_out_ = engine_->getBindingIndex("output");
+  dim_in_ = engine_->getBindingDimensions(idx_in_);
+  dim_out_ = engine_->getBindingDimensions(idx_out_);
+  nc = dim_out_.d[4] - 5;
 
   for (int i = 0; i < engine_->getNbBindings(); ++i) {
     Dims dim = engine_->getBindingDimensions(i);
@@ -286,16 +295,18 @@ bool Detector::InitMemory() {
 
 Detector::Detector() {
   SPDLOG_DEBUG("[Detector] Constructing.");
-  onnx_file_path_ = "./best.onnx";
-  engine_path_ = onnx_file_path_ + ".engine_";
-
-  // camera_.Open(index);
+  onnx_file_path_ = "./mid/best.onnx";
+  engine_path_ = onnx_file_path_ + ".engine";
+  conf_thresh_ = 0.5;
+  nms_thresh_ = 0.5;
   if (!LoadEngine()) {
     CreateEngine();
     SaveEngine();
   }
   CreateContex();
   InitMemory();
+  camera_.Setup(dim_in_.d[2], dim_in_.d[3]);
+  camera_.Open(0);
   SPDLOG_DEBUG("[Detector] Constructed.");
 }
 
@@ -304,7 +315,7 @@ Detector::~Detector() {
 
   for (auto it = bindings_.begin(); it != bindings_.end(); ++it) cudaFree(*it);
 
-  // camera_.Close();
+  camera_.Close();
   SPDLOG_DEBUG("[Detector] Destructed.");
 }
 
@@ -312,6 +323,10 @@ bool Detector::TestInfer() {
   SPDLOG_DEBUG("[Detector] TestInfer.");
   cv::Mat image = cv::imread("./image/test.jpg");
   cv::resize(image, image, cv::Size(608, 608));
+  cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
+  cv::imwrite("./image/test_tensorrt_in.jpg", image);
+
+  image = Preprocess(image);
 
   std::vector<float> output(bingings_size_.at(idx_out_) / sizeof(float));
 
@@ -321,20 +336,19 @@ bool Detector::TestInfer() {
   cudaMemcpy(output.data(), bindings_.at(idx_out_), bingings_size_.at(idx_out_),
              cudaMemcpyDeviceToHost);
 
-  auto dets = PostProcess(output.data(), conf_thres_);
-  auto final = NonMaxSuppression(dets, 0.5, neighbor_thresh_, conf_thres_);
+  auto dets = PostProcess(output);
+  NonMaxSuppression(dets, nms_thresh_);
 
-  for (auto it = final.begin(); it != final.end(); ++it) {
-    const cv::Point org(it->bbox.x_ctr - it->bbox.w / 2,
-                        it->bbox.y_ctr - it->bbox.h / 2);
-    const cv::Size s(it->bbox.w, it->bbox.h);
+  for (auto it = dets.begin(); it != dets.end(); ++it) {
+    const cv::Point org(it->x_ctr - it->w / 2, it->y_ctr - it->h / 2);
+    const cv::Size s(it->w, it->h);
     const cv::Rect roi(org, s);
     cv::rectangle(image, roi, cv::Scalar(0, 255, 0));
     cv::putText(image, std::to_string(it->class_id), org,
                 cv::FONT_HERSHEY_SCRIPT_SIMPLEX, 2.0, cv::Scalar(0, 255, 0));
   }
 
-  cv::imwrite("./image/result/test_tensorrt.jpg", image);
+  cv::imwrite("./image/test_tensorrt.jpg", image);
 
   SPDLOG_DEBUG("[Detector] TestInfer done.");
   return true;
@@ -353,9 +367,9 @@ std::vector<Detection> Detector::Infer() {
   cudaMemcpy(output.data(), bindings_.at(idx_out_), bingings_size_.at(idx_out_),
              cudaMemcpyDeviceToHost);
 
-  auto dets = PostProcess(output.data(), conf_thres_);
-  auto final = NonMaxSuppression(dets, 0.5, neighbor_thresh_, conf_thres_);
+  auto dets = PostProcess(output);
+  NonMaxSuppression(dets, nms_thresh_);
 
   SPDLOG_DEBUG("[Detector] Infered.");
-  return final;
+  return dets;
 }
