@@ -10,13 +10,6 @@ project(vision)
 # Target
 #---------------------------------------------------------------------------------------
 
-find_package(OpenCV REQUIRED) 
-find_package(spdlog REQUIRED)
-find_package(CUDA REQUIRED)
-
-message("-- CUDA version: ${CUDA_VERSION}")
-message("-- OpenCV version: ${OpenCV_VERSION}")
-
 file(GLOB ${PROJECT_NAME}_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
 )
@@ -49,4 +42,3 @@ else()
     target_link_directories(${PROJECT_NAME} PUBLIC /usr/local/cuda/lib64)
 endif()
 
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)

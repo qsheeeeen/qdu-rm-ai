@@ -10,12 +10,6 @@ project(device)
 # Target
 #---------------------------------------------------------------------------------------
 
-find_package(OpenCV REQUIRED) 
-find_package(Threads REQUIRED)
-find_package(spdlog REQUIRED)
-
-message("-- OpenCV version: ${OpenCV_VERSION}")
-
 file(GLOB ${PROJECT_NAME}_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
 )

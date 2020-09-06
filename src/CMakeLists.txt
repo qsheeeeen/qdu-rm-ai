@@ -11,6 +11,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 message("-- System arch:  ${CMAKE_SYSTEM_PROCESSOR}")
 
+find_package(BehaviorTreeV3 REQUIRED) 
+find_package(CUDA REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(spdlog REQUIRED)
+find_package(Threads REQUIRED)
+
+message("-- BehaviorTreeV3 version: ${BehaviorTreeV3_VERSION}")
+message("-- CUDA version: ${CUDA_VERSION}")
+message("-- OpenCV version: ${OpenCV_VERSION}")
+message("-- spdlog version: ${spdlog_VERSION}")
+message("-- Threads version: ${Threads_VERSION}")
+
 #---------------------------------------------------------------------------------------
 # Options
 #---------------------------------------------------------------------------------------

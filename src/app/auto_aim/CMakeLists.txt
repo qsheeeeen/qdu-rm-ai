@@ -9,8 +9,6 @@ project(auto_aim)
 # Target
 #---------------------------------------------------------------------------------------
 
-find_package(spdlog REQUIRED)
-
 add_executable(${PROJECT_NAME} main.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

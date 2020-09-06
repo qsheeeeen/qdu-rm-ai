@@ -10,9 +10,6 @@ project(behavior)
 # Target
 #---------------------------------------------------------------------------------------
 
-find_package(BehaviorTreeV3 REQUIRED) 
-find_package(spdlog REQUIRED)
-
 file(GLOB ${PROJECT_NAME}_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
 )
@@ -25,7 +22,7 @@ add_library(${PROJECT_NAME} STATIC ${${PROJECT_NAME}_SOURCES})
 # )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
-    behaviortree_cpp_v3
+    BT::behaviortree_cpp_v3
     spdlog::spdlog
 )
 
