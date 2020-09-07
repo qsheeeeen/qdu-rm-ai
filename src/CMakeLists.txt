@@ -23,6 +23,20 @@ message("-- OpenCV version: ${OpenCV_VERSION}")
 message("-- spdlog version: ${spdlog_VERSION}")
 message("-- Threads version: ${Threads_VERSION}")
 
+if(NOT CMAKE_BUILD_TYPE)
+set(CMAKE_BUILD_TYPE "Release")
+endif(NOT CMAKE_BUILD_TYPE)
+
+message("-- CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_options(-Wall -Wextra)
+
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+
+    add_compile_options(-Wall -Wextra -O2)
+endif()
+
+
 #---------------------------------------------------------------------------------------
 # Options
 #---------------------------------------------------------------------------------------

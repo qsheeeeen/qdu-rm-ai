@@ -31,5 +31,3 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     $<TARGET_PROPERTY:vision,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:device,INTERFACE_INCLUDE_DIRECTORIES>
 )
-
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
