@@ -4,15 +4,15 @@ UNFINISHED & UNTESTED.
 
 软件正处在开发初期，只完成了视觉的核心部分，其余部分正在开发中。使用后果自负。
 
-## 软件功能介绍
+## 软件介绍
 
 本开源软件为青岛大学未来战队机器人的视觉和人工智能的代码。参考了其他战队代码和各种开源机器人项目，从零编写而成。中心思想：
 
 - 使用基于pytorch的yolov5算法，训练得到的权重和模型导出到ONNX格式。
 - 在妙算平台使用TensorRT运行导出的模型。
-- 一个项目适配不同不通型号的机器人。
+- 一个项目适配不同型号的机器人。
 
-这样做增加代码了的重用，减少了工作量。实现了可以通过DLA（深度学习加速器）加速妙算上模型的推断速度，切换所适配的机器人和操作手。代码完成后只需要烧写一次，减少维护的工作量，减少出错的可能性。
+这样做增加代码了的重用，减少了工作量。实现了通过DLA（深度学习加速器）加速妙算上模型的推断速度。利用行为树实现了可控的复杂行为。
 
 ## 图片展示
 
@@ -20,7 +20,9 @@ UNFINISHED & UNTESTED.
 
 ![目标识别效果](./image/test_best.jpg?raw=true "目标识别效果")
 
-### TODO：TensorRT加速效果
+### TODO：TensorRT加速效果对比，可参考NVIDIA官方
+
+![TensorRT加速效果](./image/compare.jpg?raw=true "TensorRT加速效果")
 
 ## 依赖&环境
 
@@ -45,11 +47,27 @@ UNFINISHED & UNTESTED.
   
   - Run `ldconfig` after install BehaviorTreeV3
 
+- 获得代码.
+
+  ```sh
+  git clone --recursive https://github.com/qsheeeeen/qdu-robomaster-ai
+  
+  ```
+
+- 编译程序
+
+  ```sh
+  cd qdu-robomaster-ai
+  mkdir build
+  cd build
+  cmake ..
+  make -j
+  ```
+
 - 训练神经网络
 
   ```sh
-
-  # 以下脚本涉及相对路径，需要在本文件夹内运行。
+  # 以下脚本涉及相对路径，需要在此文件夹内运行。
   cd ./utils
 
   # 处理数据集
@@ -59,21 +77,11 @@ UNFINISHED & UNTESTED.
   sh ./train_vision.sh
   ```
 
-- 编译代码.
-
-  ```sh
-  git clone --recursive https://github.com/qsheeeeen/qdu-robomaster-ai
-  cd qdu-robomaster-ai
-  mkdir build
-  cd build
-  cmake ..
-  make -j
-  ```
-
 - 运行
-  - 暂时：使用VS Code运行，或者在repo目录里运行build里的二进制文件
+  - 暂时：使用VS Code运行，或者在repo跟目录里运行build里的二进制文件
 
-  - TODO: 
+  - TODO：
+
   ```sh
   #安装后直接使用
   qdu-rm-ai-auto-aim
@@ -104,24 +112,16 @@ UNFINISHED & UNTESTED.
 
 ### 软件流程图
 
-![步兵嵌入式硬件框图](./Image/嵌入式程序流程图.png?raw=true "步兵嵌入式硬件框图")
+![步兵嵌入式硬件框图](./image/视觉程序框图.png?raw=true "步兵嵌入式硬件框图")
 
-### 软件层级图
+### 行为树演示
 
-![嵌入式程序结构图](./Image/嵌入式程序结构图.png?raw=true "嵌入式程序结构图")
+![行为树演示](./image/行为树演示.png?raw=true "行为树演示")
 
 ## TODO
 
 - Debug Detector 输出。
-- 完成输入预处理
-- Add logging and file on top of LittleFS.
-- Add gimbal soft limit.
-- 给BSP想个更好的名字，备选"mcu"。
-- 给BSP USB print加保护，允许不同进程的使用。
-  - 给所有BSP加保护
-  - device.c里面加上一个Device_Init()，在里面初始化所有mutex
-- CAN设备代码优化。消息解析发送方向。
-  - CAN设备动态初始化，保存好几组配置。
+- Debug Detector 输入预处理。
 
 ## Roadmap
 
