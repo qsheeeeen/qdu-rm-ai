@@ -1,8 +1,8 @@
 # 青岛大学 RoboMaster 视觉 人工智能 代码开源
 
-UNFINISHED & UNTESTED.
+***UNFINISHED.***
 
-软件正处在开发初期，只完成了视觉的核心部分，其余部分正在开发中。使用后果自负。
+软件正处在开发初期，只完成了视觉的核心部分，其余部分正在开发中。
 
 ## 软件介绍
 
@@ -10,6 +10,7 @@ UNFINISHED & UNTESTED.
 
 - 使用基于pytorch的yolov5算法，训练得到的权重和模型导出到ONNX格式。
 - 在妙算平台使用TensorRT运行导出的模型。
+- 基于行为树设计哨兵的AI
 - 一个项目适配不同型号的机器人。
 
 这样做增加代码了的重用，减少了工作量。实现了通过DLA（深度学习加速器）加速妙算上模型的推断速度。利用行为树实现了可控的复杂行为。
@@ -66,9 +67,24 @@ UNFINISHED & UNTESTED.
 
 - 训练神经网络
 
+  - 准备
+
   ```sh
   # 以下脚本涉及相对路径，需要在此文件夹内运行。
-  cd ./utils
+  cd ./third_party/yolov5
+
+  # 安装依赖的包
+  pip3 install -r requirements.txt
+
+  # 导出模型需要用到ONNX
+  pip3 install -U onnx
+  ```
+
+  - 训练
+
+  ```sh
+  # 以下脚本涉及相对路径，需要在此文件夹内运行。
+  cd /path/to/qdu-robomaster-ai/utils
 
   # 处理数据集
   sh python3 roco2x.py ----dji-roco-dir=/path/to/DJI ROCO/
