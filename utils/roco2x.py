@@ -14,7 +14,10 @@ YOLO5_IMAGE_FOLDER = "images"
 ORIGIN_LABEL_FOLDER = "image_annotation"
 YOLO5_LABEL_FOLDER = "labels"
 
-CLASSES = ["armor", "base", "watcher", "car"]
+CLASSES_RADAR = ["armor", "base", "watcher", "car"]
+CLASSES_ARMOR = ["armor"]
+CLASSES = None
+OUTPUT_FILE = None
 
 SRC_LIST = [
     "robomaster_Central China Regional Competition",
@@ -29,17 +32,6 @@ DES_LIST = [
     "north",
     "south",
 ]
-
-
-def split_list(src_list, split_ratio):
-    split_index1 = math.floor(len(src_list) * split_ratio[0] / sum(split_ratio))
-    split_index2 = math.floor(len(src_list) * sum(split_ratio[:2]) / sum(split_ratio))
-
-    train = src_list[:split_index1]
-    test = src_list[split_index1:split_index2]
-    val = src_list[split_index2:]
-
-    return train, test, val
 
 
 def parse_args():
@@ -61,6 +53,14 @@ def parse_args():
         type=int,
         default=[7, 2, 1],
         help="train : test : val.",
+
+    )
+
+    parser.add_argument(
+        "--target",
+        type=str,
+        default="radar",
+        help="Traning target. Affect labels. support radar & armor",
     )
 
     parser.add_argument(
@@ -75,6 +75,17 @@ def parse_args():
     )
 
     return parser.parse_args()
+
+
+def split_list(src_list, split_ratio):
+    split_index1 = math.floor(len(src_list) * split_ratio[0] / sum(split_ratio))
+    split_index2 = math.floor(len(src_list) * sum(split_ratio[:2]) / sum(split_ratio))
+
+    train = src_list[:split_index1]
+    test = src_list[split_index1:split_index2]
+    val = src_list[split_index2:]
+
+    return train, test, val
 
 
 def resize_data(image_folder, annot_folder):
@@ -170,7 +181,7 @@ def to_yolov5(folder_path):
                     obj_name = obj.findtext("name")
 
                     try:
-                        class_index = CLASSES.index(obj_name)
+                        class_index = CLASSES_RADAR.index(obj_name)
                         f.write(
                             " ".join([str(class_index), str(x), str(y), str(w), str(h)])
                             + "\n"
@@ -181,6 +192,17 @@ def to_yolov5(folder_path):
 
 if __name__ == "__main__":
     args = parse_args()
+    print(args)
+
+    if args.target == 'radar':
+        CLASSES = CLASSES_RADAR
+        OUTPUT_FILE = "radar_dataset.yaml"
+    elif args.target == 'armor':
+        CLASSES = CLASSES_ARMOR
+        OUTPUT_FILE = "armor_dataset.yaml"
+    else:
+        raise ValueError("Do not support --target=={}".format(args.target))
+
     print("Start conversion...")
     dataset_root = os.path.expanduser(args.dji_roco_dir)
 
@@ -248,11 +270,11 @@ if __name__ == "__main__":
         "train": train_file_path,
         "val": val_file_path,
         "test": test_file_path,
-        "nc": len(CLASSES),
-        "names": CLASSES,
+        "nc": len(CLASSES_RADAR),
+        "names": CLASSES_RADAR,
     }
 
-    with open("dataset.yaml", "w+") as f:
+    with open(OUTPUT_FILE, "w+") as f:
         yaml.dump(yaml_out, f)
         print(yaml.dump(yaml_out))
 
