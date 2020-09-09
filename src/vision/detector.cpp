@@ -294,12 +294,14 @@ bool Detector::InitMemory() {
   return true;
 }
 
-Detector::Detector() {
+Detector::Detector(std::string onnx_file_path, float conf_thresh = 0.5,
+                   float nms_thresh = 0.5)
+    : onnx_file_path_(onnx_file_path),
+      conf_thresh_(conf_thresh),
+      nms_thresh_(nms_thresh) {
   SPDLOG_DEBUG("[Detector] Constructing.");
-  onnx_file_path_ = "./mid/best.onnx";
   engine_path_ = onnx_file_path_ + ".engine";
-  conf_thresh_ = 0.5;
-  nms_thresh_ = 0.5;
+
   if (!LoadEngine()) {
     CreateEngine();
     SaveEngine();

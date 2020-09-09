@@ -37,7 +37,7 @@ int main(int argc, char const* argv[]) {
   TestOpenCV();
   TestVideoWrite();
 
-  Detector detector;
+  Detector detector("./mid/armor.onnx");
   detector.TestInfer();
   detector.Infer();
   Robot bot("/dev/tty");

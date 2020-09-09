@@ -65,7 +65,7 @@ class Detector {
   bool InitMemory();
 
  public:
-  Detector();
+  Detector(std::string onnx_file_path, float conf_thresh, float nms_thresh);
   ~Detector();
   bool TestInfer();
   std::vector<Detection> Infer();
