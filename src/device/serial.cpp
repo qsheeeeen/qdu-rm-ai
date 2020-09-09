@@ -6,7 +6,6 @@
 #include <termios.h>
 #include <unistd.h>
 
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
 #include "spdlog/spdlog.h"
 
 Serial::Serial() {
@@ -15,13 +14,15 @@ Serial::Serial() {
   SPDLOG_DEBUG("[Serial] Constructed.");
 }
 
-Serial::Serial(const std::string &dev_path) {
+Serial::Serial(const std::string& dev_path) {
   SPDLOG_DEBUG("[Serial] Constructing.");
 
   dev_ = open(dev_path.c_str(), O_RDWR);
 
-  if (dev_ < 0) SPDLOG_ERROR("[Serial] Can't open Serial device.");
-  else Config(false, false, false, BaudRate::KBR115200);
+  if (dev_ < 0)
+    SPDLOG_ERROR("[Serial] Can't open Serial device.");
+  else
+    Config(false, false, false, BaudRate::KBR115200);
 
   SPDLOG_DEBUG("[Serial] Constructed.");
 }
@@ -32,7 +33,7 @@ Serial::~Serial() {
   SPDLOG_DEBUG("[Serial] Destructed.");
 }
 
-void Serial::Open(const std::string &dev_path) {
+void Serial::Open(const std::string& dev_path) {
   dev_ = open(dev_path.c_str(), O_RDWR);
 
   if (dev_ < 0) SPDLOG_ERROR("[Serial] Can't open Serial device.");
@@ -43,12 +44,12 @@ bool Serial::IsOpen() { return (dev_ > 0); }
 bool Serial::Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br) {
   struct termios tty_cfg;
 
-  SPDLOG_DEBUG("[Serial] parity={}, stop_bit={}, flow_ctrl={}, br={}", parity, stop_bit,
-                flow_ctrl, br);
+  SPDLOG_DEBUG("[Serial] parity={}, stop_bit={}, flow_ctrl={}, br={}", parity,
+               stop_bit, flow_ctrl, br);
 
   if (tcgetattr(dev_, &tty_cfg)) {
     SPDLOG_ERROR("[Serial] Error {} from tcgetattr: {}.", errno,
-                  strerror(errno));
+                 strerror(errno));
     return false;
   }
 
@@ -82,13 +83,15 @@ bool Serial::Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br) {
 
   if (tcsetattr(dev_, TCSANOW, &tty_cfg) != 0) {
     SPDLOG_ERROR("[Serial] Error {d} from tcsetattr: {s}\n", errno,
-                  strerror(errno));
+                 strerror(errno));
     return false;
   }
   return true;
 }
 
-ssize_t Serial::Trans(const void* buff, size_t len) { return write(dev_, buff, len); }
+ssize_t Serial::Trans(const void* buff, size_t len) {
+  return write(dev_, buff, len);
+}
 
 ssize_t Serial::Recv(void* buff, size_t len) { return read(dev_, buff, len); }
 

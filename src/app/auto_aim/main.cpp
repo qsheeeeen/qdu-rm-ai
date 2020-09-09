@@ -22,8 +22,13 @@ int main(int argc, char const* argv[]) {
   spdlog::set_default_logger(
       std::make_shared<spdlog::logger>("default", sink_list));
 
+#ifdef DEBUG__
   spdlog::flush_on(spdlog::level::debug);
   spdlog::set_level(spdlog::level::trace);
+#elif defined(RELEASE__)
+  spdlog::flush_on(spdlog::level::error);
+  spdlog::set_level(spdlog::level::info);
+#endif
 
   SPDLOG_WARN("***** Running Auto Aim. *****");
 
@@ -40,6 +45,5 @@ int main(int argc, char const* argv[]) {
   // Init behavior.
   // Run true tree.
 
-  
   exit(0);
 }

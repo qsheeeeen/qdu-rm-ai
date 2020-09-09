@@ -1,7 +1,5 @@
 #include "node.hpp"
 
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
-
 #include "robot.hpp"
 #include "spdlog/spdlog.h"
 
@@ -14,7 +12,7 @@ Track::Track(const std::string& name, const BT::NodeConfiguration& node_cfg)
 
 BT::NodeStatus Track::tick() {
   SPDLOG_DEBUG("[Action::Track] {} ticking.", this->name());
-  return BT::NodeStatus::SUCCESS; 
+  return BT::NodeStatus::SUCCESS;
 }
 
 BT::PortsList Track::providedPorts() {

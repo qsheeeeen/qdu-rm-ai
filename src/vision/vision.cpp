@@ -1,8 +1,6 @@
 #include "vision.hpp"
 
 #include "opencv2/opencv.hpp"
-
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
 #include "spdlog/spdlog.h"
 
 using namespace cv;
@@ -42,7 +40,7 @@ void TestVideoWrite(void) {
                    inputVideo.get(CAP_PROP_FPS), video_size, true);
 
   if (!outputVideo.isOpened()) {
-    SPDLOG_ERROR("Could not open the output video for write: {}",source );
+    SPDLOG_ERROR("Could not open the output video for write: {}", source);
     return;
   }
 

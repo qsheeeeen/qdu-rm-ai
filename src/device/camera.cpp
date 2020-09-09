@@ -6,12 +6,9 @@
 #include <thread>
 
 #include "opencv2/imgproc.hpp"
-
+#include "spdlog/spdlog.h"
 // TMP
 #include "opencv2/opencv.hpp"
-
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
-#include "spdlog/spdlog.h"
 
 void Camera::PrintDeviceInfo(MV_CC_DEVICE_INFO *mv_dev_info) {
   if (nullptr == mv_dev_info) {

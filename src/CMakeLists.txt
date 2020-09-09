@@ -9,19 +9,19 @@ project(qdu_rm_ai
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-message("-- System arch:  ${CMAKE_SYSTEM_PROCESSOR}")
+message(STATUS "-- System arch:  ${CMAKE_SYSTEM_PROCESSOR}")
 
 find_package(BehaviorTreeV3 REQUIRED) 
-find_package(CUDA REQUIRED)
+# find_package(CUDA REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(Threads REQUIRED)
 
-message("-- BehaviorTreeV3 version: ${BehaviorTreeV3_VERSION}")
-message("-- CUDA version: ${CUDA_VERSION}")
-message("-- OpenCV version: ${OpenCV_VERSION}")
-message("-- spdlog version: ${spdlog_VERSION}")
-message("-- Threads version: ${Threads_VERSION}")
+message(STATUS "-- BehaviorTreeV3 version: ${BehaviorTreeV3_VERSION}")
+message(STATUS "-- CUDA version: ${CUDA_VERSION}")
+message(STATUS "-- OpenCV version: ${OpenCV_VERSION}")
+message(STATUS "-- spdlog version: ${spdlog_VERSION}")
+message(STATUS "-- Threads version: ${Threads_VERSION}")
 
 if(NOT CMAKE_BUILD_TYPE)
 set(CMAKE_BUILD_TYPE "Release")
@@ -29,9 +29,13 @@ endif(NOT CMAKE_BUILD_TYPE)
 
 message("-- CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(DEBUG__)  
+    add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG)
+    
     add_compile_options(-Wall -Wextra)
-
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_compile_definitions(RELEASE__)  
+    add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO)
 
     add_compile_options(-Wall -Wextra -O2)
 endif()

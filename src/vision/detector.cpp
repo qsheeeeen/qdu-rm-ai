@@ -11,8 +11,6 @@
 
 #include "cuda_runtime_api.h"
 #include "opencv2/opencv.hpp"
-
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
 #include "spdlog/spdlog.h"
 
 using namespace nvinfer1;
@@ -21,7 +19,7 @@ cv::Mat Preprocess(cv::Mat raw) {
   cv::Mat image;
   raw.convertTo(image, CV_32FC3, 1.0 / 255.0, 0);
   std::vector<cv::Mat1f> ch(3);
-  cv::split(image,  ch);
+  cv::split(image, ch);
   cv::Mat final;
   cv::merge(final, ch);
   return final;
@@ -99,13 +97,13 @@ std::vector<Detection> Detector::PostProcess(std::vector<float> prob) {
       auto max_conf = std::max_element(it + 4, it + dim_out_.d[4]);
       auto class_id = std::distance(it + 4, max_conf);
 
-      Detection det {
-        *it,
-        *(it + 1),
-        *(it + 2),
-        *(it + 3),
-        *max_conf **(it + 4),
-        static_cast<float>(class_id),
+      Detection det{
+          *it,
+          *(it + 1),
+          *(it + 2),
+          *(it + 3),
+          *max_conf * *(it + 4),
+          static_cast<float>(class_id),
       };
       dets.push_back(det);
     }
