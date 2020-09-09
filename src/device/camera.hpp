@@ -10,7 +10,6 @@ class Camera {
 
   unsigned int out_h_, out_w_;
 
-  void PrintDeviceInfo(MV_CC_DEVICE_INFO *mv_dev_info);
   void Prepare();
 
  public:

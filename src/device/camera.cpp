@@ -10,7 +10,7 @@
 // TMP
 #include "opencv2/opencv.hpp"
 
-void Camera::PrintDeviceInfo(MV_CC_DEVICE_INFO *mv_dev_info) {
+static void PrintDeviceInfo(MV_CC_DEVICE_INFO *mv_dev_info) {
   if (nullptr == mv_dev_info) {
     SPDLOG_ERROR("[Camera] The Pointer of mv_dev_info is nullptr!");
     return;
@@ -116,7 +116,7 @@ int Camera::Open(unsigned int index) {
 
   err = MV_CC_SetEnumValue(camera_handle_, "TriggerMode", 0);
   if (err != MV_OK) {
-    SPDLOG_ERROR("[Camera] SetTrigger fail! err: {}.", err);
+    SPDLOG_ERROR("[Camera] TriggerMode fail! err: {}.", err);
     return err;
   }
 
@@ -144,19 +144,19 @@ int Camera::Open(unsigned int index) {
 
   err = MV_CC_SetEnumValue(camera_handle_, "ExposureAuto", 2);
   if (err != MV_OK) {
-    SPDLOG_ERROR("[Camera] AcquisitionMode fail! err: {}.", err);
+    SPDLOG_ERROR("[Camera] ExposureAuto fail! err: {}.", err);
     return err;
   }
 
   err = MV_CC_SetEnumValue(camera_handle_, "GammaSelector", 2);
   if (err != MV_OK) {
-    SPDLOG_ERROR("[Camera] AcquisitionMode fail! err: {}.", err);
+    SPDLOG_ERROR("[Camera] GammaSelector fail! err: {}.", err);
     return err;
   }
 
   err = MV_CC_SetBoolValue(camera_handle_, "GammaEnable", true);
   if (err != MV_OK) {
-    SPDLOG_ERROR("[Camera] AcquisitionMode fail! err: {}.", err);
+    SPDLOG_ERROR("[Camera] GammaEnable fail! err: {}.", err);
     return err;
   }
 
