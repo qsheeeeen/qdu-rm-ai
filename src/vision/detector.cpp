@@ -20,8 +20,11 @@ using namespace nvinfer1;
 cv::Mat Preprocess(cv::Mat raw) {
   cv::Mat image;
   raw.convertTo(image, CV_32FC3, 1.0 / 255.0, 0);
-  // NHWC to NCHW
-  return image;
+  std::vector<cv::Mat1f> ch(3);
+  cv::split(image,  ch);
+  cv::Mat final;
+  cv::merge(final, ch);
+  return final;
 }
 
 static float IOU(const Detection &det1, const Detection &det2) {
@@ -326,7 +329,7 @@ bool Detector::TestInfer() {
   cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
   cv::imwrite("./image/test_tensorrt_in.jpg", image);
 
-  image = Preprocess(image);
+  // image = Preprocess(image);
 
   std::vector<float> output(bingings_size_.at(idx_out_) / sizeof(float));
 
