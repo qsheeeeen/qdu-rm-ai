@@ -149,6 +149,8 @@
 
 1. 添加 CTest
 
+1. 实现类似多级流水线的视觉算法流程。[参考文章](https://opencv.org/hybrid-cv-dl-pipelines-with-opencv-4-4-g-api/)
+
 远期：
 
 1. ONNX1.8发布后适配yolov5的master
