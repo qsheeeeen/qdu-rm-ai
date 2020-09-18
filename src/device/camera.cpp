@@ -37,9 +37,7 @@ void Camera::Prepare() {
   std::memset(&mv_dev_list_, 0, sizeof(MV_CC_DEVICE_INFO_LIST));
   err = MV_CC_EnumDevices(MV_GIGE_DEVICE | MV_USB_DEVICE, &mv_dev_list_);
   if (err != MV_OK) {
-    err_msg = "[Camera] EnumDevices fail! err: " + std::to_string(err);
-    SPDLOG_ERROR(err_msg);
-    throw std::runtime_error(err_msg);
+    SPDLOG_ERROR("[Camera] EnumDevices fail! err: {}.", err);
   }
 
   if (mv_dev_list_.nDeviceNum > 0) {
@@ -48,13 +46,11 @@ void Camera::Prepare() {
       MV_CC_DEVICE_INFO *dev_info = mv_dev_list_.pDeviceInfo[i];
       if (dev_info == nullptr) {
         SPDLOG_ERROR("[Camera] Error Reading dev_info");
-        throw std::runtime_error("[Camera] Error Reading dev_info");
       } else
         PrintDeviceInfo(dev_info);
     }
   } else {
     SPDLOG_ERROR("[Camera] Find No Devices!");
-    throw std::runtime_error("[Camera] Find No Devices!");
   }
 }
 
