@@ -280,7 +280,6 @@ bool Detector::InitMemory() {
 
       default:
         SPDLOG_ERROR("[Detector] Do not support input type: {}", type);
-        throw std::runtime_error("[Detector] Unsupported input type");
         break;
     }
 
@@ -308,8 +307,6 @@ Detector::Detector(std::string onnx_file_path, float conf_thresh = 0.5,
   }
   CreateContex();
   InitMemory();
-  camera_.Setup(dim_in_.d[2], dim_in_.d[3]);
-  camera_.Open(0);
   SPDLOG_DEBUG("[Detector] Constructed.");
 }
 
@@ -318,7 +315,6 @@ Detector::~Detector() {
 
   for (auto it = bindings_.begin(); it != bindings_.end(); ++it) cudaFree(*it);
 
-  camera_.Close();
   SPDLOG_DEBUG("[Detector] Destructed.");
 }
 
@@ -357,11 +353,10 @@ bool Detector::TestInfer() {
   return true;
 }
 
-std::vector<Detection> Detector::Infer() {
+std::vector<Detection> Detector::Infer(cd::Mat & raw) {
   SPDLOG_DEBUG("[Detector] Infer.");
 
   std::vector<float> output(bingings_size_.at(idx_out_) / sizeof(float));
-  auto raw = camera_.GetFrame();
   auto image = Preprocess(raw);
 
   cudaMemcpy(bindings_.at(idx_in_), image.data, bingings_size_.at(idx_in_),

@@ -7,8 +7,6 @@
 #include <string>
 #include <vector>
 
-#include "camera.hpp"
-
 class TRTDeleter {
  public:
   template <typename T>
@@ -53,8 +51,6 @@ class Detector {
   int idx_in_, idx_out_;
   nvinfer1::Dims dim_in_, dim_out_;
   int nc;
-
-  Camera camera_;
 
   std::vector<Detection> PostProcess(std::vector<float> prob);
 
