@@ -22,7 +22,7 @@ int main(int argc, char const* argv[]) {
   spdlog::set_default_logger(
       std::make_shared<spdlog::logger>("default", sink_list));
 
-#ifdef DEBUG__
+#if defined(DEBUG__)
   spdlog::flush_on(spdlog::level::debug);
   spdlog::set_level(spdlog::level::trace);
 #elif defined(RELEASE__)
@@ -39,7 +39,6 @@ int main(int argc, char const* argv[]) {
 
   Detector detector("./mid/armor.onnx");
   detector.TestInfer();
-  detector.Infer();
   Robot bot("/dev/tty");
 
   // Init behavior.
