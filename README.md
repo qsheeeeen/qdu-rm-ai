@@ -51,14 +51,14 @@
 - 获得代码.
 
   ```sh
-  git clone --recursive https://github.com/qsheeeeen/qdu-robomaster-ai
+  git clone --recursive https://github.com/qsheeeeen/qdu-rm-ai
   
   ```
 
 - 编译程序
 
   ```sh
-  cd qdu-robomaster-ai
+  cd qdu-rm-ai
   mkdir build
   cd build
   cmake ..
@@ -84,7 +84,7 @@
 
   ```sh
   # 以下脚本涉及相对路径，需要在此文件夹内运行。
-  cd /path/to/qdu-robomaster-ai/utils
+  cd /path/to/qdu-rm-ai/utils
 
   # 处理数据集
   sh python3 roco2x.py ----dji-roco-dir=/path/to/DJI ROCO/
