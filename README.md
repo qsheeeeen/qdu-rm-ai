@@ -38,7 +38,7 @@
 
   - [BehavoirTree.CPP](https://github.com/BehaviorTree/BehaviorTree.CPP).
 
-  - MVS SDK from [HIKROBOT](https://www.hikrobotics.com/service/soft.htm). Follow the instructions in INSTALL.
+  - MVS SDK from [HIKROBOT](https://www.hikrobotics.com/service/download/0/0). Follow the instructions in INSTALL.
 
   - [spdlog](https://github.com/gabime/spdlog).
 
