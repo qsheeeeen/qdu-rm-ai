@@ -38,23 +38,9 @@ endif()
 
 message(STATUS "-----------------------------------------------------------------")
 
-find_package(BehaviorTreeV3 REQUIRED) 
-find_package(CUDA REQUIRED)
-find_package(OpenCV REQUIRED)
-find_package(spdlog REQUIRED)
-find_package(Threads REQUIRED)
-
-message(STATUS "BehaviorTreeV3 version: ${BehaviorTreeV3_VERSION}")
-message(STATUS "CUDA version: ${CUDA_VERSION}")
-message(STATUS "OpenCV version: ${OpenCV_VERSION}")
-message(STATUS "spdlog version: ${spdlog_VERSION}")
-message(STATUS "Threads version: ${Threads_VERSION}")
-
 #---------------------------------------------------------------------------------------
 # Compiler Options
 #---------------------------------------------------------------------------------------
-
-message(STATUS "-----------------------------------------------------------------")
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -78,11 +64,35 @@ endif()
 # Building Options
 #---------------------------------------------------------------------------------------
 
+message(STATUS "-----------------------------------------------------------------")
+
+find_package(BehaviorTreeV3 REQUIRED) 
+find_package(CUDA)
+find_package(OpenCV REQUIRED)
+find_package(spdlog REQUIRED)
+find_package(Threads REQUIRED)
+
+message(STATUS "BehaviorTreeV3 version: ${BehaviorTreeV3_VERSION}")
+message(STATUS "OpenCV version: ${OpenCV_VERSION}")
+message(STATUS "spdlog version: ${spdlog_VERSION}")
+message(STATUS "Threads version: ${Threads_VERSION}")
+
+if(CUDA_FOUND)
+    message(STATUS "CUDA version: ${CUDA_VERSION}")
+else()
+    message(WARNING "CUDA NOT found. Skipping the build of [cuda].")
+endif()
+
 #---------------------------------------------------------------------------------------
 # General Components
 #---------------------------------------------------------------------------------------
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/behavior)
+
+if(CUDA_FOUND)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/cuda)
+endif()
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/device)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vision)
 
@@ -92,6 +102,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vision)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app/auto_aim)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app/full_auto)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app/radar)
 
 #---------------------------------------------------------------------------------------
 # Install
