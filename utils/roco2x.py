@@ -36,7 +36,7 @@ DES_LIST = [
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Rearrange DJI ROCO dataset to VOC style.",
+        description="Rearrange DJI ROCO dataset to yolov5 style.",
         epilog="Example: python3 roco2x.py --dji-roco-dir ~/DJI ROCO/",
     )
 
@@ -53,7 +53,6 @@ def parse_args():
         type=int,
         default=[7, 2, 1],
         help="train : test : val.",
-
     )
 
     parser.add_argument(
@@ -194,10 +193,10 @@ if __name__ == "__main__":
     args = parse_args()
     print(args)
 
-    if args.target == 'radar':
+    if args.target == "radar":
         CLASSES = CLASSES_RADAR
         OUTPUT_FILE = "radar_dataset.yaml"
-    elif args.target == 'armor':
+    elif args.target == "armor":
         CLASSES = CLASSES_ARMOR
         OUTPUT_FILE = "armor_dataset.yaml"
     else:
