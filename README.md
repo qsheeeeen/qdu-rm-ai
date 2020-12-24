@@ -45,7 +45,9 @@
   - [CUDA](https://developer.nvidia.com/cuda-downloads)
 
   - [TensorRT](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html)
-  
+
+  - [Google Test](https://github.com/google/googletest)
+
   - Run `ldconfig` after install BehaviorTreeV3
 
 - 获得代码.

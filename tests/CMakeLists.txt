@@ -13,10 +13,3 @@ endif()
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/device)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vision)
 
-#---------------------------------------------------------------------------------------
-# Applications
-#---------------------------------------------------------------------------------------
-
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app/auto_aim)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app/full_auto)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app/radar)
