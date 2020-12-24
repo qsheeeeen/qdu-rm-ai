@@ -29,16 +29,9 @@ int main(int argc, char const* argv[]) {
   spdlog::set_level(spdlog::level::info);
 #endif
 
-  SPDLOG_WARN("***** Running Auto Aim. *****");
-
-  // Test only. TOOD: Remove.
-  TestTree();
-  TestOpenCV();
-  TestVideoWrite();
+  SPDLOG_WARN("***** Running Full Auto. *****");
 
   Robot bot("/dev/tty");
 
-  // Init behavior.
-  // Run true tree.
   exit(0);
 }

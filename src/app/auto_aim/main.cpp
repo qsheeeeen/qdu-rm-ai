@@ -31,15 +31,7 @@ int main(int argc, char const* argv[]) {
 
   SPDLOG_WARN("***** Running Auto Aim. *****");
 
-  // Test only. TOOD: Remove.
-  TestTree();
-  TestOpenCV();
-  TestVideoWrite();
-
   Robot bot("/dev/tty");
-
-  // Init behavior.
-  // Run true tree.
 
   exit(0);
 }

@@ -21,7 +21,7 @@ int main(int argc, char const* argv[]) {
   spdlog::set_default_logger(
       std::make_shared<spdlog::logger>("default", sink_list));
 
-#ifdef DEBUG__
+#if defined(DEBUG__)
   spdlog::flush_on(spdlog::level::debug);
   spdlog::set_level(spdlog::level::trace);
 #elif defined(RELEASE__)
@@ -31,14 +31,7 @@ int main(int argc, char const* argv[]) {
 
   SPDLOG_WARN("***** Running Radar. *****");
 
-  // Test only. TOOD: Remove.
-  TestTree();
-  TestOpenCV();
-  TestVideoWrite();
-
   Robot bot("/dev/tty");
 
-  // Init behavior.
-  // Run true tree.
   exit(0);
 }

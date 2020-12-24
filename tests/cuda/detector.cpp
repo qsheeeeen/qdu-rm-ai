@@ -2,7 +2,4 @@
 
 #include "gtest/gtest.h"
 
-TEST(cuda, detector_test)
-{
-    EXPECT_EQ(1, 1);
-}
+TEST(TestCuda, ExampleTest) { EXPECT_EQ(1, 1); }
