@@ -54,6 +54,7 @@
 
   ```sh
   git clone --recursive https://github.com/qsheeeeen/qdu-rm-ai
+  git clone --recursive https://gitee.com/qsheeeeen/qdu-rm-ai
   
   ```
 
@@ -64,7 +65,7 @@
   mkdir build
   cd build
   cmake ..
-  make -j
+  make -j8
   ```
 
 - 训练神经网络
@@ -102,9 +103,9 @@
 
   ```sh
   #安装后直接使用
-  qdu-rm-ai-auto-aim
-  qdu-rm-ai-full-auto
-  qdu-rm-ai-radar
+  auto-aim
+  full-auto
+  radar
   ```
 
 ## 文件目录结构及文件用途说明
