@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-TEST(vision_case, sample_test)
+TEST(vision, vision_test)
 {
     EXPECT_EQ(1, 1);
 }

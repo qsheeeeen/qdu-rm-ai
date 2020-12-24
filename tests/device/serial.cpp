@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-TEST(device_case, serial_test)
+TEST(device, serial_test)
 {
     EXPECT_EQ(1, 1);
 }

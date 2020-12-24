@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-TEST(device_case, camera_test)
+TEST(device, camera_test)
 {
     EXPECT_EQ(1, 1);
 }

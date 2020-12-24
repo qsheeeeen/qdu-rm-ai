@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-TEST(cuda_test_case, sample_test)
+TEST(cuda, detector_test)
 {
     EXPECT_EQ(1, 1);
 }

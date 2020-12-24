@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-TEST(device_case, referee_test)
+TEST(device, referee_test)
 {
     EXPECT_EQ(1, 1);
 }
