@@ -18,7 +18,7 @@ endif()
 # Platform
 #---------------------------------------------------------------------------------------
 
-message(STATUS "-----------------------------------------------------------------")
+message(STATUS "------------------------- Platform ------------------------------")
 
 string(TIMESTAMP CONFIG_TIMESTAMP "" UTC)
 message(STATUS "Timestamp: ${CONFIG_TIMESTAMP}")
@@ -39,11 +39,11 @@ if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
     message(STATUS "Configuration: ${CMAKE_BUILD_TYPE}")
 endif()
 
-message(STATUS "-----------------------------------------------------------------")
-
 #---------------------------------------------------------------------------------------
 # Compiler Options
 #---------------------------------------------------------------------------------------
+
+message(STATUS "-------------------------- Compiler ------------------------------")
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -67,7 +67,7 @@ endif()
 # Building Options
 #---------------------------------------------------------------------------------------
 
-message(STATUS "-----------------------------------------------------------------")
+message(STATUS "----------------------- Building Options ------------------------")
 
 find_package(BehaviorTreeV3 REQUIRED)
 find_package(CUDA)
@@ -86,16 +86,13 @@ set(BUILD_CUDA      OFF CACHE BOOL "Build cuda")
 set(BUILD_DEVICE    ON  CACHE BOOL "Build device")
 set(BUILD_VISION    ON  CACHE BOOL "Build vision")
 
-if(BUILD_BEHAVIOR)
-message(STATUS "BUILD_BEHAVIOR ${BUILD_BEHAVIOR}")
-message(STATUS "BUILD_CUDA ${BUILD_CUDA}")
-endif()
-
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 #---------------------------------------------------------------------------------------
 # Test
 #---------------------------------------------------------------------------------------
+
+message(STATUS "---------------------------- Test -------------------------------")
 
 enable_testing()
 find_package(GTest REQUIRED)
@@ -105,9 +102,8 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
 #---------------------------------------------------------------------------------------
 # Install
 #---------------------------------------------------------------------------------------
-
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    message(STATUS "-----------------------------------------------------------------")
+    message(STATUS "------------------------ Install --------------------------------")
     message(STATUS "Generating install")
     message(STATUS "Install to: ${CMAKE_INSTALL_PREFIX}")
 
