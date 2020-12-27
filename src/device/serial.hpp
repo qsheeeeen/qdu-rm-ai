@@ -2,11 +2,19 @@
 
 #include <string>
 
+/**
+ * @brief 波特率
+ *
+ */
 enum class BaudRate {
   kBR9600,
   KBR115200,
 };
 
+/**
+ * @brief 串口
+ *
+ */
 class Serial {
  private:
   int dev_;
