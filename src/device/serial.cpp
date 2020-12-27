@@ -79,7 +79,7 @@ bool Serial::Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br) {
   struct termios tty_cfg;
 
   SPDLOG_INFO("[Serial] parity={}, stop_bit={}, flow_ctrl={}, br={}", parity,
-               stop_bit, flow_ctrl, br);
+              stop_bit, flow_ctrl, br);
 
   if (tcgetattr(dev_, &tty_cfg)) {
     SPDLOG_ERROR("[Serial] Error {} from tcgetattr: {}.", errno,

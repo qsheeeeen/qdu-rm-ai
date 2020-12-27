@@ -5,8 +5,6 @@
 #include "gtest/gtest.h"
 #include "opencv2/opencv.hpp"
 
-TEST(TestCamera, ExampleTest) { EXPECT_EQ(1, 1); }
-
 TEST(TestCamera, TestCapture) {
   Camera cam;
   ASSERT_TRUE(cam.Open(0) == 0) << "Can not open camera.";
