@@ -7,7 +7,6 @@
 
 #include "opencv2/imgproc.hpp"
 #include "spdlog/spdlog.h"
-// TMP
 #include "opencv2/opencv.hpp"
 
 static void PrintDeviceInfo(MV_CC_DEVICE_INFO *mv_dev_info) {
