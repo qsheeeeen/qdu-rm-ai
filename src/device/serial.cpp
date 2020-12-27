@@ -8,12 +8,21 @@
 
 #include "spdlog/spdlog.h"
 
+/**
+ * @brief Construct a new Serial object
+ *
+ */
 Serial::Serial() {
   SPDLOG_DEBUG("[Serial] Constructing.");
   dev_ = -1;
   SPDLOG_DEBUG("[Serial] Constructed.");
 }
 
+/**
+ * @brief Construct a new Serial object
+ *
+ * @param dev_path 具体要读写的串口设备
+ */
 Serial::Serial(const std::string& dev_path) {
   SPDLOG_DEBUG("[Serial] Constructing.");
 
@@ -27,20 +36,45 @@ Serial::Serial(const std::string& dev_path) {
   SPDLOG_DEBUG("[Serial] Constructed.");
 }
 
+/**
+ * @brief Destroy the Serial object
+ *
+ */
 Serial::~Serial() {
   SPDLOG_DEBUG("[Serial] Destructing.");
   close(dev_);
   SPDLOG_DEBUG("[Serial] Destructed.");
 }
 
+/**
+ * @brief 打开串口
+ *
+ * @param dev_path 具体要读写的串口设备
+ */
 void Serial::Open(const std::string& dev_path) {
   dev_ = open(dev_path.c_str(), O_RDWR);
 
   if (dev_ < 0) SPDLOG_ERROR("[Serial] Can't open Serial device.");
 }
 
+/**
+ * @brief 检查串口是否打开
+ *
+ * @return true 已打开
+ * @return false 未打开
+ */
 bool Serial::IsOpen() { return (dev_ > 0); }
 
+/**
+ * @brief 配置串口
+ *
+ * @param parity
+ * @param stop_bit 停止位
+ * @param flow_ctrl 流控制
+ * @param br 波特率
+ * @return true 配置成功
+ * @return false 配置失败
+ */
 bool Serial::Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br) {
   struct termios tty_cfg;
 
@@ -89,10 +123,29 @@ bool Serial::Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br) {
   return true;
 }
 
+/**
+ * @brief 发送
+ *
+ * @param buff 缓冲区地址
+ * @param len 缓冲区长度
+ * @return ssize_t 已发送的长度
+ */
 ssize_t Serial::Trans(const void* buff, size_t len) {
   return write(dev_, buff, len);
 }
 
+/**
+ * @brief 接收
+ *
+ * @param buff 缓冲区地址
+ * @param len 缓冲区长度
+ * @return ssize_t 已发送的长度
+ */
 ssize_t Serial::Recv(void* buff, size_t len) { return read(dev_, buff, len); }
 
+/**
+ * @brief 关闭
+ *
+ * @return int 状态代码
+ */
 int Serial::Close() { return close(dev_); }
