@@ -6,8 +6,8 @@
 #include <thread>
 
 #include "opencv2/imgproc.hpp"
-#include "spdlog/spdlog.h"
 #include "opencv2/opencv.hpp"
+#include "spdlog/spdlog.h"
 
 static void PrintDeviceInfo(MV_CC_DEVICE_INFO *mv_dev_info) {
   if (nullptr == mv_dev_info) {
@@ -26,6 +26,34 @@ static void PrintDeviceInfo(MV_CC_DEVICE_INFO *mv_dev_info) {
   } else {
     SPDLOG_WARN("[Camera] Not support.");
   }
+}
+
+void Camera::GrabThread(void) {
+  SPDLOG_DEBUG("[Camera] [GrabThread] Started.");
+  int err = MV_OK;
+  memset(&raw_frame, 0, sizeof(MV_FRAME_OUT));
+  while (grabing) {
+    err = MV_CC_GetImageBuffer(camera_handle_, &raw_frame, 1000);
+    if (err == MV_OK) {
+      SPDLOG_DEBUG("[Camera] FrameNum: {}.", raw_frame.stFrameInfo.nFrameNum);
+    } else {
+      SPDLOG_ERROR("[Camera] GetImageBuffer fail! err:{}.", err);
+    }
+
+    cv::Mat raw_mat(
+        cv::Size(raw_frame.stFrameInfo.nWidth, raw_frame.stFrameInfo.nHeight),
+        CV_8UC3, raw_frame.pBufAddr);
+
+    frame_stack_.push(raw_mat.clone());
+
+    if (nullptr != raw_frame.pBufAddr) {
+      err = MV_CC_FreeImageBuffer(camera_handle_, &raw_frame);
+      if (err != MV_OK) {
+        SPDLOG_ERROR("[Camera] FreeImageBuffer fail! err:{}.", err);
+      }
+    }
+  }
+  SPDLOG_DEBUG("[Camera] [GrabThread] Stoped.");
 }
 
 void Camera::Prepare() {
@@ -59,15 +87,8 @@ Camera::Camera() {
   SPDLOG_DEBUG("[Camera] Constructed.");
 }
 
-Camera::Camera(unsigned int out_h, unsigned int out_w)
-    : out_h_(out_h), out_w_(out_w) {
-  SPDLOG_DEBUG("[Camera] Constructing.");
-  Prepare();
-  SPDLOG_DEBUG("[Camera] Constructed.");
-}
-
-Camera::Camera(unsigned int index, unsigned int out_h, unsigned int out_w)
-    : out_h_(out_h), out_w_(out_w) {
+Camera::Camera(unsigned int index, unsigned int height, unsigned int width)
+    : frame_h_(height), frame_w_(width) {
   SPDLOG_DEBUG("[Camera] Constructing.");
   Prepare();
   Open(index);
@@ -80,9 +101,11 @@ Camera::~Camera() {
   SPDLOG_DEBUG("[Camera] Destructed.");
 }
 
-void Camera::Setup(unsigned int out_h, unsigned int out_w) {
-  out_h_ = out_h;
-  out_w_ = out_w;
+void Camera::Setup(unsigned int height, unsigned int width) {
+  frame_h_ = height;
+  frame_w_ = width;
+
+  // TODO: 配置相机输入输出
 }
 
 int Camera::Open(unsigned int index) {
@@ -164,50 +187,14 @@ int Camera::Open(unsigned int index) {
 }
 
 cv::Mat Camera::GetFrame() {
-  int err = MV_OK;
-  MV_FRAME_OUT frame_out = {};
-
-  cv::Mat image;
-
-  if (!MV_CC_IsDeviceConnected(camera_handle_)) {
-    SPDLOG_ERROR("[Camera] Camera disconnected.");
-    goto finally;
-  }
-
-  err = MV_CC_GetImageBuffer(camera_handle_, &frame_out, 10);
-  if (err == MV_OK) {
-    SPDLOG_DEBUG("[Camera] Get One Frame: Width:{}, Height:{}.",
-                 frame_out.stFrameInfo.nWidth, frame_out.stFrameInfo.nHeight);
-
-    SPDLOG_DEBUG("[Camera] FrameNum: {}.", frame_out.stFrameInfo.nFrameNum);
-
-    cv::Mat raw(
-        cv::Size(frame_out.stFrameInfo.nWidth, frame_out.stFrameInfo.nHeight),
-        CV_8UC3, frame_out.pBufAddr);
-
-    // TEST ONLY
-    cv::cvtColor(raw, raw, cv::COLOR_RGB2BGR);
-    cv::imwrite("./image/camera_raw.jpg", raw);
-
-    const int offset_w = (raw.cols - raw.rows) / 2;
-    const cv::Rect roi(offset_w, 0, raw.rows, raw.rows);
-    cv::resize(raw(roi), image, cv::Size(out_h_, out_w_));
-
-    // TEST ONLY
-    cv::imwrite("./image/camera_output.jpg", image);
-
+  cv::Mat frame;
+  if (!frame_stack_.empty()) {
+    frame = frame_stack_.top();
+    frame_stack_.pop();
   } else {
-    SPDLOG_ERROR("[Camera] GetImageBuffer fail! err:{}.", err);
+    SPDLOG_ERROR("[Camera] Empty frame stack!");
   }
-
-finally:
-  if (NULL != frame_out.pBufAddr) {
-    err = MV_CC_FreeImageBuffer(camera_handle_, &frame_out);
-    if (err != MV_OK) {
-      SPDLOG_ERROR("[Camera] FreeImageBuffer fail! err:{}.", err);
-    }
-  }
-  return image;
+  return frame;
 }
 
 int Camera::Close() {
