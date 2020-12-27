@@ -37,7 +37,7 @@ void Camera::GrabThread(void) {
     if (err == MV_OK) {
       SPDLOG_DEBUG("[Camera] FrameNum: {}.", raw_frame.stFrameInfo.nFrameNum);
     } else {
-      SPDLOG_ERROR("[Camera] GetImageBuffer fail! err:{}.", err);
+      SPDLOG_ERROR("[Camera] GetImageBuffer fail! err: {0:x}.", err);
     }
 
     cv::Mat raw_mat(
@@ -49,7 +49,7 @@ void Camera::GrabThread(void) {
     if (nullptr != raw_frame.pBufAddr) {
       err = MV_CC_FreeImageBuffer(camera_handle_, &raw_frame);
       if (err != MV_OK) {
-        SPDLOG_ERROR("[Camera] FreeImageBuffer fail! err:{}.", err);
+        SPDLOG_ERROR("[Camera] FreeImageBuffer fail! err: {0:x}.", err);
       }
     }
   }
@@ -64,7 +64,7 @@ void Camera::Prepare() {
   std::memset(&mv_dev_list_, 0, sizeof(MV_CC_DEVICE_INFO_LIST));
   err = MV_CC_EnumDevices(MV_GIGE_DEVICE | MV_USB_DEVICE, &mv_dev_list_);
   if (err != MV_OK) {
-    SPDLOG_ERROR("[Camera] EnumDevices fail! err: {}.", err);
+    SPDLOG_ERROR("[Camera] EnumDevices fail! err: {0:x}.", err);
   }
 
   if (mv_dev_list_.nDeviceNum > 0) {
@@ -122,39 +122,39 @@ int Camera::Open(unsigned int index) {
 
   err = MV_CC_CreateHandle(&camera_handle_, mv_dev_list_.pDeviceInfo[index]);
   if (err != MV_OK) {
-    SPDLOG_ERROR("[Camera] CreateHandle fail! err: {}.", err);
+    SPDLOG_ERROR("[Camera] CreateHandle fail! err: {0:x}.", err);
     return err;
   }
 
   err = MV_CC_OpenDevice(camera_handle_);
   if (err != MV_OK) {
-    SPDLOG_ERROR("[Camera] OpenDevice fail! err: {}.", err);
+    SPDLOG_ERROR("[Camera] OpenDevice fail! err: {0:x}.", err);
     return err;
   }
 
   err = MV_CC_SetEnumValue(camera_handle_, "TriggerMode", 0);
   if (err != MV_OK) {
-    SPDLOG_ERROR("[Camera] TriggerMode fail! err: {}.", err);
+    SPDLOG_ERROR("[Camera] TriggerMode fail! err: {0:x}.", err);
     return err;
   }
 
   err = MV_CC_SetEnumValue(camera_handle_, "PixelFormat",
                            PixelType_Gvsp_RGB8_Packed);
   if (err != MV_OK) {
-    SPDLOG_ERROR("[Camera] PixelFormat fail! err: {}.", err);
+    SPDLOG_ERROR("[Camera] PixelFormat fail! err: {0:x}.", err);
     return err;
   }
 
   err = MV_CC_SetEnumValue(camera_handle_, "AcquisitionMode", 2);
   if (err != MV_OK) {
-    SPDLOG_ERROR("[Camera] AcquisitionMode fail! err: {}.", err);
+    SPDLOG_ERROR("[Camera] AcquisitionMode fail! err: {0:x}.", err);
     return err;
   }
 
   MVCC_FLOATVALUE frame_rate;
   err = MV_CC_GetFloatValue(camera_handle_, "ResultingFrameRate", &frame_rate);
   if (err != MV_OK) {
-    SPDLOG_ERROR("[Camera] ResultingFrameRate fail! err: {}.", err);
+    SPDLOG_ERROR("[Camera] ResultingFrameRate fail! err: {0:x}.", err);
     return err;
   } else {
     SPDLOG_INFO("[Camera] ResultingFrameRate: {}.", frame_rate.fCurValue);
@@ -162,25 +162,25 @@ int Camera::Open(unsigned int index) {
 
   err = MV_CC_SetEnumValue(camera_handle_, "ExposureAuto", 2);
   if (err != MV_OK) {
-    SPDLOG_ERROR("[Camera] ExposureAuto fail! err: {}.", err);
+    SPDLOG_ERROR("[Camera] ExposureAuto fail! err: {0:x}.", err);
     return err;
   }
 
   err = MV_CC_SetEnumValue(camera_handle_, "GammaSelector", 2);
   if (err != MV_OK) {
-    SPDLOG_ERROR("[Camera] GammaSelector fail! err: {}.", err);
+    SPDLOG_ERROR("[Camera] GammaSelector fail! err: {0:x}.", err);
     return err;
   }
 
   err = MV_CC_SetBoolValue(camera_handle_, "GammaEnable", true);
   if (err != MV_OK) {
-    SPDLOG_ERROR("[Camera] GammaEnable fail! err: {}.", err);
+    SPDLOG_ERROR("[Camera] GammaEnable fail! err: {0:x}.", err);
     return err;
   }
 
   err = MV_CC_StartGrabbing(camera_handle_);
   if (err != MV_OK) {
-    SPDLOG_ERROR("[Camera] StartGrabbing fail! err: {}.", err);
+    SPDLOG_ERROR("[Camera] StartGrabbing fail! err: {0:x}.", err);
     return err;
   }
   return MV_OK;
@@ -204,23 +204,13 @@ int Camera::Close() {
   SPDLOG_DEBUG("[Camera] Close.");
 
   err = MV_CC_StopGrabbing(camera_handle_);
-  if (err != MV_OK) {
-    SPDLOG_ERROR("[Camera] StopGrabbing fail! err:{}.", err);
-    return err;
-  }
+  SPDLOG_ERROR("[Camera] StopGrabbing fail! err:{0:x}.", err);
 
   err = MV_CC_CloseDevice(camera_handle_);
-  if (err != MV_OK) {
-    SPDLOG_ERROR("[Camera] ClosDevice fail! err:{}.", err);
-    return err;
-  }
+  SPDLOG_ERROR("[Camera] ClosDevice fail! err:{0:x}.", err);
 
   err = MV_CC_DestroyHandle(camera_handle_);
-  if (err != MV_OK) {
-    SPDLOG_ERROR("[Camera] DestroyHandle fail! err:{}.", err);
-    return err;
-  }
-
+  SPDLOG_ERROR("[Camera] DestroyHandle fail! err:{0:x}.", err);
   SPDLOG_DEBUG("[Camera] Closed.");
   return MV_OK;
 }
