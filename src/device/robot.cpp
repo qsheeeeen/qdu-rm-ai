@@ -3,14 +3,14 @@
 #include "spdlog/spdlog.h"
 
 void Robot::ComThread() {
-  SPDLOG_DEBUG("[Robot] [ComThread] Running.");
+  SPDLOG_DEBUG("[Robot] [ComThread] Started.");
 
   while (continue_parse_) {
-    com_.Recv((char *)&status_, sizeof(RecvHolder));
+    serial_.Recv((char *)&status_, sizeof(RecvHolder));
 
     commandq_mutex_.lock();
     if (!commandq_.empty()) {
-      com_.Trans((char *)&commandq_.front(), sizeof(RecvHolder));
+      serial_.Trans((char *)&commandq_.front(), sizeof(RecvHolder));
       commandq_.pop();
     }
     commandq_mutex_.unlock();
@@ -21,7 +21,7 @@ void Robot::ComThread() {
 }
 
 void Robot::CommandThread() {
-  SPDLOG_DEBUG("[Robot] [CommandThread] Running.");
+  SPDLOG_DEBUG("[Robot] [CommandThread] Started.");
 
   SPDLOG_DEBUG("[Robot] [CommandThread] Stoped.");
 }
@@ -29,9 +29,9 @@ void Robot::CommandThread() {
 Robot::Robot(const std::string &dev_path) {
   SPDLOG_DEBUG("[Robot] Constructing.");
 
-  com_.Open(dev_path);
-  com_.Config();
-  if (!com_.IsOpen()) {
+  serial_.Open(dev_path);
+  serial_.Config();
+  if (!serial_.IsOpen()) {
     SPDLOG_ERROR("[Robot] Can't open device.");
   }
 
@@ -43,6 +43,9 @@ Robot::Robot(const std::string &dev_path) {
 
 Robot::~Robot() {
   SPDLOG_DEBUG("[Robot] Destructing.");
-  com_.Close();
+  serial_.Close();
+
+  continue_parse_ = false;
+  parse_thread_.join();
   SPDLOG_DEBUG("[Robot] Destructed.");
 }

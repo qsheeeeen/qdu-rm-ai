@@ -16,7 +16,7 @@ typedef struct {
 
 class Robot {
  private:
-  Serial com_;
+  Serial serial_;
   bool continue_parse_ = false;
   std::thread parse_thread_;
   std::queue<CommandHolder> commandq_;
