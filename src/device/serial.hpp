@@ -57,7 +57,7 @@ class Serial {
   /**
    * @brief 配置串口
    *
-   * @param parity
+   * @param parity 校验
    * @param stop_bit 停止位
    * @param flow_ctrl 流控制
    * @param br 波特率

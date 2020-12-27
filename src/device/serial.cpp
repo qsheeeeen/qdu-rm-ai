@@ -42,7 +42,7 @@ Serial::Serial(const std::string& dev_path) {
  */
 Serial::~Serial() {
   SPDLOG_DEBUG("[Serial] Destructing.");
-  close(dev_);
+  Close();
   SPDLOG_DEBUG("[Serial] Destructed.");
 }
 
@@ -78,7 +78,7 @@ bool Serial::IsOpen() { return (dev_ > 0); }
 bool Serial::Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br) {
   struct termios tty_cfg;
 
-  SPDLOG_DEBUG("[Serial] parity={}, stop_bit={}, flow_ctrl={}, br={}", parity,
+  SPDLOG_INFO("[Serial] parity={}, stop_bit={}, flow_ctrl={}, br={}", parity,
                stop_bit, flow_ctrl, br);
 
   if (tcgetattr(dev_, &tty_cfg)) {
