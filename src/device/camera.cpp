@@ -9,6 +9,11 @@
 #include "opencv2/opencv.hpp"
 #include "spdlog/spdlog.h"
 
+/**
+ * @brief 打印设备信息
+ *
+ * @param mv_dev_info 设备信息结构体
+ */
 static void PrintDeviceInfo(MV_CC_DEVICE_INFO *mv_dev_info) {
   if (nullptr == mv_dev_info) {
     SPDLOG_ERROR("[Camera] The Pointer of mv_dev_info is nullptr!");
@@ -28,6 +33,10 @@ static void PrintDeviceInfo(MV_CC_DEVICE_INFO *mv_dev_info) {
   }
 }
 
+/**
+ * @brief 用于抓取图片帧的线程
+ *
+ */
 void Camera::GrabThread(void) {
   SPDLOG_DEBUG("[Camera] [GrabThread] Started.");
   int err = MV_OK;
@@ -35,9 +44,11 @@ void Camera::GrabThread(void) {
   while (grabing) {
     err = MV_CC_GetImageBuffer(camera_handle_, &raw_frame, 1000);
     if (err == MV_OK) {
-      SPDLOG_DEBUG("[Camera] FrameNum: {}.", raw_frame.stFrameInfo.nFrameNum);
+      SPDLOG_DEBUG("[Camera] [GrabThread] FrameNum: {}.",
+                   raw_frame.stFrameInfo.nFrameNum);
     } else {
-      SPDLOG_ERROR("[Camera] GetImageBuffer fail! err: {0:x}.", err);
+      SPDLOG_ERROR("[Camera] [GrabThread] GetImageBuffer fail! err: {0:x}.",
+                   err);
     }
 
     cv::Mat raw_mat(
@@ -49,13 +60,18 @@ void Camera::GrabThread(void) {
     if (nullptr != raw_frame.pBufAddr) {
       err = MV_CC_FreeImageBuffer(camera_handle_, &raw_frame);
       if (err != MV_OK) {
-        SPDLOG_ERROR("[Camera] FreeImageBuffer fail! err: {0:x}.", err);
+        SPDLOG_ERROR("[Camera] [GrabThread] FreeImageBuffer fail! err: {0:x}.",
+                     err);
       }
     }
   }
   SPDLOG_DEBUG("[Camera] [GrabThread] Stoped.");
 }
 
+/**
+ * @brief 相机初始化前的准备工作
+ *
+ */
 void Camera::Prepare() {
   int err = MV_OK;
   std::string err_msg;
@@ -81,12 +97,23 @@ void Camera::Prepare() {
   }
 }
 
+/**
+ * @brief Construct a new Camera object
+ *
+ */
 Camera::Camera() {
   SPDLOG_DEBUG("[Camera] Constructing.");
   Prepare();
   SPDLOG_DEBUG("[Camera] Constructed.");
 }
 
+/**
+ * @brief Construct a new Camera object
+ *
+ * @param index 相机索引号
+ * @param height 输出图像高度
+ * @param width 输出图像宽度
+ */
 Camera::Camera(unsigned int index, unsigned int height, unsigned int width)
     : frame_h_(height), frame_w_(width) {
   SPDLOG_DEBUG("[Camera] Constructing.");
@@ -95,12 +122,22 @@ Camera::Camera(unsigned int index, unsigned int height, unsigned int width)
   SPDLOG_DEBUG("[Camera] Constructed.");
 }
 
+/**
+ * @brief Destroy the Camera object
+ *
+ */
 Camera::~Camera() {
   SPDLOG_DEBUG("[Camera] Destructing.");
   Close();
   SPDLOG_DEBUG("[Camera] Destructed.");
 }
 
+/**
+ * @brief 设置相机参数
+ *
+ * @param height 输出图像高度
+ * @param width 输出图像宽度
+ */
 void Camera::Setup(unsigned int height, unsigned int width) {
   frame_h_ = height;
   frame_w_ = width;
@@ -108,6 +145,12 @@ void Camera::Setup(unsigned int height, unsigned int width) {
   // TODO: 配置相机输入输出
 }
 
+/**
+ * @brief 打开相机设备
+ *
+ * @param index 相机索引号
+ * @return int 状态代码
+ */
 int Camera::Open(unsigned int index) {
   int err = MV_OK;
   std::string err_msg;
@@ -186,6 +229,11 @@ int Camera::Open(unsigned int index) {
   return MV_OK;
 }
 
+/**
+ * @brief Get the Frame object
+ *
+ * @return cv::Mat 拍摄的图像
+ */
 cv::Mat Camera::GetFrame() {
   cv::Mat frame;
   if (!frame_stack_.empty()) {
@@ -197,6 +245,11 @@ cv::Mat Camera::GetFrame() {
   return frame;
 }
 
+/**
+ * @brief 关闭相机设备
+ *
+ * @return int 状态代码
+ */
 int Camera::Close() {
   int err = MV_OK;
   std::string err_msg;
