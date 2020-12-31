@@ -7,7 +7,7 @@
 
 TEST(TestCamera, TestCapture) {
   Camera cam;
-  ASSERT_TRUE(cam.Open(0) == 0) << "Can not open camera.";
+  ASSERT_TRUE(cam.Open(0) == 0) << "Can not open camera 0.";
 
   cv::Mat frame = cam.GetFrame();
   ASSERT_FALSE(frame.empty()) << "Can not get frame from camera.";
