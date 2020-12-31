@@ -31,7 +31,7 @@ Serial::Serial(const std::string& dev_path) {
   if (dev_ < 0)
     SPDLOG_ERROR("[Serial] Can't open Serial device.");
   else
-    Config(false, false, false, BaudRate::KBR115200);
+    Config(false, false, false, BaudRate::kBR115200);
 
   SPDLOG_DEBUG("[Serial] Constructed.");
 }
@@ -109,7 +109,7 @@ bool Serial::Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br) {
       cfsetispeed(&tty_cfg, B9600);
       cfsetospeed(&tty_cfg, B9600);
       break;
-    case BaudRate::KBR115200:
+    case BaudRate::kBR115200:
       cfsetispeed(&tty_cfg, B115200);
       cfsetospeed(&tty_cfg, B115200);
       break;

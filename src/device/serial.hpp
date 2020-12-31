@@ -8,7 +8,7 @@
  */
 enum class BaudRate {
   kBR9600,
-  KBR115200,
+  kBR115200,
 };
 
 /**
@@ -65,7 +65,7 @@ class Serial {
    * @return false 配置失败
    */
   bool Config(bool parity = false, bool stop_bit = false,
-              bool flow_ctrl = false, BaudRate br = BaudRate::KBR115200);
+              bool flow_ctrl = false, BaudRate br = BaudRate::kBR115200);
 
   /**
    * @brief 发送
