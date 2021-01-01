@@ -2,19 +2,27 @@
 
 #include <string>
 
-/**
- * @brief 波特率
- *
- */
+/* 波特率 */
 enum class BaudRate {
-  kBR9600,
-  kBR115200,
+  kBAUD_RATE_9600,
+  kBAUD_RATE_115200,
 };
 
-/**
- * @brief 串口
- *
- */
+/* 停止位数量 */
+enum class StopBits {
+  kSTOP_BITS_1,
+  kSTOP_BITS_2,
+};
+
+/* 有效数据 */
+enum class DataLength {
+  kDATA_LEN_5,
+  kDATA_LEN_6,
+  kDATA_LEN_7,
+  kDATA_LEN_8,
+};
+
+/* 串口 */
 class Serial {
  private:
   int dev_;
@@ -64,8 +72,10 @@ class Serial {
    * @return true 配置成功
    * @return false 配置失败
    */
-  bool Config(bool parity = false, bool stop_bit = false,
-              bool flow_ctrl = false, BaudRate br = BaudRate::kBR115200);
+  bool Config(bool parity = false, StopBits stop_bit = StopBits::kSTOP_BITS_1,
+              DataLength data_length = DataLength::kDATA_LEN_8,
+              bool flow_ctrl = false,
+              BaudRate baud_rate = BaudRate::kBAUD_RATE_115200);
 
   /**
    * @brief 发送

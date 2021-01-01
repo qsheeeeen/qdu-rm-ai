@@ -12,6 +12,7 @@ TEST(TestSerial, TestTrans) {
 
 TEST(TestSerial, TestConfig) {
   Serial com("/dev/ttyS0");
-  ASSERT_TRUE(com.Config(true, true, true, BaudRate::kBR9600))
+  ASSERT_TRUE(com.Config(true, StopBits::kSTOP_BITS_2, DataLength::kDATA_LEN_7,
+                         true, BaudRate::kBAUD_RATE_9600))
       << "Can not config serial port.";
 }

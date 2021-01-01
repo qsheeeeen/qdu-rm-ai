@@ -32,7 +32,7 @@ Serial::Serial(const std::string& dev_path) {
   if (dev_ < 0)
     SPDLOG_ERROR("[Serial] Can't open Serial device.");
   else
-    Config(false, false, false, BaudRate::kBR115200);
+    Config();
 
   SPDLOG_DEBUG("[Serial] Constructed.");
 }
@@ -76,11 +76,14 @@ bool Serial::IsOpen() { return (dev_ > 0); }
  * @return true 配置成功
  * @return false 配置失败
  */
-bool Serial::Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br) {
+bool Serial::Config(bool parity, StopBits stop_bit, DataLength data_length,
+                    bool flow_ctrl, BaudRate baud_rate) {
   struct termios tty_cfg;
 
-  SPDLOG_INFO("[Serial] parity={}, stop_bit={}, flow_ctrl={}, br={}", parity,
-              stop_bit, flow_ctrl, br);
+  SPDLOG_INFO(
+      "[Serial] parity={}, stop_bit={}, data_length={}, flow_ctrl={}, "
+      "baud_rate={}",
+      parity, stop_bit, data_length, flow_ctrl, baud_rate);
 
   if (tcgetattr(dev_, &tty_cfg)) {
     SPDLOG_ERROR("[Serial] Error {} from tcgetattr: {}.", errno,
@@ -93,26 +96,44 @@ bool Serial::Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br) {
   else
     tty_cfg.c_cflag &= ~PARENB;
 
-  if (stop_bit)
-    tty_cfg.c_cflag |= CSTOPB;
-  else
-    tty_cfg.c_cflag &= ~CSTOPB;
-
-  tty_cfg.c_cflag |= CS8;
+  switch (stop_bit) {
+    case StopBits::kSTOP_BITS_1:
+      tty_cfg.c_cflag |= CSTOPB;
+      break;
+    case StopBits::kSTOP_BITS_2:
+      tty_cfg.c_cflag &= ~CSTOPB;
+      break;
+  }
 
   if (flow_ctrl)
     tty_cfg.c_cflag |= CRTSCTS;
   else
     tty_cfg.c_cflag &= ~CRTSCTS;
 
-  switch (br) {
-    case BaudRate::kBR9600:
+  switch (baud_rate) {
+    case BaudRate::kBAUD_RATE_9600:
       cfsetispeed(&tty_cfg, B9600);
       cfsetospeed(&tty_cfg, B9600);
       break;
-    case BaudRate::kBR115200:
+    case BaudRate::kBAUD_RATE_115200:
       cfsetispeed(&tty_cfg, B115200);
       cfsetospeed(&tty_cfg, B115200);
+      break;
+  }
+
+  tty_cfg.c_cflag &= ~CSIZE;
+  switch (data_length) {
+    case DataLength::kDATA_LEN_5:
+      tty_cfg.c_cflag |= CS5;
+      break;
+    case DataLength::kDATA_LEN_6:
+      tty_cfg.c_cflag |= CS6;
+      break;
+    case DataLength::kDATA_LEN_7:
+      tty_cfg.c_cflag |= CS7;
+      break;
+    case DataLength::kDATA_LEN_8:
+      tty_cfg.c_cflag |= CS8;
       break;
   }
 
