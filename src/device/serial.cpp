@@ -1,10 +1,11 @@
 #include "serial.hpp"
 
-#include <errno.h>
 #include <fcntl.h>
-#include <string.h>
 #include <termios.h>
 #include <unistd.h>
+
+#include <cerrno>
+#include <cstring>
 
 #include "spdlog/spdlog.h"
 
@@ -83,7 +84,7 @@ bool Serial::Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br) {
 
   if (tcgetattr(dev_, &tty_cfg)) {
     SPDLOG_ERROR("[Serial] Error {} from tcgetattr: {}.", errno,
-                 strerror(errno));
+                 std::strerror(errno));
     return false;
   }
 
@@ -117,7 +118,7 @@ bool Serial::Config(bool parity, bool stop_bit, bool flow_ctrl, BaudRate br) {
 
   if (tcsetattr(dev_, TCSANOW, &tty_cfg) != 0) {
     SPDLOG_ERROR("[Serial] Error {d} from tcsetattr: {s}\n", errno,
-                 strerror(errno));
+                 std::strerror(errno));
     return false;
   }
   return true;
