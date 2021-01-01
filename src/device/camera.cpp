@@ -55,7 +55,8 @@ void Camera::GrabThread(void) {
         cv::Size(raw_frame.stFrameInfo.nWidth, raw_frame.stFrameInfo.nHeight),
         CV_8UC3, raw_frame.pBufAddr);
 
-    frame_stack_.push(raw_mat.clone());
+    std::lock_guard<std::mutex> lock(frame_stack_mutex_);
+    frame_stack_.push_front(raw_mat.clone());
 
     if (nullptr != raw_frame.pBufAddr) {
       err = MV_CC_FreeImageBuffer(camera_handle_, &raw_frame);
@@ -236,9 +237,11 @@ int Camera::Open(unsigned int index) {
  */
 cv::Mat Camera::GetFrame() {
   cv::Mat frame;
+
+  std::lock_guard<std::mutex> lock(frame_stack_mutex_);
   if (!frame_stack_.empty()) {
-    frame = frame_stack_.top();
-    frame_stack_.pop();
+    frame = frame_stack_.front();
+    frame_stack_.clear();
   } else {
     SPDLOG_ERROR("[Camera] Empty frame stack!");
   }
@@ -266,4 +269,13 @@ int Camera::Close() {
   SPDLOG_ERROR("[Camera] DestroyHandle fail! err:{0:x}.", err);
   SPDLOG_DEBUG("[Camera] Closed.");
   return MV_OK;
+}
+
+/**
+ * @brief 相机标定
+ *
+ */
+void Calibrate() {
+  // TODO
+  return;
 }
