@@ -104,7 +104,7 @@
   ```sh
   #安装后直接使用
   auto-aim
-  full-auto
+  sentry
   radar
   ```
 

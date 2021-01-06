@@ -116,8 +116,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     )
 
     install(
-        TARGETS full_auto
-        EXPORT full_auto
+        TARGETS sentry
+        EXPORT sentry
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

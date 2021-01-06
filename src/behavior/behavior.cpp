@@ -2,7 +2,7 @@
 
 #include "spdlog/spdlog.h"
 
-static const char *const xml_tree_full_auto = R"(
+static const char *const xml_tree_sentry = R"(
 
  <root main_tree_to_execute = "MainTree" >
      <BehaviorTree ID="MainTree">
