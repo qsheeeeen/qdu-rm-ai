@@ -1,25 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
 project(vision)
 
-#---------------------------------------------------------------------------------------
-# Options
-#---------------------------------------------------------------------------------------
-
-
-#---------------------------------------------------------------------------------------
-# Target
-#---------------------------------------------------------------------------------------
-
 file(GLOB ${PROJECT_NAME}_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
 )
 
 add_library(${PROJECT_NAME} STATIC ${${PROJECT_NAME}_SOURCES})
-
-
-add_dependencies(${PROJECT_NAME} 
-    device
-)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC 
     ${OpenCV_LIBS}

@@ -1,6 +1,5 @@
 #include <iostream>
 
-#include "behavior.hpp"
 #include "camera.hpp"
 #include "robot.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
