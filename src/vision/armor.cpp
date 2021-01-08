@@ -22,7 +22,7 @@ void Armor::DetectTeam() {
 
 Armor::Armor() { SPDLOG_DEBUG("[Armor] Constructed."); }
 
-Armor::Armor(const LighjtBar &left_bar, const LighjtBar &right_bar)
+Armor::Armor(const LightBar &left_bar, const LightBar &right_bar)
     : left_bar_(left_bar), right_bar_(right_bar) {
   FormRect();
   SPDLOG_DEBUG("[Armor] Constructed.");
@@ -30,7 +30,7 @@ Armor::Armor(const LighjtBar &left_bar, const LighjtBar &right_bar)
 
 Armor::~Armor() { SPDLOG_DEBUG("[Armor] Destructed."); }
 
-void Armor::Init(const LighjtBar &left_bar, const LighjtBar &right_bar) {
+void Armor::Init(const LightBar &left_bar, const LightBar &right_bar) {
   left_bar_ = left_bar;
   right_bar_ = right_bar;
 

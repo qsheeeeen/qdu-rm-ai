@@ -8,7 +8,7 @@
 
 class Armor {
  private:
-  LighjtBar left_bar_, right_bar_;
+  LightBar left_bar_, right_bar_;
   cv::RotatedRect rect_;
   game::Team team_ = game::Team::kUNKNOWN;
   game::Model model_ = game::Model::kUNKNOWN;
@@ -19,10 +19,10 @@ class Armor {
 
  public:
   Armor();
-  Armor(const LighjtBar &left_bar, const LighjtBar &right_bar);
+  Armor(const LightBar &left_bar, const LightBar &right_bar);
   ~Armor();
 
-  void Init(const LighjtBar &left_bar, const LighjtBar &right_bar);
+  void Init(const LightBar &left_bar, const LightBar &right_bar);
 
   game::Team Team(const cv::Mat &frame);
   game::Model GetModel();

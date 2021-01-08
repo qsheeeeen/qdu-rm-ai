@@ -9,8 +9,8 @@ const float angle = 5.f;
 
 const cv::RotatedRect test_rect(center, size, angle);
 
-TEST(TestVision, TestLighjtBar) {
-  LighjtBar light_bar(test_rect);
+TEST(TestVision, TestLightBar) {
+  LightBar light_bar(test_rect);
 
   ASSERT_EQ(light_bar.Center(), center);
   ASSERT_FLOAT_EQ(light_bar.Angle(), angle);
@@ -18,8 +18,8 @@ TEST(TestVision, TestLighjtBar) {
   ASSERT_GE(light_bar.Length(), size.width);
 }
 
-TEST(TestVision, TestLighjtBarInit) {
-  LighjtBar light_bar;
+TEST(TestVision, TestLightBarInit) {
+  LightBar light_bar;
 
   ASSERT_FLOAT_EQ(light_bar.Center().x, 0.f); 
   ASSERT_FLOAT_EQ(light_bar.Center().y, 0.f); 

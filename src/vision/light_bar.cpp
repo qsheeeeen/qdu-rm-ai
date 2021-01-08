@@ -3,23 +3,23 @@
 #include "opencv2/opencv.hpp"
 #include "spdlog/spdlog.h"
 
-LighjtBar::LighjtBar() { SPDLOG_DEBUG("[LighjtBar] Constructed."); }
+LightBar::LightBar() { SPDLOG_DEBUG("[LightBar] Constructed."); }
 
-LighjtBar::LighjtBar(const cv::RotatedRect &rect) : rect_(rect) {
-  SPDLOG_DEBUG("[LighjtBar] Constructed.");
+LightBar::LightBar(const cv::RotatedRect &rect) : rect_(rect) {
+  SPDLOG_DEBUG("[LightBar] Constructed.");
 }
 
-LighjtBar::~LighjtBar() { SPDLOG_DEBUG("[LighjtBar] Destructed."); }
+LightBar::~LightBar() { SPDLOG_DEBUG("[LightBar] Destructed."); }
 
-void LighjtBar::Init(const cv::RotatedRect &rect) {
+void LightBar::Init(const cv::RotatedRect &rect) {
   rect_ = rect;
-  SPDLOG_DEBUG("[LighjtBar] Inited.");
+  SPDLOG_DEBUG("[LightBar] Inited.");
 }
 
-const cv::Point2f &LighjtBar::Center() { return rect_.center; }
+const cv::Point2f &LightBar::Center() { return rect_.center; }
 
-float LighjtBar::Angle() {
-  SPDLOG_DEBUG("[LighjtBar] rect_.angle: {}", rect_.angle);
+float LightBar::Angle() {
+  SPDLOG_DEBUG("[LightBar] rect_.angle: {}", rect_.angle);
 
   if (rect_.angle > 90.f)
     return rect_.angle - 180.f;
@@ -27,8 +27,8 @@ float LighjtBar::Angle() {
     return rect_.angle;
 }
 
-float LighjtBar::Length() {
-  SPDLOG_DEBUG("[LighjtBar] rect_.size (h,w): ({}, {})", rect_.size.height,
+float LightBar::Length() {
+  SPDLOG_DEBUG("[LightBar] rect_.size (h,w): ({}, {})", rect_.size.height,
                rect_.size.width);
   return std::max(rect_.size.height, rect_.size.width);
 }

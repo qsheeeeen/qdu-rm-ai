@@ -2,14 +2,14 @@
 
 #include "opencv2/opencv.hpp"
 
-class LighjtBar {
+class LightBar {
  private:
   cv::RotatedRect rect_;
 
  public:
-  LighjtBar();
-  LighjtBar(const cv::RotatedRect &rect);
-  ~LighjtBar();
+  LightBar();
+  LightBar(const cv::RotatedRect &rect);
+  ~LightBar();
 
   void Init(const cv::RotatedRect &rect);
 
