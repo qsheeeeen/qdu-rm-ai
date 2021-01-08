@@ -5,7 +5,6 @@
 class LighjtBar {
  private:
   cv::RotatedRect rect_;
-  cv::Point2f center_;
 
  public:
   LighjtBar();

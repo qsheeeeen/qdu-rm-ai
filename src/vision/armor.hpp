@@ -9,11 +9,13 @@
 class Armor {
  private:
   LighjtBar left_bar_, right_bar_;
-  cv::Rect rect_;
-  game::Team team_;
-  game::Model model_;
-  cv::Point2f center_;
+  cv::RotatedRect rect_;
+  game::Team team_ = game::Team::kUNKNOWN;
+  game::Model model_ = game::Model::kUNKNOWN;
   cv::Mat face_;
+
+  void FormRect();
+  void DetectTeam();
 
  public:
   Armor();
@@ -22,10 +24,10 @@ class Armor {
 
   void Init(const LighjtBar &left_bar, const LighjtBar &right_bar);
 
-  const std::vector<cv::Point2f> Vertices();
-  const game::Team &Team();
-  const game::Model &Model();
+  game::Team Team(const cv::Mat &frame);
+  game::Model GetModel();
+  void SetModel(game::Model model);
   const cv::Point2f &Center();
   float Angle();
-  const cv::Mat &Face();
+  cv::Mat Face(const cv::Mat &frame);
 };
