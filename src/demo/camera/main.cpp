@@ -18,11 +18,11 @@ int main(int argc, char const* argv[]) {
   spdlog::set_default_logger(
       std::make_shared<spdlog::logger>("default", sink_list));
 
-#if defined(DEBUG__)
+#if (SPDLOG_ACTIVE_LEVEL == SPDLOG_LEVEL_DEBUG)
   spdlog::flush_on(spdlog::level::debug);
-  spdlog::set_level(spdlog::level::trace);
-#elif defined(RELEASE__)
-  spdlog::flush_on(spdlog::level::error);
+  spdlog::set_level(spdlog::level::debug);
+#elif (SPDLOG_ACTIVE_LEVEL == SPDLOG_LEVEL_INFO)
+  spdlog::flush_on(spdlog::level::err);
   spdlog::set_level(spdlog::level::info);
 #endif
 

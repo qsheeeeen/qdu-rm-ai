@@ -79,12 +79,25 @@ message(STATUS "BehaviorTreeV3 version: ${BehaviorTreeV3_VERSION}")
 message(STATUS "CUDA version: ${CUDA_VERSION}")
 message(STATUS "OpenCV version: ${OpenCV_VERSION}")
 message(STATUS "spdlog version: ${spdlog_VERSION}")
-message(STATUS "Threads version: ${Threads_VERSION}")
 
 set(BUILD_BEHAVIOR  ON  CACHE BOOL "Build behavior")
 set(BUILD_CUDA      OFF CACHE BOOL "Build cuda")
 set(BUILD_DEVICE    ON  CACHE BOOL "Build device")
 set(BUILD_VISION    ON  CACHE BOOL "Build vision")
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG)
+elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG)
+elseif(CMAKE_BUILD_TYPE STREQUAL "Realase")
+    add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO)
+elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+    add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO)
+endif ()
+
+#---------------------------------------------------------------------------------------
+# Source
+#---------------------------------------------------------------------------------------
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
