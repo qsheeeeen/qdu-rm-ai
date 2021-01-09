@@ -4,12 +4,12 @@
 #include "spdlog/spdlog.h"
 
 void Armor::FormRect() {
-  cv::Point2f center = (left_bar_.Center() + right_bar_.Center()) / 2.f;
+  cv::Point2f center = (left_bar_.Center() + right_bar_.Center()) / 2.;
   float width = cv::norm(left_bar_.Center() - right_bar_.Center());
-  float height = (left_bar_.Length() + right_bar_.Length()) / 2.f;  // TODO
+  float height = (left_bar_.Length() + right_bar_.Length()) / 2.;  // TODO
 
   rect_ = cv::RotatedRect(center, cv::Size(width, height),
-                          (left_bar_.Angle() + right_bar_.Angle()) / 2.f);
+                          (left_bar_.Angle() + right_bar_.Angle()) / 2.);
 
   SPDLOG_DEBUG("[Armor] center: ({}, {})", center.x, center.y);
   SPDLOG_DEBUG("[Armor] width, height:  ({}, {})", width, height);
@@ -22,9 +22,8 @@ void Armor::DetectTeam() {
 
 Armor::Armor() { SPDLOG_DEBUG("[Armor] Constructed."); }
 
-Armor::Armor(const LightBar &left_bar, const LightBar &right_bar)
-    : left_bar_(left_bar), right_bar_(right_bar) {
-  FormRect();
+Armor::Armor(const LightBar &left_bar, const LightBar &right_bar) {
+  Init(left_bar, right_bar);
   SPDLOG_DEBUG("[Armor] Constructed.");
 }
 
@@ -52,6 +51,12 @@ const cv::Point2f &Armor::Center() {
   SPDLOG_DEBUG("[Armor] rect_.center: ({}, {})", rect_.center.x,
                rect_.center.y);
   return rect_.center;
+}
+
+std::vector<cv::Point2f> Armor::Vertices() {
+  std::vector<cv::Point2f> vertices(4);
+  rect_.points(vertices.data());
+  return vertices;
 }
 
 float Armor::Angle() {

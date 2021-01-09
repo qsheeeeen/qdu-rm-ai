@@ -3,9 +3,9 @@
 #include "gtest/gtest.h"
 #include "opencv2/opencv.hpp"
 
-const cv::Point2f center(1.f, 1.f);
-const cv::Size2f size(2.f, 3.f);
-const float angle = 5.f;
+const cv::Point2f center(1., 1.);
+const cv::Size2f size(2., 3.);
+const float angle = 5.;
 
 const cv::RotatedRect test_rect(center, size, angle);
 
@@ -16,18 +16,12 @@ TEST(TestVision, TestLightBar) {
   ASSERT_FLOAT_EQ(light_bar.Angle(), angle);
   ASSERT_GE(light_bar.Length(), size.height);
   ASSERT_GE(light_bar.Length(), size.width);
-}
+  ASSERT_FLOAT_EQ(light_bar.Area(), size.area());
+  ASSERT_FLOAT_EQ(light_bar.AspectRatio(), size.aspectRatio());
 
-TEST(TestVision, TestLightBarInit) {
-  LightBar light_bar;
-
-  ASSERT_FLOAT_EQ(light_bar.Center().x, 0.f); 
-  ASSERT_FLOAT_EQ(light_bar.Center().y, 0.f); 
-
-  light_bar.Init(test_rect);
-
-  ASSERT_EQ(light_bar.Center(), center);
-  ASSERT_FLOAT_EQ(light_bar.Angle(), angle);
-  ASSERT_GE(light_bar.Length(), size.height);
-  ASSERT_GE(light_bar.Length(), size.width);
+  std::vector<cv::Point2f> p1 = light_bar.Vertices();
+  cv::Point2f p2[4];
+  test_rect.points(p2);
+  ASSERT_EQ(p1.size(), 4);
+  for (size_t i = 0; i < p1.size(); ++i) ASSERT_EQ(p1[i], p2[i]);
 }

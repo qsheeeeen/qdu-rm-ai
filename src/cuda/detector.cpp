@@ -27,15 +27,15 @@ cv::Mat Preprocess(cv::Mat raw) {
 
 static float IOU(const Detection &det1, const Detection &det2) {
   const float left =
-      std::max(det1.x_ctr - det1.w / 2.f, det2.x_ctr - det2.w / 2.f);
+      std::max(det1.x_ctr - det1.w / 2., det2.x_ctr - det2.w / 2.);
   const float right =
-      std::min(det1.x_ctr + det1.w / 2.f, det2.x_ctr + det2.w / 2.f);
+      std::min(det1.x_ctr + det1.w / 2., det2.x_ctr + det2.w / 2.);
   const float top =
-      std::max(det1.y_ctr - det1.h / 2.f, det2.y_ctr - det2.h / 2.f);
+      std::max(det1.y_ctr - det1.h / 2., det2.y_ctr - det2.h / 2.);
   const float bottom =
-      std::min(det1.y_ctr + det1.h / 2.f, det2.y_ctr + det2.h / 2.f);
+      std::min(det1.y_ctr + det1.h / 2., det2.y_ctr + det2.h / 2.);
 
-  if (top > bottom || left > right) return 0.f;
+  if (top > bottom || left > right) return 0.;
 
   const float inter_box_s = (right - left) * (bottom - top);
   return inter_box_s / (det1.w * det1.h + det2.w * det2.h - inter_box_s);

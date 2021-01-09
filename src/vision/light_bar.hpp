@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "opencv2/opencv.hpp"
 
 class LightBar {
@@ -14,6 +16,9 @@ class LightBar {
   void Init(const cv::RotatedRect &rect);
 
   const cv::Point2f &Center();
+  std::vector<cv::Point2f> Vertices();
   float Angle();
+  float Area();
+  float AspectRatio();
   float Length();
 };
