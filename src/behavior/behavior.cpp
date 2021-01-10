@@ -54,20 +54,3 @@ static const char *const xml_tree_sentry = R"(
  </root>
  
  )";
-
-static const char *const xml_tree_auto_aim = R"(
-
- <root main_tree_to_execute = "MainTree" >
-     <BehaviorTree ID="MainTree">
-        <Fallback name="root_sequence">
-            <LowHP name="low_hp"/>
-            <Sequence name="fight">
-                <EnamyVisable name="enamy_visable"/>
-                <Track name="track"/>
-                <Attack name="attack"/>
-            </Sequence>
-        </Fallback>
-     </BehaviorTree>
- </root>
- 
- )";
