@@ -14,9 +14,8 @@
  *
  */
 Serial::Serial() {
-  SPDLOG_DEBUG("[Serial] Constructing.");
   dev_ = -1;
-  SPDLOG_DEBUG("[Serial] Constructed.");
+  SPDLOG_DEBUG("Constructed.");
 }
 
 /**
@@ -25,16 +24,14 @@ Serial::Serial() {
  * @param dev_path 具体要读写的串口设备
  */
 Serial::Serial(const std::string& dev_path) {
-  SPDLOG_DEBUG("[Serial] Constructing.");
-
   dev_ = open(dev_path.c_str(), O_RDWR);
 
   if (dev_ < 0)
-    SPDLOG_ERROR("[Serial] Can't open Serial device.");
+    SPDLOG_ERROR("Can't open Serial device.");
   else
     Config();
 
-  SPDLOG_DEBUG("[Serial] Constructed.");
+  SPDLOG_DEBUG("Constructed.");
 }
 
 /**
@@ -42,9 +39,8 @@ Serial::Serial(const std::string& dev_path) {
  *
  */
 Serial::~Serial() {
-  SPDLOG_DEBUG("[Serial] Destructing.");
   Close();
-  SPDLOG_DEBUG("[Serial] Destructed.");
+  SPDLOG_DEBUG("Destructed.");
 }
 
 /**
@@ -55,7 +51,7 @@ Serial::~Serial() {
 void Serial::Open(const std::string& dev_path) {
   dev_ = open(dev_path.c_str(), O_RDWR);
 
-  if (dev_ < 0) SPDLOG_ERROR("[Serial] Can't open Serial device.");
+  if (dev_ < 0) SPDLOG_ERROR("Can't open Serial device.");
 }
 
 /**
@@ -81,12 +77,12 @@ bool Serial::Config(bool parity, StopBits stop_bit, DataLength data_length,
   struct termios tty_cfg;
 
   SPDLOG_INFO(
-      "[Serial] parity={}, stop_bit={}, data_length={}, flow_ctrl={}, "
+      "parity={}, stop_bit={}, data_length={}, flow_ctrl={}, "
       "baud_rate={}",
       parity, stop_bit, data_length, flow_ctrl, baud_rate);
 
   if (tcgetattr(dev_, &tty_cfg)) {
-    SPDLOG_ERROR("[Serial] Error {} from tcgetattr: {}.", errno,
+    SPDLOG_ERROR("Error {} from tcgetattr: {}.", errno,
                  std::strerror(errno));
     return false;
   }
@@ -138,7 +134,7 @@ bool Serial::Config(bool parity, StopBits stop_bit, DataLength data_length,
   }
 
   if (tcsetattr(dev_, TCSANOW, &tty_cfg) != 0) {
-    SPDLOG_ERROR("[Serial] Error {d} from tcsetattr: {s}\n", errno,
+    SPDLOG_ERROR("Error {d} from tcsetattr: {s}\n", errno,
                  std::strerror(errno));
     return false;
   }

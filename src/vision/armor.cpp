@@ -11,34 +11,34 @@ void Armor::FormRect() {
   rect_ = cv::RotatedRect(center, cv::Size(width, height),
                           (left_bar_.Angle() + right_bar_.Angle()) / 2.);
 
-  SPDLOG_DEBUG("[Armor] center: ({}, {})", center.x, center.y);
-  SPDLOG_DEBUG("[Armor] width, height:  ({}, {})", width, height);
+  SPDLOG_DEBUG("center: ({}, {})", center.x, center.y);
+  SPDLOG_DEBUG("width, height:  ({}, {})", width, height);
 }
 
 void Armor::DetectTeam() {
   team_ = game::Team::kBLUE;
-  SPDLOG_DEBUG("[Armor] team_: {}", team_);
+  SPDLOG_DEBUG("team_: {}", team_);
 }
 
-Armor::Armor() { SPDLOG_DEBUG("[Armor] Constructed."); }
+Armor::Armor() { SPDLOG_DEBUG("Constructed."); }
 
 Armor::Armor(const LightBar &left_bar, const LightBar &right_bar) {
   Init(left_bar, right_bar);
-  SPDLOG_DEBUG("[Armor] Constructed.");
+  SPDLOG_DEBUG("Constructed.");
 }
 
-Armor::~Armor() { SPDLOG_DEBUG("[Armor] Destructed."); }
+Armor::~Armor() { SPDLOG_DEBUG("Destructed."); }
 
 void Armor::Init(const LightBar &left_bar, const LightBar &right_bar) {
   left_bar_ = left_bar;
   right_bar_ = right_bar;
 
   FormRect();
-  SPDLOG_DEBUG("[Armor] Inited.");
+  SPDLOG_DEBUG("Inited.");
 }
 
 game::Team Armor::Team(const cv::Mat &frame) {
-  SPDLOG_DEBUG("[Armor] team_: {}", team_);
+  SPDLOG_DEBUG("team_: {}", team_);
   if (team_ == game::Team::kUNKNOWN) DetectTeam();
   return team_;
 }
@@ -48,7 +48,7 @@ game::Model Armor::GetModel() { return model_; }
 void Armor::SetModel(game::Model model) { model_ = model; }
 
 const cv::Point2f &Armor::Center() {
-  SPDLOG_DEBUG("[Armor] rect_.center: ({}, {})", rect_.center.x,
+  SPDLOG_DEBUG("rect_.center: ({}, {})", rect_.center.x,
                rect_.center.y);
   return rect_.center;
 }
@@ -60,7 +60,7 @@ std::vector<cv::Point2f> Armor::Vertices() {
 }
 
 float Armor::Angle() {
-  SPDLOG_DEBUG("[Armor] rect_.angle: {}", rect_.angle);
+  SPDLOG_DEBUG("rect_.angle: {}", rect_.angle);
   return rect_.angle;
 }
 
