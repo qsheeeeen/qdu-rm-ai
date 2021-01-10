@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "opencv2/opencv.hpp"
 
-TEST(TestVision, TestBlueOnly) {
+TEST(TestPreprocess, TestBlueOnly) {
   cv::Mat img = imread("../../../image/test.jpg", cv::IMREAD_COLOR);
   ASSERT_FALSE(img.empty()) << "Can not opening image.";
 
@@ -12,7 +12,7 @@ TEST(TestVision, TestBlueOnly) {
   ASSERT_FALSE(blue.empty()) << "Can not opening image.";
 }
 
-TEST(TestVision, TestBlueMinusRed) {
+TEST(TestPreprocess, TestBlueMinusRed) {
   cv::Mat img = imread("../../../image/test.jpg", cv::IMREAD_COLOR);
   ASSERT_FALSE(img.empty()) << "Can not opening image.";
 
