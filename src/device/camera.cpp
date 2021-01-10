@@ -156,7 +156,7 @@ int Camera::Open(unsigned int index) {
   int err = MV_OK;
   std::string err_msg;
 
-  SPDLOG_DEBUG("[Camera] Open index:{}.", index);
+  SPDLOG_DEBUG("[Camera] Open index: {}.", index);
 
   if (index >= mv_dev_list_.nDeviceNum) {
     SPDLOG_ERROR("[Camera] Intput index:{} >= nDeviceNum:{} !", index,

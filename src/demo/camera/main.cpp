@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include "camera.hpp"
-#include "robot.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
@@ -27,9 +26,7 @@ int main(int argc, char const* argv[]) {
   spdlog::set_level(spdlog::level::info);
 #endif
 
-  SPDLOG_WARN("***** Running Radar. *****");
-
-  Robot bot("/dev/tty");
-
+  SPDLOG_WARN("***** Running Camera Recording Demo. *****");
+  
   exit(0);
 }

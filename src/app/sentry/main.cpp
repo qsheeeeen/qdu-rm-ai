@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "behavior.hpp"
 #include "camera.hpp"
 #include "robot.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
@@ -12,7 +13,7 @@ int main(int argc, char const* argv[]) {
 
   auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
   auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
-      "logs/radar.log", true);
+      "logs/sentry.log", true);
 
   spdlog::sinks_init_list sink_list = {console_sink, file_sink};
 
@@ -27,7 +28,7 @@ int main(int argc, char const* argv[]) {
   spdlog::set_level(spdlog::level::info);
 #endif
 
-  SPDLOG_WARN("***** Running Radar. *****");
+  SPDLOG_WARN("***** Running Sentry. *****");
 
   Robot bot("/dev/tty");
 
