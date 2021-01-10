@@ -17,8 +17,8 @@ class LightBar {
 
   const cv::Point2f &Center();
   std::vector<cv::Point2f> Vertices();
-  float Angle();
-  float Area();
-  float AspectRatio();
-  float Length();
+  double Angle();
+  double Area();
+  double AspectRatio();
+  double Length();
 };

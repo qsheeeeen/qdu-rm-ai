@@ -5,8 +5,8 @@
 
 void Armor::FormRect() {
   cv::Point2f center = (left_bar_.Center() + right_bar_.Center()) / 2.;
-  float width = cv::norm(left_bar_.Center() - right_bar_.Center());
-  float height = (left_bar_.Length() + right_bar_.Length()) / 2.;  // TODO
+  double width = cv::norm(left_bar_.Center() - right_bar_.Center());
+  double height = (left_bar_.Length() + right_bar_.Length());
 
   rect_ = cv::RotatedRect(center, cv::Size(width, height),
                           (left_bar_.Angle() + right_bar_.Angle()) / 2.);
@@ -59,7 +59,7 @@ std::vector<cv::Point2f> Armor::Vertices() {
   return vertices;
 }
 
-float Armor::Angle() {
+double Armor::Angle() {
   SPDLOG_DEBUG("rect_.angle: {}", rect_.angle);
   return rect_.angle;
 }

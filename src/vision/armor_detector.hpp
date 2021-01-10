@@ -7,6 +7,25 @@
 #include "game.hpp"
 #include "light_bar.hpp"
 
+struct ArmorDetectorParam {
+  double binary_th;
+  int erosion_size;
+  size_t contour_size_th;
+  double contour_area_low_th;
+  double contour_area_high_th;
+  double bar_area_low_th;
+  double bar_area_high_th;
+  double angle_high_th;
+  double aspect_ratio_low_th;
+  double aspect_ratio_high_th;
+  double angle_diff_th;
+  double length_diff_th;
+  double height_diff_th;
+  double area_diff_th;
+  double center_dist_low_th;
+  double center_dist_high_th;
+};
+
 class ArmorDetector {
  private:
   const cv::Scalar green_ = cv::Scalar(0., 255., 0.);
@@ -15,7 +34,11 @@ class ArmorDetector {
   std::vector<LightBar> lightbars_;
   std::vector<Armor> armors_;
 
-  cv::FileStorage params_;
+  cv::FileStorage fs_;
+  ArmorDetectorParam params_;
+
+  void InitDefaultParams(std::string params_path);
+  void PrepareParams();
 
   void FindLightBars(const cv::Mat &frame);
   void MatchLightBars();
@@ -30,8 +53,6 @@ class ArmorDetector {
   ~ArmorDetector();
 
   void Init(std::string params_path, game::Team enemy_team);
-
-  void InitDefaultParams(std::string params_path);
 
   void Detect(cv::Mat &frame);
   void VisualizeResult(cv::Mat &output, bool draw_bars = false,

@@ -5,7 +5,7 @@
 
 const cv::Point2f center(1., 1.);
 const cv::Size2f size(2., 3.);
-const float angle = 5.;
+const double angle = 5.;
 
 const cv::RotatedRect test_rect(center, size, angle);
 
@@ -17,7 +17,7 @@ TEST(TestVision, TestLightBar) {
   ASSERT_GE(light_bar.Length(), size.height);
   ASSERT_GE(light_bar.Length(), size.width);
   ASSERT_FLOAT_EQ(light_bar.Area(), size.area());
-  ASSERT_FLOAT_EQ(light_bar.AspectRatio(), size.aspectRatio());
+  ASSERT_FLOAT_EQ(light_bar.AspectRatio(), (3. / 2.));
 
   std::vector<cv::Point2f> p1 = light_bar.Vertices();
   cv::Point2f p2[4];

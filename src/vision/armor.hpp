@@ -29,6 +29,6 @@ class Armor {
   void SetModel(game::Model model);
   const cv::Point2f &Center();
   std::vector<cv::Point2f> Vertices();
-  float Angle();
+  double Angle();
   cv::Mat Face(const cv::Mat &frame);
 };
