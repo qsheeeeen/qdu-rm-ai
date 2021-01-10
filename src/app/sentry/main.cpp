@@ -32,5 +32,5 @@ int main(int argc, char const* argv[]) {
 
   Robot bot("/dev/tty");
 
-  exit(0);
+  return EXIT_SUCCESS;
 }
