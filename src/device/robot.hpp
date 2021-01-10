@@ -7,11 +7,11 @@
 #include "serial.hpp"
 
 typedef struct {
-  float holder;
+  double holder;
 } RecvHolder;
 
 typedef struct {
-  float holder;
+  double holder;
 } CommandHolder;
 
 class Robot {
