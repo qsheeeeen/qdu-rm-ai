@@ -29,6 +29,7 @@ struct ArmorDetectorParam {
 class ArmorDetector {
  private:
   const cv::Scalar green_ = cv::Scalar(0., 255., 0.);
+  cv::Size frame_size_;
   game::Team enemy_team_;
   ArmorClassifier armor_classifier_;
   std::vector<LightBar> lightbars_;

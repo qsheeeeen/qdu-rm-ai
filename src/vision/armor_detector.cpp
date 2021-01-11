@@ -56,6 +56,8 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
   lightbars_.clear();
   armors_.clear();
 
+  frame_size_ = cv::Size(frame.cols, frame.rows);
+
   cv::Mat channels[3];
   cv::split(frame, channels);
 
@@ -80,7 +82,6 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
   SPDLOG_INFO("Found contours: {}", contours.size());
 
   for (const auto &contour : contours) {
-    // TODO: computional light first.
     if (contour.size() < params_.contour_size_th) continue;
 
     const double c_area = cv::contourArea(contour);
@@ -121,9 +122,8 @@ void ArmorDetector::MatchLightBars() {
           std::abs(iti->Length() - itj->Length()) / iti->Length();
       if (length_diff > params_.length_diff_th) continue;
 
-      // TODO: reletive to img size;
       const double height_diff = std::abs(iti->Center().y - itj->Center().y);
-      if (height_diff > params_.height_diff_th) continue;
+      if (height_diff > (params_.height_diff_th * frame_size_.height)) continue;
 
       const double area_diff =
           std::abs(iti->Area() - itj->Area()) / iti->Area();

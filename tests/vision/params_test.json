@@ -11,7 +11,7 @@
     "aspect_ratio_high_th": 6,
     "angle_diff_th": 10,
     "length_diff_th": 0.2,
-    "height_diff_th": 450,
+    "height_diff_th": 0.2,
     "area_diff_th": 0.6,
     "center_dist_low_th": 1,
     "center_dist_high_th": 4
