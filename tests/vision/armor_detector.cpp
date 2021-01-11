@@ -17,7 +17,7 @@ TEST(TestVision, TestArmorDetector) {
   cv::imwrite("../../../image/test_bars.jpg", result);
 
   result = img.clone();
-  armor_detector.VisualizeResult(result, false, true, true);
+  armor_detector.VisualizeResult(result, false, true, false);
   cv::imwrite("../../../image/test_armor.jpg", result);
 
   SUCCEED();

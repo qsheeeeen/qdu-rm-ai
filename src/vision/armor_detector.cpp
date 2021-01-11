@@ -89,18 +89,17 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
 
     auto potential_bar = LightBar(cv::minAreaRect(contour));
 
+    if (std::abs(potential_bar.Angle()) > double(params_.angle_high_th))
+      continue;
+
     const double b_area = potential_bar.Area();
     if (b_area < params_.bar_area_low_th) continue;
     if (b_area > params_.bar_area_high_th) continue;
-
-    if (std::abs(potential_bar.Angle()) > double(params_.angle_high_th))
-      continue;
 
     const double ar = potential_bar.AspectRatio();
     if (ar < params_.aspect_ratio_low_th) continue;
     if (ar > params_.aspect_ratio_high_th) continue;
 
-    // TODO: Add more rules.
     lightbars_.emplace_back(potential_bar);
   }
 
@@ -115,28 +114,23 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
 void ArmorDetector::MatchLightBars() {
   for (auto iti = lightbars_.begin(); iti != lightbars_.end(); ++iti) {
     for (auto itj = iti + 1; itj != lightbars_.end(); ++itj) {
-      if (iti->Angle() > 0.) {
-        if (iti->Center().y > itj->Center().y) continue;
-      } else {
-        if (iti->Center().y < itj->Center().y) continue;
-      }
-
       const double angle_diff = std::abs(iti->Angle() - itj->Angle());
       if (angle_diff > params_.angle_diff_th) continue;
 
-      double length_diff =
+      const double length_diff =
           std::abs(iti->Length() - itj->Length()) / iti->Length();
       if (length_diff > params_.length_diff_th) continue;
 
       // TODO: reletive to img size;
-      double height_diff = std::abs(iti->Center().y - itj->Center().y);
+      const double height_diff = std::abs(iti->Center().y - itj->Center().y);
       if (height_diff > params_.height_diff_th) continue;
 
-      double area_diff = std::abs(iti->Area() - itj->Area()) / iti->Area();
+      const double area_diff =
+          std::abs(iti->Area() - itj->Area()) / iti->Area();
       if (area_diff > params_.area_diff_th) continue;
 
-      double center_dist = cv::norm(iti->Center() - itj->Center());
-      double l = iti->Length();
+      const double center_dist = cv::norm(iti->Center() - itj->Center());
+      const double l = iti->Length();
       if (center_dist < l * params_.center_dist_low_th) continue;
       if (center_dist > l * params_.center_dist_high_th) continue;
 
@@ -158,15 +152,15 @@ void ArmorDetector::VisualizeLightBar(cv::Mat &output, bool add_lable) {
     for (auto &bar : lightbars_) {
       auto vertices = bar.Vertices();
       for (size_t i = 0; i < vertices.size(); ++i)
-        cv::line(output, vertices[i], vertices[(i + 1) % 4], green_);
+        cv::line(output, vertices[i], vertices[(i + 1) % 4], green_, 2);
 
-      cv::circle(output, bar.Center(), 2, green_);
+      cv::circle(output, bar.Center(), 4, green_, 2);
 
       if (add_lable) {
         std::ostringstream buf;
         buf << bar.Center().x << ", " << bar.Center().y;
         cv::putText(output, buf.str(), bar.Center(),
-                    cv::FONT_HERSHEY_SCRIPT_SIMPLEX, 1.0, green_);
+                    cv::FONT_HERSHEY_SCRIPT_SIMPLEX, 1.0, green_, 2);
       }
     }
   }
@@ -177,15 +171,15 @@ void ArmorDetector::VisualizeArmor(cv::Mat &output, bool add_lable) {
     for (auto &armor : armors_) {
       auto vertices = armor.Vertices();
       for (size_t i = 0; i < vertices.size(); ++i)
-        cv::line(output, vertices[i], vertices[(i + 1) % 4], green_);
+        cv::line(output, vertices[i], vertices[(i + 1) % 4], green_, 2);
 
-      cv::circle(output, armor.Center(), 2, green_);
+      cv::circle(output, armor.Center(), 4, green_, 2);
 
       if (add_lable) {
         std::ostringstream buf;
         buf << armor.Center().x << ", " << armor.Center().y;
         cv::putText(output, buf.str(), armor.Center(),
-                    cv::FONT_HERSHEY_SCRIPT_SIMPLEX, 1.0, green_);
+                    cv::FONT_HERSHEY_SCRIPT_SIMPLEX, 1.0, green_, 2);
       }
     }
   }
