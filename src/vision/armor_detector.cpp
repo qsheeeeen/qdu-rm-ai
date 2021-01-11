@@ -53,6 +53,7 @@ void ArmorDetector::PrepareParams() {
 }
 
 void ArmorDetector::FindLightBars(const cv::Mat &frame) {
+  const auto start = std::chrono::high_resolution_clock::now();
   lightbars_.clear();
   armors_.clear();
 
@@ -79,7 +80,7 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
 
   std::vector<std::vector<cv::Point> > contours;
   cv::findContours(result, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
-  SPDLOG_INFO("Found contours: {}", contours.size());
+  SPDLOG_DEBUG("Found contours: {}", contours.size());
 
   for (const auto &contour : contours) {
     if (contour.size() < params_.contour_size_th) continue;
@@ -104,15 +105,21 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
     lightbars_.emplace_back(potential_bar);
   }
 
-  SPDLOG_INFO("Found light bars: {}", lightbars_.size());
+  SPDLOG_DEBUG("Found light bars: {}", lightbars_.size());
 
   std::sort(lightbars_.begin(), lightbars_.end(),
             [](LightBar &bar1, LightBar &bar2) {
               return bar1.Center().x < bar2.Center().x;
             });
+  const auto stop = std::chrono::high_resolution_clock::now();
+  duration_find_bars_ =
+      std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+
+  SPDLOG_DEBUG("duration_find_bars_: {} us", duration_find_bars_.count());
 }
 
 void ArmorDetector::MatchLightBars() {
+  const auto start = std::chrono::high_resolution_clock::now();
   for (auto iti = lightbars_.begin(); iti != lightbars_.end(); ++iti) {
     for (auto itj = iti + 1; itj != lightbars_.end(); ++itj) {
       const double angle_diff = std::abs(iti->Angle() - itj->Angle());
@@ -140,7 +147,12 @@ void ArmorDetector::MatchLightBars() {
       break;
     }
   }
-  SPDLOG_INFO("Found armors: {}", armors_.size());
+  SPDLOG_DEBUG("Found armors: {}", armors_.size());
+
+  const auto stop = std::chrono::high_resolution_clock::now();
+  duration_find_armors_ =
+      std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+  SPDLOG_DEBUG("duration_find_armors_: {} us", duration_find_armors_.count());
 }
 
 game::Model ArmorDetector::GetModel(const Armor &armor) {
@@ -159,8 +171,8 @@ void ArmorDetector::VisualizeLightBar(cv::Mat &output, bool add_lable) {
       if (add_lable) {
         std::ostringstream buf;
         buf << bar.Center().x << ", " << bar.Center().y;
-        cv::putText(output, buf.str(), bar.Center(),
-                    cv::FONT_HERSHEY_SCRIPT_SIMPLEX, 1.0, green_, 2);
+        cv::putText(output, buf.str(), vertices[1], cv::FONT_HERSHEY_SIMPLEX,
+                    1.0, green_, 2);
       }
     }
   }
@@ -178,8 +190,8 @@ void ArmorDetector::VisualizeArmor(cv::Mat &output, bool add_lable) {
       if (add_lable) {
         std::ostringstream buf;
         buf << armor.Center().x << ", " << armor.Center().y;
-        cv::putText(output, buf.str(), armor.Center(),
-                    cv::FONT_HERSHEY_SCRIPT_SIMPLEX, 1.0, green_, 2);
+        cv::putText(output, buf.str(), vertices[1], cv::FONT_HERSHEY_SIMPLEX,
+                    1.0, green_, 2);
       }
     }
   }
@@ -223,4 +235,11 @@ void ArmorDetector::VisualizeResult(cv::Mat &output, bool draw_bars,
                                     bool draw_armor, bool add_lable) {
   if (draw_bars) VisualizeLightBar(output, add_lable);
   if (draw_armor) VisualizeArmor(output, add_lable);
+  if (add_lable) {
+    std::ostringstream buf;
+    buf << "Performance: " << duration_find_bars_.count() << "us to find bars, "
+        << duration_find_armors_.count() << "us to match armors.";
+    cv::putText(output, buf.str(), cv::Size(0, frame_size_.height),
+                cv::FONT_HERSHEY_SIMPLEX, 1.0, green_, 2);
+  }
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <vector>
 
 #include "armor.hpp"
@@ -37,6 +38,9 @@ class ArmorDetector {
 
   cv::FileStorage fs_;
   ArmorDetectorParam params_;
+
+  std::chrono::microseconds duration_find_bars_;
+  std::chrono::microseconds duration_find_armors_;
 
   void InitDefaultParams(std::string params_path);
   void PrepareParams();
