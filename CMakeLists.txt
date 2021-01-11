@@ -48,8 +48,8 @@ message(STATUS "-------------------------- Compiler ----------------------------
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wextra -O0")
-set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -O2")
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wextra -Og")
+set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -Ofast")
 
 message(STATUS "C++ standard: ${CMAKE_CXX_STANDARD}")
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
