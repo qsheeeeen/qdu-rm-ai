@@ -166,7 +166,7 @@ void ArmorDetector::VisualizeLightBar(cv::Mat &output, bool add_lable) {
       for (size_t i = 0; i < vertices.size(); ++i)
         cv::line(output, vertices[i], vertices[(i + 1) % 4], green_, 2);
 
-      cv::circle(output, bar.Center(), 4, green_, 2);
+      cv::drawMarker(output, bar.Center(), green_, cv::MARKER_CROSS, 20, 2);
 
       if (add_lable) {
         std::ostringstream buf;
@@ -185,7 +185,7 @@ void ArmorDetector::VisualizeArmor(cv::Mat &output, bool add_lable) {
       for (size_t i = 0; i < vertices.size(); ++i)
         cv::line(output, vertices[i], vertices[(i + 1) % 4], green_, 2);
 
-      cv::circle(output, armor.Center(), 4, green_, 2);
+      cv::drawMarker(output, armor.Center(), green_, cv::MARKER_DIAMOND, 20, 2);
 
       if (add_lable) {
         std::ostringstream buf;
