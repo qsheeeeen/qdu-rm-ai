@@ -19,7 +19,7 @@
 
 ### 目标识别效果
 
-![目标识别效果](./image/test_best.jpg?raw=true "目标识别效果")
+![目标识别效果](./image/test_yolo.jpg?raw=true "目标识别效果")
 
 ### TODO：TensorRT加速效果对比，可参考NVIDIA官方
 
