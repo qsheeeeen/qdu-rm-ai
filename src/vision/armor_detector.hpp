@@ -29,7 +29,6 @@ struct ArmorDetectorParam {
 
 class ArmorDetector {
  private:
-  const cv::Scalar green_ = cv::Scalar(0., 255., 0.);
   cv::Size frame_size_;
   game::Team enemy_team_;
   ArmorClassifier armor_classifier_;
@@ -39,8 +38,8 @@ class ArmorDetector {
   cv::FileStorage fs_;
   ArmorDetectorParam params_;
 
-  std::chrono::microseconds duration_find_bars_;
-  std::chrono::microseconds duration_find_armors_;
+  std::chrono::milliseconds duration_bars_;
+  std::chrono::milliseconds duration_armors_;
 
   void InitDefaultParams(std::string params_path);
   void PrepareParams();
@@ -59,7 +58,7 @@ class ArmorDetector {
 
   void Init(std::string params_path, game::Team enemy_team);
 
-  void Detect(cv::Mat &frame);
+  const std::vector<Armor> &Detect(cv::Mat &frame);
   void VisualizeResult(cv::Mat &output, bool draw_bars = false,
                        bool draw_armor = true, bool add_lable = true);
 };

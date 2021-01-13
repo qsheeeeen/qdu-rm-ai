@@ -5,6 +5,13 @@
 #include "opencv2/opencv.hpp"
 #include "spdlog/spdlog.h"
 
+namespace {
+
+const auto cv_font = cv::FONT_HERSHEY_SIMPLEX;
+const auto green = cv::Scalar(0., 255., 0.);
+
+}  // namespace
+
 void ArmorDetector::InitDefaultParams(std::string params_path) {
   fs_.open(params_path, cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
 
@@ -112,10 +119,10 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
               return bar1.Center().x < bar2.Center().x;
             });
   const auto stop = std::chrono::high_resolution_clock::now();
-  duration_find_bars_ =
-      std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+  duration_bars_ =
+      std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 
-  SPDLOG_DEBUG("duration_find_bars_: {} us", duration_find_bars_.count());
+  SPDLOG_DEBUG("duration_bars_: {} ms", duration_bars_.count());
 }
 
 void ArmorDetector::MatchLightBars() {
@@ -150,9 +157,9 @@ void ArmorDetector::MatchLightBars() {
   SPDLOG_DEBUG("Found armors: {}", armors_.size());
 
   const auto stop = std::chrono::high_resolution_clock::now();
-  duration_find_armors_ =
-      std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-  SPDLOG_DEBUG("duration_find_armors_: {} us", duration_find_armors_.count());
+  duration_armors_ =
+      std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+  SPDLOG_DEBUG("duration_armors_: {} ms", duration_armors_.count());
 }
 
 game::Model ArmorDetector::GetModel(const Armor &armor) {
@@ -164,15 +171,14 @@ void ArmorDetector::VisualizeLightBar(cv::Mat &output, bool add_lable) {
     for (auto &bar : lightbars_) {
       auto vertices = bar.Vertices();
       for (size_t i = 0; i < vertices.size(); ++i)
-        cv::line(output, vertices[i], vertices[(i + 1) % 4], green_, 2);
+        cv::line(output, vertices[i], vertices[(i + 1) % 4], green);
 
-      cv::drawMarker(output, bar.Center(), green_, cv::MARKER_CROSS, 20, 2);
+      cv::drawMarker(output, bar.Center(), green, cv::MARKER_CROSS);
 
       if (add_lable) {
         std::ostringstream buf;
         buf << bar.Center().x << ", " << bar.Center().y;
-        cv::putText(output, buf.str(), vertices[1], cv::FONT_HERSHEY_SIMPLEX,
-                    1.0, green_, 2);
+        cv::putText(output, buf.str(), vertices[1], cv_font, 1.0, green);
       }
     }
   }
@@ -183,15 +189,14 @@ void ArmorDetector::VisualizeArmor(cv::Mat &output, bool add_lable) {
     for (auto &armor : armors_) {
       auto vertices = armor.Vertices();
       for (size_t i = 0; i < vertices.size(); ++i)
-        cv::line(output, vertices[i], vertices[(i + 1) % 4], green_, 2);
+        cv::line(output, vertices[i], vertices[(i + 1) % 4], green);
 
-      cv::drawMarker(output, armor.Center(), green_, cv::MARKER_DIAMOND, 20, 2);
+      cv::drawMarker(output, armor.Center(), green, cv::MARKER_DIAMOND);
 
       if (add_lable) {
         std::ostringstream buf;
         buf << armor.Center().x << ", " << armor.Center().y;
-        cv::putText(output, buf.str(), vertices[1], cv::FONT_HERSHEY_SIMPLEX,
-                    1.0, green_, 2);
+        cv::putText(output, buf.str(), vertices[1], cv_font, 1.0, green);
       }
     }
   }
@@ -224,11 +229,12 @@ void ArmorDetector::Init(std::string params_path, game::Team enemy_team) {
   SPDLOG_DEBUG("Inited.");
 }
 
-void ArmorDetector::Detect(cv::Mat &frame) {
+const std::vector<Armor> &ArmorDetector::Detect(cv::Mat &frame) {
   SPDLOG_DEBUG("Detecting");
   FindLightBars(frame);
   MatchLightBars();
   SPDLOG_DEBUG("Detected.");
+  return armors_;
 }
 
 void ArmorDetector::VisualizeResult(cv::Mat &output, bool draw_bars,
@@ -237,9 +243,19 @@ void ArmorDetector::VisualizeResult(cv::Mat &output, bool draw_bars,
   if (draw_armor) VisualizeArmor(output, add_lable);
   if (add_lable) {
     std::ostringstream buf;
-    buf << "Performance: " << duration_find_bars_.count() << "us to find bars, "
-        << duration_find_armors_.count() << "us to match armors.";
-    cv::putText(output, buf.str(), cv::Size(0, frame_size_.height),
-                cv::FONT_HERSHEY_SIMPLEX, 1.0, green_, 2);
+    buf << lightbars_.size() << " bars in " << duration_bars_.count() << " ms.";
+
+    int baseLine;
+    int v_pos = 0;
+    cv::Size text_size = cv::getTextSize(buf.str(), cv_font, 1.0, 2, &baseLine);
+    v_pos += static_cast<int>(1.3 * text_size.height);
+    cv::putText(output, buf.str(), cv::Point(0, v_pos), cv_font, 1.0, green);
+
+    buf.str(std::string());
+    buf << armors_.size() << " armors in " << duration_armors_.count()
+        << " ms.";
+    text_size = cv::getTextSize(buf.str(), cv_font, 1.0, 2, &baseLine);
+    v_pos += static_cast<int>(1.3 * text_size.height);
+    cv::putText(output, buf.str(), cv::Point(0, v_pos), cv_font, 1.0, green);
   }
 }

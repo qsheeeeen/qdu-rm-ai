@@ -10,7 +10,8 @@ TEST(TestVision, TestArmorDetector) {
   cv::Mat img = imread("../../../image/test.jpg", cv::IMREAD_COLOR);
   ASSERT_FALSE(img.empty()) << "Can not opening image.";
 
-  armor_detector.Detect(img);
+  std::vector<Armor> armors = armor_detector.Detect(img);
+  ASSERT_EQ(armors.size(), 6);
 
   cv::Mat result = img.clone();
   armor_detector.VisualizeResult(result, true, false, true);
