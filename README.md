@@ -17,9 +17,17 @@
 
 ## 图片展示
 
-### 目标识别效果
+### YOLO识别效果
 
-![目标识别效果](./image/test_yolo.jpg?raw=true "目标识别效果")
+![YOLO识别效果](./image/test_yolo.jpg?raw=true "YOLO识别效果")
+
+### OpenCV灯条识别效果
+
+![OpenCV灯条识别效果](./image/test_bars.jpg?raw=true "OpenCV灯条识别效果")
+
+### 装甲板匹配效果
+
+![装甲板匹配效果](./image/test_armor.jpg?raw=true "装甲板匹配效果")
 
 ### TODO：TensorRT加速效果对比，可参考NVIDIA官方
 
