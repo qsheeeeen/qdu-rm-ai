@@ -46,7 +46,6 @@ class ArmorDetector {
 
   void FindLightBars(const cv::Mat &frame);
   void MatchLightBars();
-  game::Model GetModel(const Armor &armor);
 
   void VisualizeLightBar(cv::Mat &output, bool add_lable);
   void VisualizeArmor(cv::Mat &output, bool add_lable);
