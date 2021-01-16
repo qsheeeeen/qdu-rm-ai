@@ -4,6 +4,7 @@
 #include <NvInferRuntimeCommon.h>
 
 #include <memory>
+#include <opencv2/opencv.hpp>
 #include <string>
 #include <vector>
 
@@ -64,5 +65,5 @@ class Detector {
   Detector(std::string onnx_file_path, float conf_thresh, float nms_thresh);
   ~Detector();
   bool TestInfer();
-  std::vector<Detection> Infer();
+  std::vector<Detection> Infer(cv::Mat &);
 };

@@ -353,7 +353,7 @@ bool Detector::TestInfer() {
   return true;
 }
 
-std::vector<Detection> Detector::Infer(cd::Mat & raw) {
+std::vector<Detection> Detector::Infer(cv::Mat &raw) {
   SPDLOG_DEBUG("[Detector] Infer.");
 
   std::vector<float> output(bingings_size_.at(idx_out_) / sizeof(float));
