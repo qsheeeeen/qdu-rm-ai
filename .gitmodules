@@ -1,3 +1,7 @@
 [submodule "third_party/yolov5"]
 	path = third_party/yolov5
 	url = https://github.com/ultralytics/yolov5
+
+[submodule "build/tests/behavior/third_party/qdu-rm-protocol"]
+	path = build/tests/behavior/third_party/qdu-rm-protocol
+	url = https://gitee.com/qsheeeeen/qdu-rm-protocol.git
