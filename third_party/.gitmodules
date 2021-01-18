@@ -1,0 +1,3 @@
+[submodule "qdu-rm-protocol"]
+	path = qdu-rm-protocol
+	url = https://gitee.com/qsheeeeen/qdu-rm-protocol.git
