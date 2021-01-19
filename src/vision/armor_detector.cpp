@@ -13,50 +13,57 @@ const auto kGREEN = cv::Scalar(0., 255., 0.);
 }  // namespace
 
 void ArmorDetector::InitDefaultParams(std::string params_path) {
-  fs_.open(params_path, cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
+  cv::FileStorage fs(params_path,
+                     cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
 
-  fs_ << "binary_th" << 230;
-  fs_ << "erosion_size" << 5;
+  fs << "binary_th" << 230;
+  fs << "erosion_size" << 5;
 
-  fs_ << "contour_size_th" << 20;
-  fs_ << "contour_area_low_th" << 100;
-  fs_ << "contour_area_high_th" << 10000;
-  fs_ << "bar_area_low_th" << 100;
-  fs_ << "bar_area_high_th" << 10000;
-  fs_ << "angle_high_th" << 60;
-  fs_ << "aspect_ratio_low_th" << 2;
-  fs_ << "aspect_ratio_high_th" << 5;
+  fs << "contour_size_th" << 20;
+  fs << "contour_area_low_th" << 100;
+  fs << "contour_area_high_th" << 10000;
+  fs << "bar_area_low_th" << 100;
+  fs << "bar_area_high_th" << 10000;
+  fs << "angle_high_th" << 60;
+  fs << "aspect_ratio_low_th" << 2;
+  fs << "aspect_ratio_high_th" << 5;
 
-  fs_ << "angle_diff_th" << 0.5;
-  fs_ << "length_diff_th" << 0.5;
-  fs_ << "height_diff_th" << 0.5;
-  fs_ << "area_diff_th" << 0.5;
-  fs_ << "center_dist_low_th" << 1.5;
-  fs_ << "center_dist_high_th" << 5;
-  fs_.release();
-
+  fs << "angle_diff_th" << 0.5;
+  fs << "length_diff_th" << 0.5;
+  fs << "height_diff_th" << 0.5;
+  fs << "area_diff_th" << 0.5;
+  fs << "center_dist_low_th" << 1.5;
+  fs << "center_dist_high_th" << 5;
   SPDLOG_DEBUG("Inited params.");
 }
 
-void ArmorDetector::PrepareParams() {
-  params_.binary_th = fs_["binary_th"];
-  params_.erosion_size = fs_["erosion_size"];
+bool ArmorDetector::PrepareParams(std::string params_path) {
+  cv::FileStorage fs(params_path,
+                     cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
+  if (fs.isOpened()) {
+    params_.binary_th = fs["binary_th"];
+    params_.erosion_size = fs["erosion_size"];
 
-  params_.contour_size_th = int(fs_["contour_size_th"]);
-  params_.contour_area_low_th = fs_["contour_area_low_th"];
-  params_.contour_area_high_th = fs_["contour_area_high_th"];
-  params_.bar_area_low_th = fs_["bar_area_low_th"];
-  params_.bar_area_high_th = fs_["bar_area_high_th"];
-  params_.angle_high_th = fs_["angle_high_th"];
-  params_.aspect_ratio_low_th = fs_["aspect_ratio_low_th"];
-  params_.aspect_ratio_high_th = fs_["aspect_ratio_high_th"];
+    params_.contour_size_th = int(fs["contour_size_th"]);
+    params_.contour_area_low_th = fs["contour_area_low_th"];
+    params_.contour_area_high_th = fs["contour_area_high_th"];
+    params_.bar_area_low_th = fs["bar_area_low_th"];
+    params_.bar_area_high_th = fs["bar_area_high_th"];
+    params_.angle_high_th = fs["angle_high_th"];
+    params_.aspect_ratio_low_th = fs["aspect_ratio_low_th"];
+    params_.aspect_ratio_high_th = fs["aspect_ratio_high_th"];
 
-  params_.angle_diff_th = fs_["angle_diff_th"];
-  params_.length_diff_th = fs_["length_diff_th"];
-  params_.height_diff_th = fs_["height_diff_th"];
-  params_.area_diff_th = fs_["area_diff_th"];
-  params_.center_dist_low_th = fs_["center_dist_low_th"];
-  params_.center_dist_high_th = fs_["center_dist_high_th"];
+    params_.angle_diff_th = fs["angle_diff_th"];
+    params_.length_diff_th = fs["length_diff_th"];
+    params_.height_diff_th = fs["height_diff_th"];
+    params_.area_diff_th = fs["area_diff_th"];
+    params_.center_dist_low_th = fs["center_dist_low_th"];
+    params_.center_dist_high_th = fs["center_dist_high_th"];
+    return true;
+  } else {
+    SPDLOG_ERROR("Can not inited params.");
+    return false;
+  }
 }
 
 void ArmorDetector::FindLightBars(const cv::Mat &frame) {
@@ -205,20 +212,12 @@ ArmorDetector::ArmorDetector(std::string params_path, game::Team enemy_team) {
   SPDLOG_DEBUG("Constructed.");
 }
 
-ArmorDetector::~ArmorDetector() {
-  fs_.release();
-  SPDLOG_DEBUG("Destructed.");
-}
+ArmorDetector::~ArmorDetector() { SPDLOG_DEBUG("Destructed."); }
 
 void ArmorDetector::Init(std::string params_path, game::Team enemy_team) {
-  fs_.open(params_path, cv::FileStorage::READ | cv::FileStorage::FORMAT_JSON);
-
-  if (fs_.isOpened()) {
-    PrepareParams();
-  } else {
+  if (!PrepareParams(params_path)) {
     InitDefaultParams(params_path);
-    fs_.open(params_path, cv::FileStorage::READ | cv::FileStorage::FORMAT_JSON);
-    PrepareParams();
+    PrepareParams(params_path);
     SPDLOG_WARN("Can not find parasm file. Created and reloaded.");
   }
   enemy_team_ = enemy_team;

@@ -35,14 +35,12 @@ class ArmorDetector {
   std::vector<LightBar> lightbars_;
   std::vector<Armor> armors_;
 
-  cv::FileStorage fs_;
   ArmorDetectorParam params_;
 
-  std::chrono::milliseconds duration_bars_;
-  std::chrono::milliseconds duration_armors_;
+  std::chrono::milliseconds duration_bars_, duration_armors_;
 
   void InitDefaultParams(std::string params_path);
-  void PrepareParams();
+  bool PrepareParams(std::string params_path);
 
   void FindLightBars(const cv::Mat &frame);
   void MatchLightBars();
