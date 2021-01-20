@@ -17,7 +17,7 @@ void Armor::FormRect() {
 
 void Armor::DetectTeam() {
   team_ = game::Team::kBLUE;
-  SPDLOG_DEBUG("team_: {}", team_);
+  SPDLOG_DEBUG("team_: {}", game::TeamToString(team_));
 }
 
 Armor::Armor() { SPDLOG_DEBUG("Constructed."); }

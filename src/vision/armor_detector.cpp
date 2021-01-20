@@ -156,7 +156,7 @@ void ArmorDetector::MatchLightBars() {
       if (center_dist > l * params_.center_dist_high_th) continue;
 
       auto armor = Armor(*iti, *itj);
-      armor.SetModel(armor_classifier_.Classify(armor));
+      armor.SetModel(armor_classifier_.ClassifyModel(armor));
       armors_.emplace_back(armor);
       break;
     }
