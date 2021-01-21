@@ -70,6 +70,8 @@ cv::Mat Armor::Face(const cv::Mat &frame) {
 
   cv::Mat perspective;
   cv::warpPerspective(frame, perspective, trans_mat, dst_rect.size());
+  cv::adaptiveThreshold(perspective, perspective, 255,
+                        cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 3, 1);
   return perspective;
 }
 
