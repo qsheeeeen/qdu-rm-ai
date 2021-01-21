@@ -36,7 +36,7 @@ MCU::MCU(const std::string &dev_path) {
   continue_parse_ = true;
   parse_thread_ = std::thread(&MCU::ComThread, this);
 
-  SPDLOG_DEBUG("Constructed.");
+  SPDLOG_TRACE("Constructed.");
 }
 
 MCU::~MCU() {
@@ -44,5 +44,5 @@ MCU::~MCU() {
 
   continue_parse_ = false;
   parse_thread_.join();
-  SPDLOG_DEBUG("Destructed.");
+  SPDLOG_TRACE("Destructed.");
 }

@@ -3,14 +3,14 @@
 #include "opencv2/opencv.hpp"
 #include "spdlog/spdlog.h"
 
-LightBar::LightBar() { SPDLOG_DEBUG("Constructed."); }
+LightBar::LightBar() { SPDLOG_TRACE("Constructed."); }
 
 LightBar::LightBar(const cv::RotatedRect &rect) {
   Init(rect);
-  SPDLOG_DEBUG("Constructed.");
+  SPDLOG_TRACE("Constructed.");
 }
 
-LightBar::~LightBar() { SPDLOG_DEBUG("Destructed."); }
+LightBar::~LightBar() { SPDLOG_TRACE("Destructed."); }
 
 void LightBar::Init(const cv::RotatedRect &rect) {
   rect_ = rect;

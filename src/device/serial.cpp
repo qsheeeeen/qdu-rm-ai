@@ -15,7 +15,7 @@
  */
 Serial::Serial() {
   dev_ = -1;
-  SPDLOG_DEBUG("Constructed.");
+  SPDLOG_TRACE("Constructed.");
 }
 
 /**
@@ -31,7 +31,7 @@ Serial::Serial(const std::string& dev_path) {
   else
     Config();
 
-  SPDLOG_DEBUG("Constructed.");
+  SPDLOG_TRACE("Constructed.");
 }
 
 /**
@@ -40,7 +40,7 @@ Serial::Serial(const std::string& dev_path) {
  */
 Serial::~Serial() {
   Close();
-  SPDLOG_DEBUG("Destructed.");
+  SPDLOG_TRACE("Destructed.");
 }
 
 /**

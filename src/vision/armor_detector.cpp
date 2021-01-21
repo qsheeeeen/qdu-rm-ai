@@ -205,14 +205,14 @@ void ArmorDetector::VisualizeArmor(cv::Mat &output, bool add_lable) {
   }
 }
 
-ArmorDetector::ArmorDetector() { SPDLOG_DEBUG("Constructed."); }
+ArmorDetector::ArmorDetector() { SPDLOG_TRACE("Constructed."); }
 
 ArmorDetector::ArmorDetector(std::string params_path, game::Team enemy_team) {
   Init(params_path, enemy_team);
-  SPDLOG_DEBUG("Constructed.");
+  SPDLOG_TRACE("Constructed.");
 }
 
-ArmorDetector::~ArmorDetector() { SPDLOG_DEBUG("Destructed."); }
+ArmorDetector::~ArmorDetector() { SPDLOG_TRACE("Destructed."); }
 
 void ArmorDetector::Init(std::string params_path, game::Team enemy_team) {
   if (!PrepareParams(params_path)) {

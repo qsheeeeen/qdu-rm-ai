@@ -105,7 +105,7 @@ void Camera::Prepare() {
 Camera::Camera() {
   SPDLOG_DEBUG("Constructing.");
   Prepare();
-  SPDLOG_DEBUG("Constructed.");
+  SPDLOG_TRACE("Constructed.");
 }
 
 /**
@@ -120,7 +120,7 @@ Camera::Camera(unsigned int index, unsigned int height, unsigned int width)
   SPDLOG_DEBUG("Constructing.");
   Prepare();
   Open(index);
-  SPDLOG_DEBUG("Constructed.");
+  SPDLOG_TRACE("Constructed.");
 }
 
 /**
@@ -130,7 +130,7 @@ Camera::Camera(unsigned int index, unsigned int height, unsigned int width)
 Camera::~Camera() {
   SPDLOG_DEBUG("Destructing.");
   Close();
-  SPDLOG_DEBUG("Destructed.");
+  SPDLOG_TRACE("Destructed.");
 }
 
 /**

@@ -15,14 +15,14 @@ void Armor::FormRect() {
   SPDLOG_DEBUG("width, height:  ({}, {})", width, height);
 }
 
-Armor::Armor() { SPDLOG_DEBUG("Constructed."); }
+Armor::Armor() { SPDLOG_TRACE("Constructed."); }
 
 Armor::Armor(const LightBar &left_bar, const LightBar &right_bar) {
   Init(left_bar, right_bar);
-  SPDLOG_DEBUG("Constructed.");
+  SPDLOG_TRACE("Constructed.");
 }
 
-Armor::~Armor() { SPDLOG_DEBUG("Destructed."); }
+Armor::~Armor() { SPDLOG_TRACE("Destructed."); }
 
 void Armor::Init(const LightBar &left_bar, const LightBar &right_bar) {
   left_bar_ = left_bar;

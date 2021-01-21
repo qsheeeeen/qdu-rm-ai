@@ -53,14 +53,14 @@ void RangeEstimator::PnpEstimate(Armor& armor) {
 
 double RangeEstimator::PinHoleEstimate(std::vector<cv::Point2f> target) {}
 
-RangeEstimator::RangeEstimator() { SPDLOG_DEBUG("Constructed."); }
+RangeEstimator::RangeEstimator() { SPDLOG_TRACE("Constructed."); }
 
 RangeEstimator::RangeEstimator(std::string cam_model) {
   Init(cam_model);
-  SPDLOG_DEBUG("Constructed.");
+  SPDLOG_TRACE("Constructed.");
 }
 
-RangeEstimator::~RangeEstimator() { SPDLOG_DEBUG("Destructed."); }
+RangeEstimator::~RangeEstimator() { SPDLOG_TRACE("Destructed."); }
 
 void RangeEstimator::Init(std::string cam_model) { SPDLOG_DEBUG("Inited."); }
 
