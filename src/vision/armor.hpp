@@ -12,10 +12,9 @@ class Armor {
   cv::RotatedRect rect_;
   game::Team team_ = game::Team::kUNKNOWN;
   game::Model model_ = game::Model::kUNKNOWN;
-  cv::Mat face_;
+  cv::Mat face_, rotation_, translation_;
 
   void FormRect();
-  void DetectTeam();
 
  public:
   Armor();
@@ -24,11 +23,13 @@ class Armor {
 
   void Init(const LightBar &left_bar, const LightBar &right_bar);
 
-  game::Team Team(const cv::Mat &frame);
-  game::Model GetModel();
-  void SetModel(game::Model model);
+  game::Team &Team();
+  game::Model &Model();
   const cv::Point2f &Center();
   std::vector<cv::Point2f> Vertices();
   double Angle();
   cv::Mat Face(const cv::Mat &frame);
+  cv::Mat &Rotation();
+  cv::Vec3d RotationAxis();
+  cv::Mat &Translation();
 };

@@ -15,11 +15,6 @@ void Armor::FormRect() {
   SPDLOG_DEBUG("width, height:  ({}, {})", width, height);
 }
 
-void Armor::DetectTeam() {
-  team_ = game::Team::kBLUE;
-  SPDLOG_DEBUG("team_: {}", game::TeamToString(team_));
-}
-
 Armor::Armor() { SPDLOG_DEBUG("Constructed."); }
 
 Armor::Armor(const LightBar &left_bar, const LightBar &right_bar) {
@@ -37,19 +32,15 @@ void Armor::Init(const LightBar &left_bar, const LightBar &right_bar) {
   SPDLOG_DEBUG("Inited.");
 }
 
-game::Team Armor::Team(const cv::Mat &frame) {
+game::Team &Armor::Team() {
   SPDLOG_DEBUG("team_: {}", team_);
-  if (team_ == game::Team::kUNKNOWN) DetectTeam();
   return team_;
 }
 
-game::Model Armor::GetModel() { return model_; }
-
-void Armor::SetModel(game::Model model) { model_ = model; }
+game::Model &Armor::Model() { return model_; }
 
 const cv::Point2f &Armor::Center() {
-  SPDLOG_DEBUG("rect_.center: ({}, {})", rect_.center.x,
-               rect_.center.y);
+  SPDLOG_DEBUG("rect_.center: ({}, {})", rect_.center.x, rect_.center.y);
   return rect_.center;
 }
 
@@ -81,3 +72,14 @@ cv::Mat Armor::Face(const cv::Mat &frame) {
   cv::warpPerspective(frame, perspective, trans_mat, dst_rect.size());
   return perspective;
 }
+
+cv::Mat &Armor::Rotation() { return rotation_; }
+
+cv::Vec3d Armor::RotationAxis() {
+  cv::Vec3d axis(rotation_.at<double>(2, 1) - rotation_.at<double>(1, 2),
+                 rotation_.at<double>(0, 2) - rotation_.at<double>(2, 0),
+                 rotation_.at<double>(1, 0) - rotation_.at<double>(0, 1));
+  return axis;
+}
+
+cv::Mat &Armor::Translation() { return translation_; }

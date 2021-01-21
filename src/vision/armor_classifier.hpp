@@ -18,6 +18,6 @@ class ArmorClassifier {
   void LoadModel(std::string path);
 
   void Train();
-  game::Model ClassifyModel(Armor &armor);
-  game::Team ClassifyTeam(Armor &armor);
+  void ClassifyModel(Armor &armor);
+  void ClassifyTeam(Armor &armor);
 };

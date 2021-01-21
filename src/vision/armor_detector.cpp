@@ -16,7 +16,7 @@ void ArmorDetector::InitDefaultParams(std::string params_path) {
   cv::FileStorage fs(params_path,
                      cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
 
-  fs << "binary_th" << 230;
+  fs << "binary_th" << 220;
   fs << "erosion_size" << 5;
 
   fs << "contour_size_th" << 20;
@@ -26,20 +26,20 @@ void ArmorDetector::InitDefaultParams(std::string params_path) {
   fs << "bar_area_high_th" << 10000;
   fs << "angle_high_th" << 60;
   fs << "aspect_ratio_low_th" << 2;
-  fs << "aspect_ratio_high_th" << 5;
+  fs << "aspect_ratio_high_th" << 6;
 
-  fs << "angle_diff_th" << 0.5;
-  fs << "length_diff_th" << 0.5;
-  fs << "height_diff_th" << 0.5;
-  fs << "area_diff_th" << 0.5;
-  fs << "center_dist_low_th" << 1.5;
-  fs << "center_dist_high_th" << 5;
+  fs << "angle_diff_th" << 10;
+  fs << "length_diff_th" << 0.2;
+  fs << "height_diff_th" << 0.2;
+  fs << "area_diff_th" << 0.6;
+  fs << "center_dist_low_th" << 1;
+  fs << "center_dist_high_th" << 4;
   SPDLOG_DEBUG("Inited params.");
 }
 
 bool ArmorDetector::PrepareParams(std::string params_path) {
   cv::FileStorage fs(params_path,
-                     cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
+                     cv::FileStorage::READ | cv::FileStorage::FORMAT_JSON);
   if (fs.isOpened()) {
     params_.binary_th = fs["binary_th"];
     params_.erosion_size = fs["erosion_size"];
@@ -156,7 +156,7 @@ void ArmorDetector::MatchLightBars() {
       if (center_dist > l * params_.center_dist_high_th) continue;
 
       auto armor = Armor(*iti, *itj);
-      armor.SetModel(armor_classifier_.ClassifyModel(armor));
+      armor_classifier_.ClassifyModel(armor);
       armors_.emplace_back(armor);
       break;
     }

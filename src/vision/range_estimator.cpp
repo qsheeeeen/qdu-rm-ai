@@ -39,8 +39,8 @@ void RangeEstimator::LoadCameraMat(std::string path) {
 
 void RangeEstimator::PnpEstimate(Armor& armor) {
   cv::Mat rotation, translation;
-  if (armor.GetModel() == game::Model::kHERO ||
-      armor.GetModel() == game::Model::kINFANTRY) {
+  if (armor.Model() == game::Model::kHERO ||
+      armor.Model() == game::Model::kINFANTRY) {
     cv::solvePnP(kCOORD_BIG_ARMOR, armor.Vertices(), cam_mat_, distor_coff_,
                  rotation, translation, false, cv::SOLVEPNP_IPPE);
   } else {

@@ -11,10 +11,10 @@ void ArmorClassifier::LoadModel(std::string path) {}
 
 void ArmorClassifier::Train() {}
 
-game::Model ArmorClassifier::ClassifyModel(Armor &armor) {
-  return game::Model::kINFANTRY;
+void ArmorClassifier::ClassifyModel(Armor &armor) {
+  armor.Model() = game::Model::kINFANTRY;
 }
 
-game::Team ArmorClassifier::ClassifyTeam(Armor &armor) {
-  return game::Team::kBLUE;
+void ArmorClassifier::ClassifyTeam(Armor &armor) {
+  armor.Team() = game::Team::kBLUE;
 }
