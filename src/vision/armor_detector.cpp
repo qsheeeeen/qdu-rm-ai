@@ -157,6 +157,7 @@ void ArmorDetector::MatchLightBars() {
 
       auto armor = Armor(*iti, *itj);
       armor_classifier_.ClassifyModel(armor);
+      armor_classifier_.ClassifyTeam(armor);
       armors_.emplace_back(armor);
       break;
     }
