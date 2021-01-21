@@ -14,7 +14,7 @@ typedef struct {
   double holder;
 } CommandHolder;
 
-class Robot {
+class MCU {
  private:
   Serial serial_;
   bool continue_parse_ = false;
@@ -27,7 +27,7 @@ class Robot {
   void CommandThread();
 
  public:
-  Robot(const std::string &dev_path);
-  ~Robot();
+  MCU(const std::string &dev_path);
+  ~MCU();
   void Command();
 };

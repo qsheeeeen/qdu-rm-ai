@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "camera.hpp"
-#include "robot.hpp"
+#include "mcu.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
@@ -29,7 +29,7 @@ int main(int argc, char const* argv[]) {
 
   SPDLOG_WARN("***** Running Auto Aim. *****");
 
-  Robot bot("/dev/tty");
+  MCU mcu("/dev/tty");
 
   return EXIT_SUCCESS;
 }

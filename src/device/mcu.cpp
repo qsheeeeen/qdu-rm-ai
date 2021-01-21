@@ -1,8 +1,8 @@
-#include "robot.hpp"
+#include "mcu.hpp"
 
 #include "spdlog/spdlog.h"
 
-void Robot::ComThread() {
+void MCU::ComThread() {
   SPDLOG_DEBUG("[ComThread] Started.");
 
   while (continue_parse_) {
@@ -20,13 +20,13 @@ void Robot::ComThread() {
   SPDLOG_DEBUG("[ComThread] Stoped.");
 }
 
-void Robot::CommandThread() {
+void MCU::CommandThread() {
   SPDLOG_DEBUG("[CommandThread] Started.");
 
   SPDLOG_DEBUG("[CommandThread] Stoped.");
 }
 
-Robot::Robot(const std::string &dev_path) {
+MCU::MCU(const std::string &dev_path) {
   serial_.Open(dev_path);
   serial_.Config();
   if (!serial_.IsOpen()) {
@@ -34,12 +34,12 @@ Robot::Robot(const std::string &dev_path) {
   }
 
   continue_parse_ = true;
-  parse_thread_ = std::thread(&Robot::ComThread, this);
+  parse_thread_ = std::thread(&MCU::ComThread, this);
 
   SPDLOG_DEBUG("Constructed.");
 }
 
-Robot::~Robot() {
+MCU::~MCU() {
   serial_.Close();
 
   continue_parse_ = false;
