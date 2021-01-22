@@ -29,7 +29,7 @@ const std::vector<cv::Point3f> kCOORD_BIG_ARMOR{
 
 }  // namespace
 
-void RobotDetector::InitDefaultParams(std::string params_path) {
+void RobotDetector::InitDefaultParams(const std::string& params_path) {
   cv::FileStorage fs(params_path,
                      cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
 
@@ -41,7 +41,7 @@ void RobotDetector::InitDefaultParams(std::string params_path) {
   SPDLOG_DEBUG("Inited params.");
 }
 
-bool RobotDetector::PrepareParams(std::string path) {
+bool RobotDetector::PrepareParams(const std::string& path) {
   cv::FileStorage fs(path,
                      cv::FileStorage::READ | cv::FileStorage::FORMAT_JSON);
 
@@ -58,7 +58,7 @@ bool RobotDetector::PrepareParams(std::string path) {
   }
 }
 
-void RobotDetector::LoadCameraMat(std::string path) {
+void RobotDetector::LoadCameraMat(const std::string& path) {
   cv::FileStorage fs(path,
                      cv::FileStorage::READ | cv::FileStorage::FORMAT_JSON);
 
@@ -90,15 +90,15 @@ double RobotDetector::AxisAngle(cv::Vec3d &axis1, cv::Vec3d &axis2) {
 
 RobotDetector::RobotDetector() { SPDLOG_TRACE("Constructed."); }
 
-RobotDetector::RobotDetector(std::string params_path,
-                             std::string cam_param_path) {
+RobotDetector::RobotDetector(const std::string& params_path,
+                             const std::string& cam_param_path) {
   Init(params_path, cam_param_path);
   SPDLOG_TRACE("Constructed.");
 }
 
 RobotDetector::~RobotDetector() { SPDLOG_TRACE("Destructed."); }
 
-void RobotDetector::Init(std::string params_path, std::string cam_param_path) {
+void RobotDetector::Init(const std::string& params_path, const std::string& cam_param_path) {
   if (!PrepareParams(params_path)) {
     InitDefaultParams(params_path);
     PrepareParams(params_path);

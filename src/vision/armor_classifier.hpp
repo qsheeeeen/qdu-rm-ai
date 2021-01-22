@@ -14,8 +14,8 @@ class ArmorClassifier {
   ArmorClassifier();
   ~ArmorClassifier();
 
-  void StoreModel(std::string path);
-  void LoadModel(std::string path);
+  void StoreModel(const std::string& path);
+  void LoadModel(const std::string& path);
 
   void Train();
   void ClassifyModel(Armor &armor);

@@ -16,16 +16,16 @@ class RangeEstimator {
   std::vector<cv::Mat> rotations_;
   std::vector<cv::Mat> translations_;
 
-  void LoadCameraMat(std::string path);
+  void LoadCameraMat(const std::string& path);
   void PnpEstimate(Armor& armor);
   double PinHoleEstimate(std::vector<cv::Point2f> target);
 
  public:
   RangeEstimator();
-  RangeEstimator(std::string cam_model);
+  RangeEstimator(const std::string& cam_model);
   ~RangeEstimator();
 
-  void Init(std::string cam_model);
+  void Init(const std::string& cam_model);
   double Estimate(Armor& armor, double bullet_speed);
   void VisualizeResult(cv::Mat& output, bool add_lable = true);
 };

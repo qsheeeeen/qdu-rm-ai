@@ -75,7 +75,6 @@ void Camera::GrabThread(void) {
  */
 void Camera::Prepare() {
   int err = MV_OK;
-  std::string err_msg;
   SPDLOG_DEBUG("Prepare.");
 
   std::memset(&mv_dev_list_, 0, sizeof(MV_CC_DEVICE_INFO_LIST));
@@ -103,7 +102,6 @@ void Camera::Prepare() {
  *
  */
 Camera::Camera() {
-  SPDLOG_DEBUG("Constructing.");
   Prepare();
   SPDLOG_TRACE("Constructed.");
 }
@@ -117,7 +115,6 @@ Camera::Camera() {
  */
 Camera::Camera(unsigned int index, unsigned int height, unsigned int width)
     : frame_h_(height), frame_w_(width) {
-  SPDLOG_DEBUG("Constructing.");
   Prepare();
   Open(index);
   SPDLOG_TRACE("Constructed.");
@@ -128,7 +125,6 @@ Camera::Camera(unsigned int index, unsigned int height, unsigned int width)
  *
  */
 Camera::~Camera() {
-  SPDLOG_DEBUG("Destructing.");
   Close();
   SPDLOG_TRACE("Destructed.");
 }
@@ -154,7 +150,6 @@ void Camera::Setup(unsigned int height, unsigned int width) {
  */
 int Camera::Open(unsigned int index) {
   int err = MV_OK;
-  std::string err_msg;
 
   SPDLOG_DEBUG("Open index: {}.", index);
 
@@ -255,10 +250,6 @@ cv::Mat Camera::GetFrame() {
  */
 int Camera::Close() {
   int err = MV_OK;
-  std::string err_msg;
-
-  SPDLOG_DEBUG("Close.");
-
   err = MV_CC_StopGrabbing(camera_handle_);
   SPDLOG_ERROR("StopGrabbing fail! err:{0:x}.", err);
 

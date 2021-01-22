@@ -26,9 +26,9 @@ class RobotDetector {
 
   std::chrono::milliseconds duration_robots_;
 
-  void InitDefaultParams(std::string params_path);
-  bool PrepareParams(std::string path);
-  void LoadCameraMat(std::string path);
+  void InitDefaultParams(const std::string& params_path);
+  bool PrepareParams(const std::string& path);
+  void LoadCameraMat(const std::string& path);
 
   void Estimate3D(Armor &armor);
   double AxisAngle(cv::Vec3d &axis1, cv::Vec3d &axis2);
@@ -36,10 +36,10 @@ class RobotDetector {
 
  public:
   RobotDetector();
-  RobotDetector(std::string params_path, std::string cam_param_path);
+  RobotDetector(const std::string& params_path, const std::string& cam_param_path);
   ~RobotDetector();
 
-  void Init(std::string params_path, std::string cam_param_path);
+  void Init(const std::string& params_path, const std::string& cam_param_path);
 
   void Detect(std::vector<Armor> &armors);
   void VisualizeResult(cv::Mat &output, bool add_lable = true);

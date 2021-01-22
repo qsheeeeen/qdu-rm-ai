@@ -39,8 +39,8 @@ class ArmorDetector {
 
   std::chrono::milliseconds duration_bars_, duration_armors_;
 
-  void InitDefaultParams(std::string params_path);
-  bool PrepareParams(std::string params_path);
+  void InitDefaultParams(const std::string& params_path);
+  bool PrepareParams(const std::string& params_path);
 
   void FindLightBars(const cv::Mat &frame);
   void MatchLightBars();
@@ -50,10 +50,10 @@ class ArmorDetector {
 
  public:
   ArmorDetector();
-  ArmorDetector(std::string params_path, game::Team enemy_team);
+  ArmorDetector(const std::string& params_path, game::Team enemy_team);
   ~ArmorDetector();
 
-  void Init(std::string params_path, game::Team enemy_team);
+  void Init(const std::string& params_path, game::Team enemy_team);
 
   const std::vector<Armor> &Detect(cv::Mat &frame);
   void VisualizeResult(cv::Mat &output, bool draw_bars = false,

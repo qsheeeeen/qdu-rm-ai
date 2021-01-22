@@ -12,7 +12,7 @@ const auto kGREEN = cv::Scalar(0., 255., 0.);
 
 }  // namespace
 
-void ArmorDetector::InitDefaultParams(std::string params_path) {
+void ArmorDetector::InitDefaultParams(const std::string& params_path) {
   cv::FileStorage fs(params_path,
                      cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
 
@@ -37,7 +37,7 @@ void ArmorDetector::InitDefaultParams(std::string params_path) {
   SPDLOG_DEBUG("Inited params.");
 }
 
-bool ArmorDetector::PrepareParams(std::string params_path) {
+bool ArmorDetector::PrepareParams(const std::string& params_path) {
   cv::FileStorage fs(params_path,
                      cv::FileStorage::READ | cv::FileStorage::FORMAT_JSON);
   if (fs.isOpened()) {
@@ -208,14 +208,14 @@ void ArmorDetector::VisualizeArmor(cv::Mat &output, bool add_lable) {
 
 ArmorDetector::ArmorDetector() { SPDLOG_TRACE("Constructed."); }
 
-ArmorDetector::ArmorDetector(std::string params_path, game::Team enemy_team) {
+ArmorDetector::ArmorDetector(const std::string& params_path, game::Team enemy_team) {
   Init(params_path, enemy_team);
   SPDLOG_TRACE("Constructed.");
 }
 
 ArmorDetector::~ArmorDetector() { SPDLOG_TRACE("Destructed."); }
 
-void ArmorDetector::Init(std::string params_path, game::Team enemy_team) {
+void ArmorDetector::Init(const std::string& params_path, game::Team enemy_team) {
   if (!PrepareParams(params_path)) {
     InitDefaultParams(params_path);
     PrepareParams(params_path);

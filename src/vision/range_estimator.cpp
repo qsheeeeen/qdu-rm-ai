@@ -24,7 +24,7 @@ const std::vector<cv::Point3f> kCOORD_BIG_ARMOR{
 
 }  // namespace
 
-void RangeEstimator::LoadCameraMat(std::string path) {
+void RangeEstimator::LoadCameraMat(const std::string& path) {
   fs_.open(path, cv::FileStorage::READ | cv::FileStorage::FORMAT_JSON);
 
   if (fs_.isOpened()) {
@@ -55,14 +55,14 @@ double RangeEstimator::PinHoleEstimate(std::vector<cv::Point2f> target) {}
 
 RangeEstimator::RangeEstimator() { SPDLOG_TRACE("Constructed."); }
 
-RangeEstimator::RangeEstimator(std::string cam_model) {
+RangeEstimator::RangeEstimator(const std::string& cam_model) {
   Init(cam_model);
   SPDLOG_TRACE("Constructed.");
 }
 
 RangeEstimator::~RangeEstimator() { SPDLOG_TRACE("Destructed."); }
 
-void RangeEstimator::Init(std::string cam_model) { SPDLOG_DEBUG("Inited."); }
+void RangeEstimator::Init(const std::string& cam_model) { SPDLOG_DEBUG("Inited."); }
 
 double RangeEstimator::Estimate(Armor& armor, double bullet_speed) {}
 
