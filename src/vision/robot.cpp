@@ -27,10 +27,16 @@ void Robot::Init(std::vector<Armor> armors) {
   SPDLOG_DEBUG("Inited.");
 }
 
-game::Team Robot::Team() { return armors_.front().Team(); }
-game::Model Robot::Model() { return armors_.front().Model(); }
+game::Team Robot::Team() { return armors_.front().GetTeam(); }
+game::Model Robot::Model() { return armors_.front().GetModel(); }
 cv::Point3f Robot::Center() {}
-std::vector<cv::Point2f> Robot::Vertices() {}
+
+std::vector<cv::Point3f> Robot::Vertices() {
+  cv::Mat point_mat = cv::Mat(armors_.front().Vertices3D()).reshape(1).t();
+  cv::Point3f word(cv::Mat(point_mat * armors_.front().GetRotMat() +
+                           armors_.front().GetTransVec()));
+}
+
 cv::Mat Robot::Rotation() {}
 cv::Vec3d Robot::RotationAxis() {}
 cv::Mat Robot::Translation() {}

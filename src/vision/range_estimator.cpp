@@ -39,12 +39,12 @@ void RangeEstimator::LoadCameraMat(const std::string& path) {
 
 void RangeEstimator::PnpEstimate(Armor& armor) {
   cv::Mat rotation, translation;
-  if (armor.Model() == game::Model::kHERO ||
-      armor.Model() == game::Model::kINFANTRY) {
-    cv::solvePnP(kCOORD_BIG_ARMOR, armor.Vertices(), cam_mat_, distor_coff_,
+  if (armor.GetModel() == game::Model::kHERO ||
+      armor.GetModel() == game::Model::kINFANTRY) {
+    cv::solvePnP(kCOORD_BIG_ARMOR, armor.Vertices2D(), cam_mat_, distor_coff_,
                  rotation, translation, false, cv::SOLVEPNP_IPPE);
   } else {
-    cv::solvePnP(kCOORD_SMALL_ARMOR, armor.Vertices(), cam_mat_, distor_coff_,
+    cv::solvePnP(kCOORD_SMALL_ARMOR, armor.Vertices2D(), cam_mat_, distor_coff_,
                  rotation, translation, false, cv::SOLVEPNP_IPPE);
   }
   rotations_.push_back(rotation);
@@ -67,8 +67,8 @@ void RangeEstimator::Init(const std::string& cam_model) { SPDLOG_DEBUG("Inited."
 double RangeEstimator::Estimate(Armor& armor, double bullet_speed) {}
 
 void RangeEstimator::VisualizeResult(cv::Mat& output, bool add_lable) {
-  std::vector<cv::Point3d> nose_end_point3D{cv::Point3d(0., 0., 500.0)};
-  std::vector<cv::Point2d> nose_end_point2D;
+  std::vector<cv::Point3f> nose_end_point3D{cv::Point3f(0., 0., 500.0)};
+  std::vector<cv::Point2f> nose_end_point2D;
 
   // for (const auto& rotation : rotations_) {
   //   cv::projectPoints(nose_end_point3D, rotation, translation, cam_mat_,

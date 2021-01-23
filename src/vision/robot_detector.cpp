@@ -10,23 +10,6 @@ namespace {
 const auto kCV_FONT = cv::FONT_HERSHEY_SIMPLEX;
 const auto kGREEN = cv::Scalar(0., 255., 0.);
 
-const double kSMALL_ARMOR_WIDTH = 135.;
-const double KBIG_ARMOR_WIDTH = 230.;
-const double kARMOR_HEIGHT = 120.74072829;
-const double kARMOR_DEPTH = 32.35238064;
-
-const std::vector<cv::Point3f> kCOORD_SMALL_ARMOR{
-    cv::Point3f(-kSMALL_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, kARMOR_DEPTH),
-    cv::Point3f(kSMALL_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, 0.),
-    cv::Point3f(kSMALL_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, 0.),
-    cv::Point3f(-kSMALL_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH)};
-
-const std::vector<cv::Point3f> kCOORD_BIG_ARMOR{
-    cv::Point3f(-KBIG_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, kARMOR_DEPTH),
-    cv::Point3f(KBIG_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, 0.),
-    cv::Point3f(KBIG_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, 0.),
-    cv::Point3f(-KBIG_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH)};
-
 }  // namespace
 
 void RobotDetector::InitDefaultParams(const std::string& params_path) {
@@ -71,20 +54,14 @@ void RobotDetector::LoadCameraMat(const std::string& path) {
   }
 }
 
-void RobotDetector::Estimate3D(Armor &armor) {
-  if (armor.Model() == game::Model::kHERO ||
-      armor.Model() == game::Model::kINFANTRY) {
-    cv::solvePnP(kCOORD_BIG_ARMOR, armor.Vertices(), cam_mat_, distor_coff_,
-                 armor.Rotation(), armor.Translation(), false,
-                 cv::SOLVEPNP_IPPE);
-  } else {
-    cv::solvePnP(kCOORD_SMALL_ARMOR, armor.Vertices(), cam_mat_, distor_coff_,
-                 armor.Rotation(), armor.Translation(), false,
-                 cv::SOLVEPNP_IPPE);
-  }
+void RobotDetector::Estimate3D(Armor& armor) {
+  cv::Mat rot_vec, trans_vec;
+  cv::solvePnP(armor.Vertices3D(), armor.Vertices2D(), cam_mat_, distor_coff_,
+               rot_vec, trans_vec, false, cv::SOLVEPNP_IPPE);
+  armor.SetRotVec(rot_vec), armor.SetTransVec(trans_vec);
 }
 
-double RobotDetector::AxisAngle(cv::Vec3d &axis1, cv::Vec3d &axis2) {
+double RobotDetector::AxisAngle(cv::Vec3d& axis1, cv::Vec3d& axis2) {
   return std::acos(axis1.dot(axis2) / (cv::norm(axis1) * cv::norm(axis2)));
 }
 
@@ -98,7 +75,8 @@ RobotDetector::RobotDetector(const std::string& params_path,
 
 RobotDetector::~RobotDetector() { SPDLOG_TRACE("Destructed."); }
 
-void RobotDetector::Init(const std::string& params_path, const std::string& cam_param_path) {
+void RobotDetector::Init(const std::string& params_path,
+                         const std::string& cam_param_path) {
   if (!PrepareParams(params_path)) {
     InitDefaultParams(params_path);
     PrepareParams(params_path);
@@ -108,19 +86,20 @@ void RobotDetector::Init(const std::string& params_path, const std::string& cam_
   SPDLOG_DEBUG("Inited.");
 }
 
-void RobotDetector::Detect(std::vector<Armor> &armors) {
+void RobotDetector::Detect(std::vector<Armor>& armors) {
   SPDLOG_DEBUG("Detecting");
   const auto start = std::chrono::high_resolution_clock::now();
   for (auto iti = armors.begin(); iti != armors.end(); ++iti) {
     bool found_match = false;
     Estimate3D(*iti);
     for (auto itj = iti + 1; itj != armors.end(); ++itj) {
-      if (iti->Model() != itj->Model()) continue;
+      if (iti->GetModel() != itj->GetModel()) continue;
 
-      const double height_diff = std::abs(iti->Center().y - itj->Center().y);
+      const double height_diff =
+          std::abs(iti->Center2D().y - itj->Center2D().y);
       if (height_diff > (params_.height_diff_th * frame_size_.height)) continue;
 
-      const double center_dist = cv::norm(iti->Center() - itj->Center());
+      const double center_dist = cv::norm(iti->Center2D() - itj->Center2D());
       if (center_dist < params_.center_dist_low_th) continue;
       if (center_dist > params_.center_dist_high_th) continue;
 
@@ -145,11 +124,11 @@ void RobotDetector::Detect(std::vector<Armor> &armors) {
   SPDLOG_DEBUG("Detected.");
 }
 
-void RobotDetector::VisualizeResult(cv::Mat &output, bool add_lable) {
-  std::vector<cv::Point2d> robot_2d;
+void RobotDetector::VisualizeResult(cv::Mat& output, bool add_lable) {
+  std::vector<cv::Point2f> robot_2d;
 
   if (!robots_.empty()) {
-    for (auto &robot : robots_) {
+    for (auto& robot : robots_) {
       cv::projectPoints(robot.Vertices(), robot.Rotation(), robot.Translation(),
                         cam_mat_, distor_coff_, robot_2d);
 

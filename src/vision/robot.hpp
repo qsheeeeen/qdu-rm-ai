@@ -22,7 +22,7 @@ class Robot {
   game::Team Team();
   game::Model Model();
   cv::Point3f Center();
-  std::vector<cv::Point2f> Vertices();
+  std::vector<cv::Point3f> Vertices();
   cv::Mat Rotation();
   cv::Vec3d RotationAxis();
   cv::Mat Translation();

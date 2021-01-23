@@ -16,12 +16,12 @@ const game::Model model = game::Model::kHERO;
 TEST(TestVision, TestArmor) {
   Armor armor(left_bar, right_bar);
 
-  ASSERT_FLOAT_EQ(armor.Center().x, 2.);
-  ASSERT_FLOAT_EQ(armor.Center().y, 2.);
-  ASSERT_FLOAT_EQ(armor.Angle(), 6.);
+  ASSERT_FLOAT_EQ(armor.Center2D().x, 2.);
+  ASSERT_FLOAT_EQ(armor.Center2D().y, 2.);
+  ASSERT_FLOAT_EQ(armor.Angle2D(), 6.);
 
-  ASSERT_EQ(armor.Model(), game::Model::kUNKNOWN);
+  ASSERT_EQ(armor.GetModel(), game::Model::kUNKNOWN);
 
-  armor.Model() = model;
-  ASSERT_EQ(armor.Model(), model);
+  armor.SetModel(model);
+  ASSERT_EQ(armor.GetModel(), model);
 }
