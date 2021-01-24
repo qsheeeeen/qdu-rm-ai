@@ -4,25 +4,21 @@
 #include <queue>
 #include <thread>
 
+#include "crc16.h"
+#include "protocol.h"
 #include "serial.hpp"
-
-typedef struct {
-  double holder;
-} RecvHolder;
-
-typedef struct {
-  double holder;
-} CommandHolder;
 
 class MCU {
  private:
   Serial serial_;
   bool continue_parse_ = false;
   std::thread parse_thread_;
-  std::queue<CommandHolder> commandq_;
+  std::queue<Protocol_AI_t> commandq_;
   std::mutex commandq_mutex_;
 
-  RecvHolder status_;
+  Protocol_Referee_t status_refe_;
+  Protocol_MCU_t status_mcu_;
+
   void ComThread();
   void CommandThread();
 
