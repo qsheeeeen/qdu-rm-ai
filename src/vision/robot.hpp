@@ -19,11 +19,12 @@ class Robot {
   void Init(Armor armor);
   void Init(std::vector<Armor> armors);
 
-  game::Team Team();
-  game::Model Model();
-  cv::Point3f Center();
-  std::vector<cv::Point3f> Vertices();
-  cv::Mat Rotation();
+  game::Team GetTeam();
+  game::Model GetModel();
+
+  cv::Point3f Center3D();
+  std::vector<cv::Point3f> Vertices3D();
+  cv::Mat GetRotMat();
   cv::Vec3d RotationAxis();
   cv::Mat Translation();
 };

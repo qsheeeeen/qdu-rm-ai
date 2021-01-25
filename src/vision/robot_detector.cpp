@@ -129,7 +129,7 @@ void RobotDetector::VisualizeResult(cv::Mat& output, bool add_lable) {
 
   if (!robots_.empty()) {
     for (auto& robot : robots_) {
-      cv::projectPoints(robot.Vertices(), robot.Rotation(), robot.Translation(),
+      cv::projectPoints(robot.Vertices3D(), robot.GetRotMat(), robot.Translation(),
                         cam_mat_, distor_coff_, robot_2d);
 
       auto size = robot_2d.size();
@@ -137,11 +137,10 @@ void RobotDetector::VisualizeResult(cv::Mat& output, bool add_lable) {
         for (size_t j = i + 1; j < size; ++j)
           cv::line(output, robot_2d[i], robot_2d[j], kGREEN);
       }
-
       if (add_lable) {
         std::ostringstream buf;
-        buf << game::TeamToString(robot.Team()) << ", "
-            << game::ModelToString(robot.Model());
+        buf << game::TeamToString(robot.GetTeam()) << ", "
+            << game::ModelToString(robot.GetModel());
         cv::putText(output, buf.str(), robot_2d[0], kCV_FONT, 1.0, kGREEN);
       }
     }

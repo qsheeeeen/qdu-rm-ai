@@ -11,24 +11,19 @@ const double kARMOR_HEIGHT = 125. * std::sin(75. / 180. * M_PI);
 const double kARMOR_DEPTH = 125. * std::cos(75. / 180. * M_PI);
 const double kHIT_DEPTH = 125. / 2. * std::cos(75. / 180. * M_PI);
 
-/* clang-format off */
+const std::vector<cv::Point3f> kCOORD_SMALL_ARMOR{
+    cv::Point3f(-kSMALL_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, kARMOR_DEPTH),
+    cv::Point3f(kSMALL_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, 0.),
+    cv::Point3f(kSMALL_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, 0.),
+    cv::Point3f(-kSMALL_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH)};
 
-/* 这里是一列一个point， */
-const cv::Matx43d kCOORD_SMALL_ARMOR(
-    -kSMALL_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, kARMOR_DEPTH,
-    kSMALL_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, 0.,
-    kSMALL_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, 0.,
-    -kSMALL_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH);
+const std::vector<cv::Point3f> kCOORD_BIG_ARMOR{
+    cv::Point3f(-KBIG_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, kARMOR_DEPTH),
+    cv::Point3f(KBIG_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, 0.),
+    cv::Point3f(KBIG_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, 0.),
+    cv::Point3f(-KBIG_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH)};
 
-const cv::Matx43d kCOORD_BIG_ARMOR(
-    -KBIG_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, kARMOR_DEPTH,
-    KBIG_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, 0.,
-    KBIG_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, 0.,
-    -KBIG_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH);
-
-const cv ::Matx13d kHIT_TARGET(0., 0., kHIT_DEPTH);
-
-/* clang-format on */
+const cv ::Point3f kHIT_TARGET(0., 0., kHIT_DEPTH);
 
 }  // namespace
 
@@ -137,12 +132,12 @@ cv::Vec3d Armor::RotationAxis() {
 }
 
 const std::vector<cv::Point3f> &Armor::Vertices3D() {
-  // if (GetModel() == game::Model::kHERO ||
-  //     GetModel() == game::Model::kINFANTRY) {
-  //   return kCOORD_BIG_ARMOR.t() * rot_vec + trans_vec;
-  // } else {
-  //   return kCOORD_SMALL_ARMOR.t() * rot_vec + trans_vec;
-  // }
+  if (GetModel() == game::Model::kHERO ||
+      GetModel() == game::Model::kINFANTRY) {
+    return kCOORD_BIG_ARMOR;
+  } else {
+    return kCOORD_SMALL_ARMOR;
+  }
 }
 
 cv::Point3f Armor::HitTarget() {
