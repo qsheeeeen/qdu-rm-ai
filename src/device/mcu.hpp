@@ -4,7 +4,7 @@
 #include <queue>
 #include <thread>
 
-#include "crc16.h"
+#include "crc16.hpp"
 #include "protocol.h"
 #include "serial.hpp"
 
