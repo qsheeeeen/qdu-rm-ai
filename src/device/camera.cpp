@@ -40,7 +40,7 @@ static void PrintDeviceInfo(MV_CC_DEVICE_INFO *mv_dev_info) {
 void Camera::GrabThread(void) {
   SPDLOG_DEBUG("[GrabThread] Started.");
   int err = MV_OK;
-  memset(&raw_frame, 0, sizeof(MV_FRAME_OUT));
+  std::memset(&raw_frame, 0, sizeof(MV_FRAME_OUT));
   while (grabing) {
     err = MV_CC_GetImageBuffer(camera_handle_, &raw_frame, 1000);
     if (err == MV_OK) {
