@@ -148,7 +148,7 @@ bool Serial::Config(bool parity, StopBits stop_bit, DataLength data_length,
  * @param len 缓冲区长度
  * @return ssize_t 已发送的长度
  */
-ssize_t Serial::Trans(const void* buff, size_t len) {
+ssize_t Serial::Trans(const void* buff, std::size_t len) {
   return write(dev_, buff, len);
 }
 
@@ -159,7 +159,7 @@ ssize_t Serial::Trans(const void* buff, size_t len) {
  * @param len 缓冲区长度
  * @return ssize_t 已发送的长度
  */
-ssize_t Serial::Recv(void* buff, size_t len) { return read(dev_, buff, len); }
+ssize_t Serial::Recv(void* buff, std::size_t len) { return read(dev_, buff, len); }
 
 /**
  * @brief 关闭

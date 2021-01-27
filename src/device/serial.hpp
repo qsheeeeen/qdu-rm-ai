@@ -84,7 +84,7 @@ class Serial {
    * @param len 缓冲区长度
    * @return ssize_t 已发送的长度
    */
-  ssize_t Trans(const void* buff, size_t len);
+  ssize_t Trans(const void* buff, std::size_t len);
 
   /**
    * @brief 接收
@@ -93,7 +93,7 @@ class Serial {
    * @param len 缓冲区长度
    * @return ssize_t 已发送的长度
    */
-  ssize_t Recv(void* buff, size_t len);
+  ssize_t Recv(void* buff, std::size_t len);
 
   /**
    * @brief 关闭

@@ -174,7 +174,7 @@ void ArmorDetector::VisualizeLightBar(cv::Mat &output, bool add_lable) {
   if (!lightbars_.empty()) {
     for (auto &bar : lightbars_) {
       auto vertices = bar.Vertices();
-      for (size_t i = 0; i < vertices.size(); ++i)
+      for (std::size_t i = 0; i < vertices.size(); ++i)
         cv::line(output, vertices[i], vertices[(i + 1) % 4], kGREEN);
 
       cv::drawMarker(output, bar.Center(), kGREEN, cv::MARKER_CROSS);
@@ -192,7 +192,7 @@ void ArmorDetector::VisualizeArmor(cv::Mat &output, bool add_lable) {
   if (!armors_.empty()) {
     for (auto &armor : armors_) {
       auto vertices = armor.Vertices2D();
-      for (size_t i = 0; i < vertices.size(); ++i)
+      for (std::size_t i = 0; i < vertices.size(); ++i)
         cv::line(output, vertices[i], vertices[(i + 1) % 4], kGREEN);
 
       cv::drawMarker(output, armor.Center2D(), kGREEN, cv::MARKER_DIAMOND);

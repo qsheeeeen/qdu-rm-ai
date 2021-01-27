@@ -23,5 +23,5 @@ TEST(TestVision, TestLightBar) {
   cv::Point2f p2[4];
   test_rect.points(p2);
   ASSERT_EQ(p1.size(), 4);
-  for (size_t i = 0; i < p1.size(); ++i) ASSERT_EQ(p1[i], p2[i]);
+  for (std::size_t i = 0; i < p1.size(); ++i) ASSERT_EQ(p1[i], p2[i]);
 }

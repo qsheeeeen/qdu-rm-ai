@@ -133,8 +133,8 @@ void RobotDetector::VisualizeResult(cv::Mat& output, bool add_lable) {
                         cam_mat_, distor_coff_, robot_2d);
 
       auto size = robot_2d.size();
-      for (size_t i = 0; i < size; ++i) {
-        for (size_t j = i + 1; j < size; ++j)
+      for (std::size_t i = 0; i < size; ++i) {
+        for (std::size_t j = i + 1; j < size; ++j)
           cv::line(output, robot_2d[i], robot_2d[j], kGREEN);
       }
       if (add_lable) {

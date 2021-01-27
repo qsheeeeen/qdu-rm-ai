@@ -11,7 +11,7 @@
 struct ArmorDetectorParam {
   double binary_th;
   int erosion_size;
-  size_t contour_size_th;
+  std::size_t contour_size_th;
   double contour_area_low_th;
   double contour_area_high_th;
   double bar_area_low_th;
