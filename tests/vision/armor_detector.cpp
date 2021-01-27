@@ -13,18 +13,18 @@ TEST(TestVision, TestArmorDetector) {
   std::vector<Armor> armors = armor_detector.Detect(img);
   EXPECT_EQ(armors.size(), 6) << "Can not detect armor in original image.";
 
+  cv::Mat result = img.clone();
+  armor_detector.VisualizeResult(result, true, true, true);
+  cv::imwrite("../../../image/test_origin.jpg", result);
+
   cv::resize(img, img, cv::Size(640, 426));
 
   armors = armor_detector.Detect(img);
   EXPECT_EQ(armors.size(), 6) << "Can not detect armor in small image.";
 
-  cv::Mat result = img.clone();
-  armor_detector.VisualizeResult(result, true, false, true);
-  cv::imwrite("../../../image/test_bars.jpg", result);
-
   result = img.clone();
-  armor_detector.VisualizeResult(result, false, true, false);
-  cv::imwrite("../../../image/test_armor.jpg", result);
+  armor_detector.VisualizeResult(result, true, true, false);
+  cv::imwrite("../../../image/test_resized.jpg", result);
 
   SUCCEED();
 }
