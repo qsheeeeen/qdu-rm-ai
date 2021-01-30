@@ -135,7 +135,7 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
   SPDLOG_DEBUG("duration_bars_: {} ms", duration_bars_.count());
 }
 
-void ArmorDetector::MatchLightBars() {
+void ArmorDetector::MatchLightBars(const cv::Mat &frame) {
   const auto start = std::chrono::high_resolution_clock::now();
   for (auto iti = lightbars_.begin(); iti != lightbars_.end(); ++iti) {
     for (auto itj = iti + 1; itj != lightbars_.end(); ++itj) {
@@ -159,8 +159,8 @@ void ArmorDetector::MatchLightBars() {
       if (center_dist > l * params_.center_dist_high_th) continue;
 
       auto armor = Armor(*iti, *itj);
-      armor_classifier_.ClassifyModel(armor);
-      armor_classifier_.ClassifyTeam(armor);
+      armor_classifier_.ClassifyModel(armor, frame);
+      armor_classifier_.ClassifyTeam(armor, frame);
       armors_.emplace_back(armor);
       break;
     }
@@ -233,7 +233,7 @@ void ArmorDetector::Init(const std::string &params_path,
 const std::vector<Armor> &ArmorDetector::Detect(cv::Mat &frame) {
   SPDLOG_DEBUG("Detecting");
   FindLightBars(frame);
-  MatchLightBars();
+  MatchLightBars(frame);
   SPDLOG_DEBUG("Detected.");
   return armors_;
 }

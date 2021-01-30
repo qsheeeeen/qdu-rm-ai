@@ -14,10 +14,10 @@ class ArmorClassifier {
   ArmorClassifier();
   ~ArmorClassifier();
 
-  void StoreModel(const std::string& path);
-  void LoadModel(const std::string& path);
+  void StoreModel(const std::string &path);
+  void LoadModel(const std::string &path);
 
   void Train();
-  void ClassifyModel(Armor &armor);
-  void ClassifyTeam(Armor &armor);
+  void ClassifyModel(Armor &armor, const cv::Mat &frame);
+  void ClassifyTeam(Armor &armor, const cv::Mat &frame);
 };

@@ -5,11 +5,15 @@
 
 namespace {
 
-const double kSMALL_ARMOR_WIDTH = 135.;
-const double KBIG_ARMOR_WIDTH = 230.;
-const double kARMOR_HEIGHT = 125. * std::sin(75. / 180. * M_PI);
-const double kARMOR_DEPTH = 125. * std::cos(75. / 180. * M_PI);
-const double kHIT_DEPTH = 125. / 2. * std::cos(75. / 180. * M_PI);
+const double kARMOR_WIDTH = 125.;
+const double kSMALL_ARMOR_LENGTH = 135.;
+const double KBIG_ARMOR_LENGTH = 230.;
+const double kARMOR_HEIGHT = kARMOR_WIDTH * std::sin(75. / 180. * M_PI);
+const double kARMOR_DEPTH = kARMOR_WIDTH * std::cos(75. / 180. * M_PI);
+const double kHIT_DEPTH = kARMOR_WIDTH / 2. * std::cos(75. / 180. * M_PI);
+
+const cv::Rect kSMALL_ARMOR_FACE(0, 0, kSMALL_ARMOR_LENGTH, kARMOR_WIDTH);
+const cv::Rect kBIG_ARMOR_FACE(0, 0, KBIG_ARMOR_LENGTH, kARMOR_WIDTH);
 
 const cv::Matx43d kCOORD_SMALL_ARMOR(
     -kSMALL_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, kARMOR_DEPTH,
@@ -87,17 +91,20 @@ double Armor::Angle2D() {
 }
 
 cv::Mat Armor::Face2D(const cv::Mat &frame) {
-  cv::Point2f src_vertices[4];
-  rect_.points(src_vertices);
+  cv::Rect dst_rect;
+  if (game::HasBigArmor(GetModel())) {
+    dst_rect = kBIG_ARMOR_FACE;
+  } else {
+    dst_rect = kSMALL_ARMOR_FACE;
+  }
 
-  cv::Point2f dst_vertices[4];
-  cv::Rect dst_rect(0, 0, 100, 100);  // TODO
-  dst_vertices[0] = dst_rect.tl() + cv::Point(0, dst_rect.height);
-  dst_vertices[1] = dst_rect.tl();
-  dst_vertices[2] = dst_rect.br() - cv::Point(0, dst_rect.height);
-  dst_vertices[3] = dst_rect.br();
-
-  cv::Mat trans_mat = cv::getPerspectiveTransform(src_vertices, dst_vertices);
+  std::vector<cv::Point2f> dst_vertices{
+      dst_rect.tl() + cv::Point(0, dst_rect.height),
+      dst_rect.tl(),
+      dst_rect.br() - cv::Point(0, dst_rect.height),
+      dst_rect.br(),
+  };
+  cv::Mat trans_mat = cv::getPerspectiveTransform(Vertices2D(), dst_vertices);
 
   cv::Mat perspective;
   cv::warpPerspective(frame, perspective, trans_mat, dst_rect.size());
@@ -132,8 +139,7 @@ cv::Vec3d Armor::RotationAxis() {
 }
 
 const cv::Mat Armor::Vertices3D() {
-  if (GetModel() == game::Model::kHERO ||
-      GetModel() == game::Model::kINFANTRY) {
+  if (game::HasBigArmor(GetModel())) {
     return cv::Mat(kCOORD_BIG_ARMOR);
   } else {
     return cv::Mat(kCOORD_SMALL_ARMOR);
@@ -147,6 +153,5 @@ cv::Point3f Armor::HitTarget() {
 }
 
 const cv::Point3f Armor::WorldCoord() {
-  // world_coord_ =  
-
+  // world_coord_ =
 }

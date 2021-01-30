@@ -24,4 +24,6 @@ enum class Model {
 std::string TeamToString(Team team);
 std::string ModelToString(Model model);
 
+bool HasBigArmor(Model model);
+
 }  // namespace game
