@@ -12,14 +12,14 @@ const auto kGREEN = cv::Scalar(0., 255., 0.);
 
 }  // namespace
 
-void ArmorDetector::InitDefaultParams(const std::string& params_path) {
+void ArmorDetector::InitDefaultParams(const std::string &params_path) {
   cv::FileStorage fs(params_path,
                      cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
 
   fs << "binary_th" << 220;
   fs << "erosion_size" << 5;
 
-  fs << "contour_size_th" << 20;
+  fs << "contour_size_low_th" << 20;
   fs << "contour_area_low_th" << 100;
   fs << "contour_area_high_th" << 10000;
   fs << "bar_area_low_th" << 100;
@@ -37,14 +37,14 @@ void ArmorDetector::InitDefaultParams(const std::string& params_path) {
   SPDLOG_DEBUG("Inited params.");
 }
 
-bool ArmorDetector::PrepareParams(const std::string& params_path) {
+bool ArmorDetector::PrepareParams(const std::string &params_path) {
   cv::FileStorage fs(params_path,
                      cv::FileStorage::READ | cv::FileStorage::FORMAT_JSON);
   if (fs.isOpened()) {
     params_.binary_th = fs["binary_th"];
     params_.erosion_size = fs["erosion_size"];
 
-    params_.contour_size_th = int(fs["contour_size_th"]);
+    params_.contour_size_low_th = int(fs["contour_size_low_th"]);
     params_.contour_area_low_th = fs["contour_area_low_th"];
     params_.contour_area_high_th = fs["contour_area_high_th"];
     params_.bar_area_low_th = fs["bar_area_low_th"];
@@ -61,7 +61,7 @@ bool ArmorDetector::PrepareParams(const std::string& params_path) {
     params_.center_dist_high_th = fs["center_dist_high_th"];
     return true;
   } else {
-    SPDLOG_ERROR("Can not inited params.");
+    SPDLOG_ERROR("Can not load params.");
     return false;
   }
 }
@@ -76,12 +76,15 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
   cv::Mat channels[3];
   cv::split(frame, channels);
 
+#if 1
   cv::Mat result = channels[0];
-  // if (enemy_team_ == game::Team::kBLUE) {
-  //   result = channels[0] - channels[2];
-  // } else if (enemy_team_ == game::Team::kRED) {
-  //   result = channels[2] - channels[0];
-  // }
+#else
+  if (enemy_team_ == game::Team::kBLUE) {
+    result = channels[0] - channels[2];
+  } else if (enemy_team_ == game::Team::kRED) {
+    result = channels[2] - channels[0];
+  }
+#endif
 
   // TODO: sharpen blur add contrast.
 
@@ -89,7 +92,7 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
 
   const int erosion_size = params_.erosion_size;
   cv::Mat kernel = cv::getStructuringElement(
-      cv::MORPH_RECT, cv::Size(2 * erosion_size + 1, 2 * erosion_size + 1));
+      cv::MORPH_ELLIPSE, cv::Size(2 * erosion_size + 1, 2 * erosion_size + 1));
   cv::morphologyEx(result, result, cv::MORPH_OPEN, kernel);
 
   std::vector<std::vector<cv::Point> > contours;
@@ -97,7 +100,7 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
   SPDLOG_DEBUG("Found contours: {}", contours.size());
 
   for (const auto &contour : contours) {
-    if (contour.size() < params_.contour_size_th) continue;
+    if (contour.size() < params_.contour_size_low_th) continue;
 
     const double c_area = cv::contourArea(contour);
     if (c_area < params_.contour_area_low_th) continue;
@@ -105,7 +108,7 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
 
     auto potential_bar = LightBar(cv::minAreaRect(contour));
 
-    if (std::abs(potential_bar.Angle()) > double(params_.angle_high_th))
+    if (std::abs(potential_bar.Angle()) > params_.angle_high_th)
       continue;
 
     const double b_area = potential_bar.Area();
@@ -208,14 +211,16 @@ void ArmorDetector::VisualizeArmor(cv::Mat &output, bool add_lable) {
 
 ArmorDetector::ArmorDetector() { SPDLOG_TRACE("Constructed."); }
 
-ArmorDetector::ArmorDetector(const std::string& params_path, game::Team enemy_team) {
+ArmorDetector::ArmorDetector(const std::string &params_path,
+                             game::Team enemy_team) {
   Init(params_path, enemy_team);
   SPDLOG_TRACE("Constructed.");
 }
 
 ArmorDetector::~ArmorDetector() { SPDLOG_TRACE("Destructed."); }
 
-void ArmorDetector::Init(const std::string& params_path, game::Team enemy_team) {
+void ArmorDetector::Init(const std::string &params_path,
+                         game::Team enemy_team) {
   if (!PrepareParams(params_path)) {
     InitDefaultParams(params_path);
     PrepareParams(params_path);
