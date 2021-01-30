@@ -11,17 +11,17 @@ const double kARMOR_HEIGHT = 125. * std::sin(75. / 180. * M_PI);
 const double kARMOR_DEPTH = 125. * std::cos(75. / 180. * M_PI);
 const double kHIT_DEPTH = 125. / 2. * std::cos(75. / 180. * M_PI);
 
-const std::vector<cv::Point3f> kCOORD_SMALL_ARMOR{
-    cv::Point3f(-kSMALL_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, kARMOR_DEPTH),
-    cv::Point3f(kSMALL_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, 0.),
-    cv::Point3f(kSMALL_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, 0.),
-    cv::Point3f(-kSMALL_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH)};
+const cv::Matx43d kCOORD_SMALL_ARMOR(
+    -kSMALL_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, kARMOR_DEPTH,
+    kSMALL_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, 0.,
+    kSMALL_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, 0.,
+    -kSMALL_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH);
 
-const std::vector<cv::Point3f> kCOORD_BIG_ARMOR{
-    cv::Point3f(-KBIG_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, kARMOR_DEPTH),
-    cv::Point3f(KBIG_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, 0.),
-    cv::Point3f(KBIG_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, 0.),
-    cv::Point3f(-KBIG_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH)};
+const cv::Matx43d kCOORD_BIG_ARMOR(
+    -KBIG_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, kARMOR_DEPTH,
+    KBIG_ARMOR_WIDTH / 2., -kARMOR_HEIGHT / 2, 0.,
+    KBIG_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, 0.,
+    -KBIG_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH);
 
 const cv ::Point3f kHIT_TARGET(0., 0., kHIT_DEPTH);
 
@@ -86,7 +86,7 @@ double Armor::Angle2D() {
   return rect_.angle;
 }
 
-cv::Mat Armor::Face(const cv::Mat &frame) {
+cv::Mat Armor::Face2D(const cv::Mat &frame) {
   cv::Point2f src_vertices[4];
   rect_.points(src_vertices);
 
@@ -131,17 +131,22 @@ cv::Vec3d Armor::RotationAxis() {
   return axis;
 }
 
-const std::vector<cv::Point3f> &Armor::Vertices3D() {
+const cv::Mat Armor::Vertices3D() {
   if (GetModel() == game::Model::kHERO ||
       GetModel() == game::Model::kINFANTRY) {
-    return kCOORD_BIG_ARMOR;
+    return cv::Mat(kCOORD_BIG_ARMOR);
   } else {
-    return kCOORD_SMALL_ARMOR;
+    return cv::Mat(kCOORD_SMALL_ARMOR);
   }
 }
 
 cv::Point3f Armor::HitTarget() {
   auto point_mat = cv::Mat(kHIT_TARGET).reshape(1).t();
-  cv::Point3f target(cv::Mat(point_mat * rot_vec_ + trans_vec_));
+  cv::Point3f target(cv::Mat(point_mat * rot_mat_ + trans_vec_));
   return target;
+}
+
+const cv::Point3f Armor::WorldCoord() {
+  // world_coord_ =  
+
 }

@@ -13,6 +13,7 @@ class Armor {
   game::Team team_ = game::Team::kUNKNOWN;
   game::Model model_ = game::Model::kUNKNOWN;
   cv::Mat face_, rot_vec_, rot_mat_, trans_vec_;
+  cv::Point3f world_coord_;
 
   void FormRect();
 
@@ -32,7 +33,7 @@ class Armor {
   const cv::Point2f &Center2D();
   std::vector<cv::Point2f> Vertices2D();
   double Angle2D();
-  cv::Mat Face(const cv::Mat &frame);
+  cv::Mat Face2D(const cv::Mat &frame);
 
   const cv::Mat &GetRotVec();
   void SetRotVec(const cv::Mat &rot_vec);
@@ -44,6 +45,7 @@ class Armor {
   void SetTransVec(const cv::Mat &trans_vec);
 
   cv::Vec3d RotationAxis();
-  const std::vector<cv::Point3f> &Vertices3D();
+  const cv::Mat Vertices3D();
   cv::Point3f HitTarget();
+  const cv::Point3f WorldCoord();
 };
