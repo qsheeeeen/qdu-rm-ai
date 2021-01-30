@@ -46,11 +46,15 @@ void RobotDetector::LoadCameraMat(const std::string& path) {
                      cv::FileStorage::READ | cv::FileStorage::FORMAT_JSON);
 
   if (fs.isOpened()) {
-    cam_mat_ = fs[cam_model_]["cam_mat"].mat();
-    distor_coff_ = fs[cam_model_]["distor_coff"].mat();
-    SPDLOG_DEBUG("Loaded cali data.");
+    cam_mat_ = fs["cam_mat"].mat();
+    distor_coff_ = fs["distor_coff"].mat();
+    if (cam_mat_.empty() && distor_coff_.empty()) {
+      SPDLOG_ERROR("Can not load cali data.");
+    } else {
+      SPDLOG_DEBUG("Loaded cali data.");
+    }
   } else {
-    SPDLOG_ERROR("Can not load cali data for '{}' in '{}'", cam_model_, path);
+    SPDLOG_ERROR("Can not open file: '{}'", path);
   }
 }
 
@@ -68,21 +72,21 @@ double RobotDetector::AxisAngle(cv::Vec3d& axis1, cv::Vec3d& axis2) {
 RobotDetector::RobotDetector() { SPDLOG_TRACE("Constructed."); }
 
 RobotDetector::RobotDetector(const std::string& params_path,
-                             const std::string& cam_param_path) {
-  Init(params_path, cam_param_path);
+                             const std::string& cam_mat_path) {
+  Init(params_path, cam_mat_path);
   SPDLOG_TRACE("Constructed.");
 }
 
 RobotDetector::~RobotDetector() { SPDLOG_TRACE("Destructed."); }
 
 void RobotDetector::Init(const std::string& params_path,
-                         const std::string& cam_param_path) {
+                         const std::string& cam_mat_path) {
   if (!PrepareParams(params_path)) {
     InitDefaultParams(params_path);
     PrepareParams(params_path);
     SPDLOG_WARN("Can not find parasm file. Created and reloaded.");
   }
-  LoadCameraMat(cam_param_path);
+  LoadCameraMat(cam_mat_path);
   SPDLOG_DEBUG("Inited.");
 }
 
@@ -129,8 +133,8 @@ void RobotDetector::VisualizeResult(cv::Mat& output, bool add_lable) {
 
   if (!robots_.empty()) {
     for (auto& robot : robots_) {
-      cv::projectPoints(robot.Vertices3D(), robot.GetRotMat(), robot.Translation(),
-                        cam_mat_, distor_coff_, robot_2d);
+      cv::projectPoints(robot.Vertices3D(), robot.GetRotMat(),
+                        robot.Translation(), cam_mat_, distor_coff_, robot_2d);
 
       auto size = robot_2d.size();
       for (std::size_t i = 0; i < size; ++i) {
