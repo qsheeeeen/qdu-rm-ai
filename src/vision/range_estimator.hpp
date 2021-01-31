@@ -13,6 +13,16 @@ class RangeEstimator {
   cv::Mat cam_mat_;
   cv::Mat distor_coff_;
 
+  cv::Point2f target_center;
+
+  // AngleSolve target
+  typedef struct euler_angle
+  {
+      double yaw;
+      double pitch;
+      double roll;
+  }euler_angle;
+
   std::vector<cv::Mat> rotations_;
   std::vector<cv::Mat> translations_;
 
@@ -26,6 +36,7 @@ class RangeEstimator {
   ~RangeEstimator();
 
   void Init(const std::string& cam_model);
-  double Estimate(Armor& armor, double bullet_speed);
+  bool IsOrthogonal(cv::Mat src);
+  euler_angle Estimate(Armor& armor, double bullet_speed);
   void VisualizeResult(cv::Mat& output, bool add_lable = true);
 };
