@@ -39,7 +39,7 @@ std::string ModelToString(Model model) {
 }
 
 bool HasBigArmor(Model model) {
-  return (model == Model::kHERO || model == Model::kINFANTRY);
+  return (model == Model::kHERO || model == Model::kSENTRY);
 }
 
 }  // namespace game
