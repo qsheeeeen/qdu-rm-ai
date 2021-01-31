@@ -47,8 +47,7 @@ void Camera::GrabThread(void) {
       SPDLOG_DEBUG("[GrabThread] FrameNum: {}.",
                    raw_frame.stFrameInfo.nFrameNum);
     } else {
-      SPDLOG_ERROR("[GrabThread] GetImageBuffer fail! err: {0:x}.",
-                   err);
+      SPDLOG_ERROR("[GrabThread] GetImageBuffer fail! err: {0:x}.", err);
     }
 
     cv::Mat raw_mat(
@@ -59,10 +58,8 @@ void Camera::GrabThread(void) {
     frame_stack_.push_front(raw_mat.clone());
 
     if (nullptr != raw_frame.pBufAddr) {
-      err = MV_CC_FreeImageBuffer(camera_handle_, &raw_frame);
-      if (err != MV_OK) {
-        SPDLOG_ERROR("[GrabThread] FreeImageBuffer fail! err: {0:x}.",
-                     err);
+      if ((err = MV_CC_FreeImageBuffer(camera_handle_, &raw_frame)) != MV_OK) {
+        SPDLOG_ERROR("[GrabThread] FreeImageBuffer fail! err: {0:x}.", err);
       }
     }
   }
@@ -165,14 +162,12 @@ int Camera::Open(unsigned int index) {
     return err;
   }
 
-  err = MV_CC_OpenDevice(camera_handle_);
-  if (err != MV_OK) {
+  if ((err = MV_CC_OpenDevice(camera_handle_)) != MV_OK) {
     SPDLOG_ERROR("OpenDevice fail! err: {0:x}.", err);
     return err;
   }
 
-  err = MV_CC_SetEnumValue(camera_handle_, "TriggerMode", 0);
-  if (err != MV_OK) {
+  if ((err = MV_CC_SetEnumValue(camera_handle_, "TriggerMode", 0)) != MV_OK) {
     SPDLOG_ERROR("TriggerMode fail! err: {0:x}.", err);
     return err;
   }
@@ -199,29 +194,28 @@ int Camera::Open(unsigned int index) {
     SPDLOG_INFO("ResultingFrameRate: {}.", frame_rate.fCurValue);
   }
 
-  err = MV_CC_SetEnumValue(camera_handle_, "ExposureAuto", 2);
-  if (err != MV_OK) {
+  if ((err = MV_CC_SetEnumValue(camera_handle_, "ExposureAuto", 2)) != MV_OK) {
     SPDLOG_ERROR("ExposureAuto fail! err: {0:x}.", err);
     return err;
   }
 
-  err = MV_CC_SetEnumValue(camera_handle_, "GammaSelector", 2);
-  if (err != MV_OK) {
+  if ((MV_CC_SetEnumValue(camera_handle_, "GammaSelector", 2)) != MV_OK) {
     SPDLOG_ERROR("GammaSelector fail! err: {0:x}.", err);
     return err;
   }
 
-  err = MV_CC_SetBoolValue(camera_handle_, "GammaEnable", true);
-  if (err != MV_OK) {
+  if ((MV_CC_SetBoolValue(camera_handle_, "GammaEnable", true)) != MV_OK) {
     SPDLOG_ERROR("GammaEnable fail! err: {0:x}.", err);
     return err;
   }
 
-  err = MV_CC_StartGrabbing(camera_handle_);
-  if (err != MV_OK) {
+  if ((MV_CC_StartGrabbing(camera_handle_)) != MV_OK) {
     SPDLOG_ERROR("StartGrabbing fail! err: {0:x}.", err);
     return err;
   }
+
+  grabing = true;
+  grab_thread_ = std::thread(&Camera::GrabThread, this);
   return MV_OK;
 }
 
@@ -249,16 +243,24 @@ cv::Mat Camera::GetFrame() {
  * @return int 状态代码
  */
 int Camera::Close() {
+  grabing = false;
+  grab_thread_.join();
+
   int err = MV_OK;
-  err = MV_CC_StopGrabbing(camera_handle_);
-  SPDLOG_ERROR("StopGrabbing fail! err:{0:x}.", err);
-
-  err = MV_CC_CloseDevice(camera_handle_);
-  SPDLOG_ERROR("ClosDevice fail! err:{0:x}.", err);
-
-  err = MV_CC_DestroyHandle(camera_handle_);
-  SPDLOG_ERROR("DestroyHandle fail! err:{0:x}.", err);
+  if ((err = MV_CC_StopGrabbing(camera_handle_)) != MV_OK) {
+    SPDLOG_ERROR("StopGrabbing fail! err:{0:x}.", err);
+    return err;
+  }
+  if ((err = MV_CC_CloseDevice(camera_handle_)) != MV_OK) {
+    SPDLOG_ERROR("ClosDevice fail! err:{0:x}.", err);
+    return err;
+  }
+  if ((err = MV_CC_DestroyHandle(camera_handle_)) != MV_OK) {
+    SPDLOG_ERROR("DestroyHandle fail! err:{0:x}.", err);
+    return err;
+  }
   SPDLOG_DEBUG("Closed.");
+
   return MV_OK;
 }
 
