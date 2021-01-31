@@ -5,6 +5,7 @@
 
 #include "armor.hpp"
 #include "armor_classifier.hpp"
+#include "detector.hpp"
 #include "game.hpp"
 #include "light_bar.hpp"
 
@@ -27,35 +28,32 @@ struct ArmorDetectorParam {
   double center_dist_high_th;
 };
 
-class ArmorDetector {
+class ArmorDetector : public Detector<Armor, ArmorDetectorParam> {
  private:
   cv::Size frame_size_;
   game::Team enemy_team_;
   ArmorClassifier armor_classifier_;
   std::vector<LightBar> lightbars_;
-  std::vector<Armor> armors_;
-
-  ArmorDetectorParam params_;
 
   std::chrono::milliseconds duration_bars_, duration_armors_;
 
-  void InitDefaultParams(const std::string& params_path);
-  bool PrepareParams(const std::string& params_path);
+  void InitDefaultParams(const std::string &params_path);
+  bool PrepareParams(const std::string &params_path);
 
   void FindLightBars(const cv::Mat &frame);
   void MatchLightBars(const cv::Mat &frame);
 
-  void VisualizeLightBar(cv::Mat &output, bool add_lable);
-  void VisualizeArmor(cv::Mat &output, bool add_lable);
+  void VisualizeLightBar(const cv::Mat &output, bool add_lable);
+  void VisualizeArmor(const cv::Mat &output, bool add_lable);
 
  public:
   ArmorDetector();
-  ArmorDetector(const std::string& params_path, game::Team enemy_team);
+  ArmorDetector(const std::string &params_path, game::Team enemy_team);
   ~ArmorDetector();
 
-  void Init(const std::string& params_path, game::Team enemy_team);
+  void LoadParams(const std::string &params_path);
+  void SetEnemyTeam(game::Team enemy_team);
 
-  const std::vector<Armor> &Detect(cv::Mat &frame);
-  void VisualizeResult(cv::Mat &output, bool draw_bars = false,
-                       bool draw_armor = true, bool add_lable = true);
+  const std::vector<Armor> &Detect(const cv::Mat &frame);
+  void VisualizeResult(const cv::Mat &output, bool add_lable = true);
 };
