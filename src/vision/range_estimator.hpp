@@ -37,6 +37,6 @@ class RangeEstimator {
 
   void Init(const std::string& cam_model);
   bool IsOrthogonal(cv::Mat src);
-  euler_angle Estimate(Armor& armor, double bullet_speed);
+  int Estimate(Armor& armor, double bullet_speed);
   void VisualizeResult(cv::Mat& output, bool add_lable = true);
 };
