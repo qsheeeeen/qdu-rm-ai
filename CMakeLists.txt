@@ -80,10 +80,7 @@ message(STATUS "CUDA version: ${CUDA_VERSION}")
 message(STATUS "OpenCV version: ${OpenCV_VERSION}")
 message(STATUS "spdlog version: ${spdlog_VERSION}")
 
-set(BUILD_BEHAVIOR  ON  CACHE BOOL "Build behavior")
-set(BUILD_CUDA      OFF CACHE BOOL "Build cuda")
-set(BUILD_DEVICE    ON  CACHE BOOL "Build device")
-set(BUILD_VISION    ON  CACHE BOOL "Build vision")
+option(BUILD_NN "Build nn" OFF)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG)
