@@ -28,5 +28,5 @@ int main(int argc, char const* argv[]) {
 
   SPDLOG_WARN("***** Running Camera Recording Demo. *****");
   
-  exit(0);
+  return 0;
 }
