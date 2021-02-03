@@ -28,17 +28,16 @@ struct ArmorDetectorParam {
   double center_dist_high_th;
 };
 
-class ArmorDetector : public Detector<Armor, ArmorDetectorParam> {
+class ArmorDetector : private Detector<Armor, ArmorDetectorParam> {
  private:
-  cv::Size frame_size_;
   game::Team enemy_team_;
   ArmorClassifier armor_classifier_;
   std::vector<LightBar> lightbars_;
 
   std::chrono::milliseconds duration_bars_, duration_armors_;
 
-  void InitDefaultParams(const std::string &params_path);
-  bool PrepareParams(const std::string &params_path);
+  void InitDefaultParams(const std::string &path);
+  bool PrepareParams(const std::string &path);
 
   void FindLightBars(const cv::Mat &frame);
   void MatchLightBars(const cv::Mat &frame);
@@ -51,7 +50,6 @@ class ArmorDetector : public Detector<Armor, ArmorDetectorParam> {
   ArmorDetector(const std::string &params_path, game::Team enemy_team);
   ~ArmorDetector();
 
-  void LoadParams(const std::string &params_path);
   void SetEnemyTeam(game::Team enemy_team);
 
   const std::vector<Armor> &Detect(const cv::Mat &frame);

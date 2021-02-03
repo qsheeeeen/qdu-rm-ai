@@ -219,15 +219,6 @@ ArmorDetector::ArmorDetector(const std::string &params_path,
 
 ArmorDetector::~ArmorDetector() { SPDLOG_TRACE("Destructed."); }
 
-void ArmorDetector::LoadParams(const std::string &params_path) {
-  if (!PrepareParams(params_path)) {
-    InitDefaultParams(params_path);
-    PrepareParams(params_path);
-    SPDLOG_WARN("Can not find parasm file. Created and reloaded.");
-  }
-  SPDLOG_DEBUG("Params loaded.");
-}
-
 void ArmorDetector::SetEnemyTeam(game::Team enemy_team) {
   enemy_team_ = enemy_team;
 }
