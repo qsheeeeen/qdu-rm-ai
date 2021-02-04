@@ -1,0 +1,18 @@
+{
+    "binary_th": 230,
+    "erosion_size": 2,
+    "contour_size_th": 4,
+    "contour_area_low_th": 100,
+    "contour_area_high_th": 400,
+    "bar_area_low_th": 150,
+    "bar_area_high_th": 400,
+    "angle_high_th": 180,
+    "aspect_ratio_low_th": 1,
+    "aspect_ratio_high_th": 4,
+    "angle_diff_th": 40,
+    "length_diff_th": 0.7,
+    "height_diff_th": 0.067,
+    "area_diff_th": 0.4,
+    "center_dist_low_th": 1,
+    "center_dist_high_th": 4
+}

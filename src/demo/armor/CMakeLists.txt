@@ -9,6 +9,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     spdlog::spdlog
 )
 
-target_include_directories(${PROJECT_NAME} PRIVATE
+target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
+    $<TARGET_PROPERTY:vision,INTERFACE_INCLUDE_DIRECTORIES>
 )

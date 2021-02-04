@@ -73,11 +73,11 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
 
   frame_size_ = cv::Size(frame.cols, frame.rows);
 
-  cv::Mat channels[3];
+  cv::Mat channels[3], result;
   cv::split(frame, channels);
 
 #if 1
-  cv::Mat result = channels[0];
+  result = channels[0];
 #else
   if (enemy_team_ == game::Team::kBLUE) {
     result = channels[0] - channels[2];
@@ -87,6 +87,7 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
 #endif
 
   // TODO: sharpen blur add contrast.
+  cv::GaussianBlur(result, result, cv::Size(2 * params_.erosion_size + 1, 2 * params_.erosion_size + 1), 1);
 
   cv::threshold(result, result, params_.binary_th, 255., cv::THRESH_BINARY);
 
@@ -139,7 +140,7 @@ void ArmorDetector::MatchLightBars(const cv::Mat &frame) {
   for (auto iti = lightbars_.begin(); iti != lightbars_.end(); ++iti) {
     for (auto itj = iti + 1; itj != lightbars_.end(); ++itj) {
       const double angle_diff = std::abs(iti->Angle() - itj->Angle());
-      if (angle_diff > params_.angle_diff_th) continue;
+      //if (angle_diff > params_.angle_diff_th) continue;
 
       const double length_diff =
           std::abs(iti->Length() - itj->Length()) / iti->Length();
