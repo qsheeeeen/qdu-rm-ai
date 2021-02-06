@@ -47,6 +47,7 @@ bool ArmorDetector::PrepareParams(const std::string &params_path) {
   if (fs.isOpened()) {
     params_.binary_th = fs["binary_th"];
     params_.se_erosion = fs["se_erosion"];
+    params_.ap_erosion = fs["ap_erosion"];
 
     params_.contour_size_low_th = int(fs["contour_size_low_th"]);
     params_.contour_area_low_th = fs["contour_area_low_th"];

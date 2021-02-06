@@ -1,6 +1,7 @@
 {
     "binary_th": 220,
-    "erosion_size": 5,
+    "se_erosion": 5,
+    "ap_erosion": 5.0,
     "contour_size_th": 20,
     "contour_area_low_th": 100,
     "contour_area_high_th": 10000,
