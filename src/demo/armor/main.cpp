@@ -7,10 +7,12 @@
 #include "spdlog/spdlog.h"
 
 namespace {
-const std::string avi_path = "../../../image/2.avi";
-const std::string output_video_path = "../../../image/test1.mp4";
-const std::string output_video_path_gray = "../../../image/test_gray.mp4";
-const std::string params_path = "../../../src/demo/armor/params_test_blue.json";
+
+const std::string source_path = "../../../../image/2.avi";
+const std::string output_path = "../../../../image/test_detect.avi";
+const std::string params_path =
+    "../../../../src/demo/armor/params_test_blue.json";
+
 }  // namespace
 
 int main(int argc, char const* argv[]) {
@@ -30,61 +32,40 @@ int main(int argc, char const* argv[]) {
   spdlog::flush_on(spdlog::level::debug);
   spdlog::set_level(spdlog::level::debug);
 #elif (SPDLOG_ACTIVE_LEVEL == SPDLOG_LEVEL_INFO)
-  spdlog::flush_on(spdlog::level::err);
+  spdlog::flush_on(spdlog::level::info);
   spdlog::set_level(spdlog::level::info);
 #endif
 
   SPDLOG_WARN("***** Running Armor Detecting Demo. *****");
 
-  cv::Mat frame, result, gray;
-  cv::VideoCapture capture;
-
-  capture.open(avi_path);
-  if (!capture.isOpened()) {
-    SPDLOG_ERROR("[MainTest] Can't Open Video {}.", avi_path);
+  cv::VideoCapture cap(source_path);
+  if (!cap.isOpened()) {
+    SPDLOG_ERROR("Can't open {}.", source_path);
     return -1;
   }
 
-#ifdef x
-  cv::VideoWriter outputVideo_gray, outputVideo;
-  int code = outputVideo.fourcc('X', 'V', 'I', 'D');
-  outputVideo.open(output_video_path, code, 30.0, cv::Size2d(640, 480));
-  outputVideo_gray.open(output_video_path_gray, code, 30.0, cv::Size2d(640, 480));
-  if (!outputVideo.isOpened()) {
-    SPDLOG_ERROR("[MainTest] Can't Open Video {}.", output_video_path);
+  cv::Size f_size(cap.get(cv::CAP_PROP_FRAME_WIDTH),
+                  cap.get(cv::CAP_PROP_FRAME_HEIGHT));
+  double fps = cap.get(cv::CAP_PROP_FPS);
+  int codec = cap.get(cv::CAP_PROP_FOURCC);
+
+  cv::VideoWriter writer(output_path, codec, fps, f_size);
+  if (!writer.isOpened()) {
+    SPDLOG_ERROR("Can't write to {}.", output_path);
     return -1;
   }
-#endif
 
-  for (;;) {
-    capture >> frame;
-    if (frame.empty()) {
-      SPDLOG_ERROR("[MainTest] Empty Frame.");
-      return -2;
-    } else {
-      ArmorDetector detector(params_path, game::Team::kBLUE);
-      std::vector<Armor> armors = detector.Detect(frame);
-      if (armors.size() == 0) {
-        SPDLOG_DEBUG("[Armors] Found Armor Is {}.", armors.size());
-        result = frame;
-      } else {
-        result = frame.clone();
-        cv::resize(result, result, cv::Size2d(640, 480));
-        detector.VisualizeResult(result, true);
-      }
-      cv::threshold(result, gray, 200, 255, cv::THRESH_BINARY);
-      cv::imshow("vedio", gray);
-      if (cv::waitKey(33) == 'q') break;
-    }
+  ArmorDetector detector(params_path, game::Team::kBLUE);
 
-#ifdef x
-    outputVideo.write(result);
-    outputVideo_gray.write(gray);
-#endif
+  cv::Mat frame;
+  while (cap.read(frame)) {
+    detector.Detect(frame);
+    detector.VisualizeResult(frame, 2);
+
+    cv::imshow("vedio", frame);
+    if (cv::waitKey() == 'q') break;
+
+    writer.write(frame);
   }
-#ifdef x
-  outputVideo.release();
-#endif
-  capture.release();
   return 0;
 }

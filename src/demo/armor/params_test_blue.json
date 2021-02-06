@@ -1,6 +1,7 @@
 {
-    "binary_th": 230,
-    "erosion_size": 2,
+    "binary_th": 235,
+    "se_erosion": 2,
+    "ap_erosion": 1.0,
     "contour_size_th": 4,
     "contour_area_low_th": 100,
     "contour_area_high_th": 400,
@@ -14,5 +15,5 @@
     "height_diff_th": 0.067,
     "area_diff_th": 0.4,
     "center_dist_low_th": 1,
-    "center_dist_high_th": 4
+    "center_dist_high_th": 3
 }
