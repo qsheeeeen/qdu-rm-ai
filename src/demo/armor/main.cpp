@@ -46,8 +46,9 @@ int main(int argc, char const* argv[]) {
 
   cv::Size f_size(cap.get(cv::CAP_PROP_FRAME_WIDTH),
                   cap.get(cv::CAP_PROP_FRAME_HEIGHT));
-  double fps = cap.get(cv::CAP_PROP_FPS);
-  int codec = cap.get(cv::CAP_PROP_FOURCC);
+  const double fps = cap.get(cv::CAP_PROP_FPS);
+  const int delay = static_cast<int>(1000. / fps);
+  const int codec = cap.get(cv::CAP_PROP_FOURCC);
 
   cv::VideoWriter writer(output_path, codec, fps, f_size);
   if (!writer.isOpened()) {
@@ -63,7 +64,7 @@ int main(int argc, char const* argv[]) {
     detector.VisualizeResult(frame, 2);
 
     cv::imshow("vedio", frame);
-    if (cv::waitKey() == 'q') break;
+    if (cv::waitKey(delay) == 'q') break;
 
     writer.write(frame);
   }
