@@ -23,7 +23,7 @@ int main(int argc, char const* argv[]) {
   spdlog::flush_on(spdlog::level::debug);
   spdlog::set_level(spdlog::level::debug);
 #elif (SPDLOG_ACTIVE_LEVEL == SPDLOG_LEVEL_INFO)
-  spdlog::flush_on(spdlog::level::err);
+  spdlog::flush_on(spdlog::level::info);
   spdlog::set_level(spdlog::level::info);
 #endif
 
