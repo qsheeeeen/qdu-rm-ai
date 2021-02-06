@@ -9,6 +9,8 @@ namespace {
 
 const auto kCV_FONT = cv::FONT_HERSHEY_SIMPLEX;
 const auto kGREEN = cv::Scalar(0., 255., 0.);
+const auto kRED = cv::Scalar(0., 0., 255.);
+const auto kYELLOW = cv::Scalar(0., 255., 255.);
 
 }  // namespace
 
@@ -16,8 +18,10 @@ void ArmorDetector::InitDefaultParams(const std::string &params_path) {
   cv::FileStorage fs(params_path,
                      cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
 
+  fs.writeComment("binary threshold");
   fs << "binary_th" << 220;
-  fs << "erosion_size" << 5;
+  fs << "se_erosion" << 5;
+  fs << "ap_erosion" << 1.;
 
   fs << "contour_size_low_th" << 20;
   fs << "contour_area_low_th" << 100;
@@ -42,7 +46,7 @@ bool ArmorDetector::PrepareParams(const std::string &params_path) {
                      cv::FileStorage::READ | cv::FileStorage::FORMAT_JSON);
   if (fs.isOpened()) {
     params_.binary_th = fs["binary_th"];
-    params_.erosion_size = fs["erosion_size"];
+    params_.se_erosion = fs["se_erosion"];
 
     params_.contour_size_low_th = int(fs["contour_size_low_th"]);
     params_.contour_area_low_th = fs["contour_area_low_th"];
@@ -86,21 +90,24 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
   }
 #endif
 
-  // TODO: sharpen blur add contrast.
-  cv::GaussianBlur(result, result, cv::Size(2 * params_.erosion_size + 1, 2 * params_.erosion_size + 1), 1);
-
   cv::threshold(result, result, params_.binary_th, 255., cv::THRESH_BINARY);
 
-  const int erosion_size = params_.erosion_size;
   cv::Mat kernel = cv::getStructuringElement(
-      cv::MORPH_ELLIPSE, cv::Size(2 * erosion_size + 1, 2 * erosion_size + 1));
+      cv::MORPH_ELLIPSE,
+      cv::Size(2 * params_.se_erosion + 1, 2 * params_.se_erosion + 1));
+
   cv::morphologyEx(result, result, cv::MORPH_OPEN, kernel);
+  cv::findContours(result, contours_, cv::RETR_LIST,
+                   cv::CHAIN_APPROX_TC89_KCOS);
 
-  std::vector<std::vector<cv::Point> > contours;
-  cv::findContours(result, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
-  SPDLOG_DEBUG("Found contours: {}", contours.size());
+  contours_poly_.resize(contours_.size());
+  for (size_t k = 0; k < contours_.size(); ++k) {
+    cv::approxPolyDP(cv::Mat(contours_[k]), contours_poly_[k],
+                     params_.ap_erosion, true);
+  }
+  SPDLOG_DEBUG("Found contours: {}", contours_.size());
 
-  for (const auto &contour : contours) {
+  for (const auto &contour : contours_poly_) {
     if (contour.size() < params_.contour_size_low_th) continue;
 
     const double c_area = cv::contourArea(contour);
@@ -140,7 +147,7 @@ void ArmorDetector::MatchLightBars(const cv::Mat &frame) {
   for (auto iti = lightbars_.begin(); iti != lightbars_.end(); ++iti) {
     for (auto itj = iti + 1; itj != lightbars_.end(); ++itj) {
       const double angle_diff = std::abs(iti->Angle() - itj->Angle());
-      //if (angle_diff > params_.angle_diff_th) continue;
+      if (angle_diff > params_.angle_diff_th) continue;
 
       const double length_diff =
           std::abs(iti->Length() - itj->Length()) / iti->Length();
@@ -232,10 +239,12 @@ const std::vector<Armor> &ArmorDetector::Detect(const cv::Mat &frame) {
   return targets_;
 }
 
-void ArmorDetector::VisualizeResult(const cv::Mat &output, bool add_lable) {
-  VisualizeLightBar(output, add_lable);
-  VisualizeArmor(output, add_lable);
-  if (add_lable) {
+void ArmorDetector::VisualizeResult(const cv::Mat &output, int verbose) {
+  if (verbose > 0) {
+    cv::drawContours(output, contours_, -1, kRED);
+    cv::drawContours(output, contours_poly_, -1, kYELLOW);
+  }
+  if (verbose > 1) {
     std::ostringstream buf;
     buf << lightbars_.size() << " bars in " << duration_bars_.count() << " ms.";
 
@@ -253,4 +262,6 @@ void ArmorDetector::VisualizeResult(const cv::Mat &output, bool add_lable) {
     v_pos += static_cast<int>(1.3 * text_size.height);
     cv::putText(output, buf.str(), cv::Point(0, v_pos), kCV_FONT, 1.0, kGREEN);
   }
+  VisualizeLightBar(output, verbose > 2);
+  VisualizeArmor(output, verbose > 2);
 }

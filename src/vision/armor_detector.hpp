@@ -11,7 +11,8 @@
 
 struct ArmorDetectorParam {
   double binary_th;
-  int erosion_size;
+  int se_erosion;    /* erosion in getStructuringElement */
+  double ap_erosion; /* erosion in approxPolyDP */
   std::size_t contour_size_low_th;
   double contour_area_low_th;
   double contour_area_high_th;
@@ -32,6 +33,7 @@ class ArmorDetector : private Detector<Armor, ArmorDetectorParam> {
  private:
   game::Team enemy_team_;
   ArmorClassifier armor_classifier_;
+  std::vector<std::vector<cv::Point> > contours_, contours_poly_;
   std::vector<LightBar> lightbars_;
 
   std::chrono::milliseconds duration_bars_, duration_armors_;
@@ -53,5 +55,5 @@ class ArmorDetector : private Detector<Armor, ArmorDetectorParam> {
   void SetEnemyTeam(game::Team enemy_team);
 
   const std::vector<Armor> &Detect(const cv::Mat &frame);
-  void VisualizeResult(const cv::Mat &output, bool add_lable = true);
+  void VisualizeResult(const cv::Mat &output, int verbose = 1);
 };

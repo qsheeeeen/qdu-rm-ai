@@ -28,6 +28,5 @@ class Detector {
   }
 
   virtual const std::vector<Target> &Detect(const cv::Mat &frame) = 0;
-  virtual void VisualizeResult(const cv::Mat &output,
-                               bool add_lable = true) = 0;
+  virtual void VisualizeResult(const cv::Mat &output, int verbose = 1) = 0;
 };
