@@ -23,7 +23,7 @@ int main(int argc, char const* argv[]) {
   spdlog::set_level(spdlog::level::debug);
 #elif (SPDLOG_ACTIVE_LEVEL == SPDLOG_LEVEL_INFO)
   spdlog::flush_on(spdlog::level::info);
-  spdlog::set_level(spdlog::level::in1fo);
+  spdlog::set_level(spdlog::level::info);
 #endif
 
   SPDLOG_WARN("***** Running Camera Recording Demo. *****");

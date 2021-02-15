@@ -1,6 +1,8 @@
 #include "range_estimator.hpp"
 
 #include <math.h>
+
+#include "opencv2/core/core.hpp"
 #include "opencv2/opencv.hpp"
 #include "spdlog/spdlog.h"
 
@@ -56,7 +58,28 @@ void RangeEstimator::PnpEstimate(Armor& armor) {
   translations_.push_back(translation);
 }
 
-double RangeEstimator::PinHoleEstimate(std::vector<cv::Point2f> target) {}
+double RangeEstimator::PinHoleEstimate(std::vector<cv::Point2f> target) {
+  double fx = cam_mat_.at<double>(0, 0);
+  double fy = cam_mat_.at<double>(1, 1);
+  double cx = cam_mat_.at<double>(0, 2);
+  double cy = cam_mat_.at<double>(1, 2);
+  cv::Point2f pnt;
+
+  std::vector<cv::Point2f> out;
+  target.push_back(target_center);
+
+  //对像素点去畸变
+  cv::undistortPoints(target, out, cam_mat_, distor_coff_, cv::noArray(),
+                      cam_mat_);
+  pnt = out.front();
+
+  //去畸变后的比值
+  double rxNew = (pnt.x - cx) / fx;
+  double ryNew = (pnt.y - cy) / fy;
+
+  euler_angle_.yaw = atan(rxNew) / CV_PI * 180;
+  euler_angle_.pitch = -atan(ryNew) / CV_PI * 180;
+}
 
 RangeEstimator::RangeEstimator() { SPDLOG_TRACE("Constructed."); }
 
@@ -72,8 +95,7 @@ void RangeEstimator::Init(const std::string& cam_model) {
 }
 
 bool RangeEstimator::IsOrthogonal(cv::Mat src) {
-  cv::Mat src_transpose = src.t();
-  cv::Mat should_be_identity = src_transpose * src;
+  cv::Mat should_be_identity = src.t() * src;
   cv::Mat idty = cv::Mat::eye(3, 3, CV_32FC3);
   double n = cv::norm(idty - should_be_identity, cv::NORM_L2);
   if (n < 1e-6)
@@ -83,32 +105,9 @@ bool RangeEstimator::IsOrthogonal(cv::Mat src) {
 }
 
 int RangeEstimator::Estimate(Armor& armor, double bullet_speed) {
-  // 单位化
-  double theta = sqrt(pow(rotations_.back().at<double>(0, 0), 2) +
-                      pow(rotations_.back().at<double>(1, 0), 2) +
-                      pow(rotations_.back().at<double>(1, 0), 2));
-  cv::Mat r_unitization = rotations_.front() / theta;
-  rotations_.pop_back();
+  cv::Mat r_matrix(3, 3, CV_32F, cv::Scalar(0));
+  cv::Rodrigues(armor.GetRotVec(), r_matrix, cv::noArray());
 
-  // 取值
-  double r00 = r_unitization.at<double>(0, 0);
-  double r10 = r_unitization.at<double>(1, 0);
-  double r20 = r_unitization.at<double>(2, 0);
-
-  // 构造中间传递阵
-  cv::Mat r_transfer(3, 3, CV_32F, cv::Scalar(0));
-  r_transfer.push_back((0.0, -r20, r10));
-  r_transfer.push_back((r20, 0.0, -r00));
-  r_transfer.push_back((-r10, r00, 0.0));
-
-  // 求解旋转矩阵
-  cv::Mat identity_matrix = cv::Mat::eye(3, 3, CV_32FC3);
-  cv::Mat r_transpose = r_unitization.t();
-  cv::Mat r_matrix = cos(theta) * identity_matrix +
-                     (1 - cos(theta)) * r_unitization * r_transpose +
-                     sin(theta) * r_transfer;
-
-  euler_angle target_armor;
   if (IsOrthogonal(r_matrix)) {
     // 奇异性判定
     double singular = sqrt(pow(r_matrix.at<double>(0, 0), 2) +
@@ -116,27 +115,24 @@ int RangeEstimator::Estimate(Armor& armor, double bullet_speed) {
 
     // 解算目标位置的欧拉角
     if (singular >= 1e-6) {
-      target_armor.pitch =
+      euler_angle_.pitch =
           atan2(r_matrix.at<double>(2, 1), r_matrix.at<double>(2, 2));
-      target_armor.yaw = atan2(-r_matrix.at<double>(2, 0), singular);
-      target_armor.roll = 0.0;
     } else {
-      target_armor.pitch =
+      euler_angle_.pitch =
           atan2(-r_matrix.at<double>(1, 2), r_matrix.at<double>(1, 1));
-      target_armor.yaw = atan2(-r_matrix.at<double>(2, 0), singular);
-      target_armor.roll = 0.0;
     }
-
+    euler_angle_.yaw = atan2(-r_matrix.at<double>(2, 0), singular);
+    euler_angle_.roll = 0.0;
     // 解算需要调整到的欧拉角
-    double t = tan(target_armor.pitch);
+    double t = tan(euler_angle_.pitch);
     double b = bullet_speed * bullet_speed;
     if (target_center.y < 540) {
-      target_armor.pitch =
+      euler_angle_.pitch =
           atan((b * t - sqrt(pow(b, 2) * t * t - pow((kG * kHEIGHT_ARMOR), 2) -
                              2 * kG * kHEIGHT_ARMOR * b * t * t)) /
                (kG * kHEIGHT_ARMOR));
     } else {
-      target_armor.pitch =
+      euler_angle_.pitch =
           atan((-2 * b * t +
                 sqrt(4 * pow(b, 2) * t * t -
                      4 * ((bullet_speed * t) * t + kG * kHEIGHT_SHELL) *
@@ -145,8 +141,8 @@ int RangeEstimator::Estimate(Armor& armor, double bullet_speed) {
     }
 
     // 转化为角度
-    target_armor.pitch *= 180.0 / 3.1415926;
-    target_armor.yaw *= 180.0 / 3.1415926;
+    euler_angle_.pitch *= 180.0 / CV_PI;
+    euler_angle_.yaw *= 180.0 / CV_PI;
   } else {
     SPDLOG_ERROR("Orthogonal Error.");
   }

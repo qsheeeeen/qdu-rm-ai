@@ -16,12 +16,12 @@ class RangeEstimator {
   cv::Point2f target_center;
 
   // AngleSolve target
-  typedef struct euler_angle
+  struct euler_angle
   {
       double yaw;
       double pitch;
       double roll;
-  }euler_angle;
+  }euler_angle_;
 
   std::vector<cv::Mat> rotations_;
   std::vector<cv::Mat> translations_;
