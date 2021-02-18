@@ -18,15 +18,10 @@ class Detector {
   virtual void InitDefaultParams(const std::string &path) = 0;
   virtual bool PrepareParams(const std::string &path) = 0;
 
-  void LoadParams(const std::string &path) {
-    if (!PrepareParams(path)) {
-      InitDefaultParams(path);
-      PrepareParams(path);
-      SPDLOG_WARN("Can not find parasm file. Created and reloaded.");
-    }
-    SPDLOG_DEBUG("Params loaded.");
-  }
+  void LoadParams(const std::string &path);
 
   virtual const std::vector<Target> &Detect(const cv::Mat &frame) = 0;
   virtual void VisualizeResult(const cv::Mat &output, int verbose = 1) = 0;
 };
+
+#include "detector.tpp"
