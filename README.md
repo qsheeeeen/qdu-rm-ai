@@ -8,8 +8,7 @@
 
 本开源软件为青岛大学未来战队机器人的视觉和人工智能的代码。参考了其他战队代码和各种开源机器人项目，从零编写而成。中心思想：
 
-- 使用基于pytorch的yolov5算法，训练得到的权重和模型导出到ONNX格式。
-- 在妙算平台使用TensorRT运行导出的模型。
+- 基于OpenCV的
 - 基于行为树设计哨兵的AI
 - 一个项目适配不同型号的机器人。
 
@@ -77,7 +76,7 @@
   make -j8
   ```
 
-- 训练神经网络
+- 神经网络
 
   - 准备
 
@@ -103,6 +102,9 @@
 
   # 训练模型
   sh ./train_vision.sh
+
+  # 导出模型
+  sh ./todo.sh
   ```
 
 - 运行
@@ -148,29 +150,23 @@
 
 ![行为树演示](./image/行为树演示.png?raw=true "行为树演示")
 
-## TODO
-
-- Debug Detector 输出。
-- Debug Detector 输入预处理。
-
 ## Roadmap
 
 近期：
 
-1. 完善自瞄部分代码
-
 1. 添加 CInstall
-
-1. 进行整体调试，在妙算上实现功能
 
 1. 实现类似多级流水线的视觉算法流程。[参考文章](https://opencv.org/hybrid-cv-dl-pipelines-with-opencv-4-4-g-api/)
 
 远期：
 
-1. ONNX1.8发布后适配yolov5的master
-
-1. 添加Int8运行
-
 1. 添加机关击打
 
-1. 【视情况】添加雷达部分代码
+1. 第二阶段
+    1. 使用基于pytorch的yolov5算法，训练得到的权重和模型导出到ONNX格式。
+    1. 在妙算平台使用TensorRT运行导出的模型。
+    1. ONNX1.8发布后适配yolov5的master
+    1. 添加Int8运行
+
+1. 第三阶段
+    1. 添加雷达部分代码
