@@ -51,14 +51,14 @@ std::vector<cv::Point2f> Buff::Vertices2D(cv::RotatedRect rect) {
 }
 
 std::vector<Armor> Buff::GetArmors() {
-  SPDLOG_DEBUG("armors_: {}", armors_);
+  // TODO: SPDLOG_DEBUG("armors_: {}", armors_);
   return armors_;
 }
 
 void Buff::SetArmors(std::vector<Armor> armors) { armors_ = armors; }
 
 std::vector<std::vector<cv::Point2f>> Buff::GetContours() {
-  SPDLOG_DEBUG("contours_: {}", contours_);
+  // TODO: SPDLOG_DEBUG("contours_: {}", contours_);
   return contours_;
 }
 
@@ -67,7 +67,7 @@ void Buff::SetContours(std::vector<std::vector<cv::Point2f>> contours) {
 }
 
 std::vector<cv::RotatedRect> Buff::GetRects() {
-  SPDLOG_DEBUG("rects_: {}", rects_);
+  // TODO: SPDLOG_DEBUG("rects_: {}", rects_);
   return rects_;
 }
 
