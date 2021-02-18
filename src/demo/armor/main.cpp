@@ -7,12 +7,11 @@
 #include "spdlog/spdlog.h"
 
 namespace {
-
-const std::string source_path = "../../../../image/2.avi";
-const std::string output_path = "../../../../image/test_detect.avi";
+const std::string avi_path = "../../../../image/2.avi";
+const std::string output_video_path = "../../../../image/test1.mp4";
+const std::string output_video_path_gray = "../../../../image/test_gray.mp4";
 const std::string params_path =
     "../../../../src/demo/armor/params_test_blue.json";
-
 }  // namespace
 
 int main(int argc, char const* argv[]) {
