@@ -31,7 +31,6 @@
 ### TODO：TensorRT加速效果对比，可参考NVIDIA官方
 
 ![TensorRT加速效果](./image/compare.jpg?raw=true "TensorRT加速效果")
-*没有图*
 
 ## 依赖&环境
 

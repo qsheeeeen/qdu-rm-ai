@@ -38,7 +38,7 @@ Buff::~Buff() { SPDLOG_TRACE("Destructed."); }
 void Buff::Init() { SPDLOG_DEBUG("Inited."); }
 
 bool IsTarget() {
-  bool target;
+  bool target = false;
   // TODO:
   // SVM(contours_)
   return target;
@@ -51,14 +51,14 @@ std::vector<cv::Point2f> Buff::Vertices2D(cv::RotatedRect rect) {
 }
 
 std::vector<Armor> Buff::GetArmors() {
-  // TODO: SPDLOG_DEBUG("armors_: {}", armors_);
+  SPDLOG_DEBUG("armors_: {}", armors_.size());
   return armors_;
 }
 
 void Buff::SetArmors(std::vector<Armor> armors) { armors_ = armors; }
 
 std::vector<std::vector<cv::Point2f>> Buff::GetContours() {
-  // TODO: SPDLOG_DEBUG("contours_: {}", contours_);
+  SPDLOG_DEBUG("contours_: {}", contours_.size());
   return contours_;
 }
 
@@ -66,12 +66,12 @@ void Buff::SetContours(std::vector<std::vector<cv::Point2f>> contours) {
   contours_ = contours;
 }
 
-std::vector<cv::RotatedRect> Buff::GetRects() {
-  // TODO: SPDLOG_DEBUG("rects_: {}", rects_);
-  return rects_;
+std::vector<cv::RotatedRect> Buff::GetTracks() {
+  SPDLOG_DEBUG("rects_: {}", tracks_.size());
+  return tracks_;
 }
 
-void Buff::SetRects(std::vector<cv::RotatedRect> rects) { rects_ = rects; }
+void Buff::SetTracks(std::vector<cv::RotatedRect> tracks) { tracks_ = tracks; }
 
 game::Team Armor::GetTeam() {
   SPDLOG_DEBUG("team_: {}", team_);

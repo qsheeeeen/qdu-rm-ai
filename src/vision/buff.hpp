@@ -6,7 +6,7 @@ class Buff {
  private:
   std::vector<std::vector<cv::Point2f>> contours_;
   std::vector<Armor> armors_;
-  std::vector<cv::RotatedRect> rects_;
+  std::vector<cv::RotatedRect> tracks_;
   game::Team team_ = game::Team::kUNKNOWN;
   cv::Point3f world_coord_;
 
@@ -27,8 +27,8 @@ class Buff {
   std::vector<std::vector<cv::Point2f>> GetContours();
   void SetContours(std::vector<std::vector<cv::Point2f>> contours);
 
-  std::vector<cv::RotatedRect> GetRects();
-  void SetRects(std::vector<cv::RotatedRect> rects);
+  std::vector<cv::RotatedRect> GetTracks();
+  void SetTracks(std::vector<cv::RotatedRect> tracks);
 
   game::Team GetTeam();
   void SetTeam(game::Team team);

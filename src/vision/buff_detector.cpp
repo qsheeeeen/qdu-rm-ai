@@ -23,21 +23,14 @@ void BuffDetector::InitDefaultParams(const std::string &params_path) {
   fs << "se_erosion" << 5;
   fs << "ap_erosion" << 1.;
 
-  fs << "contour_size_low_th" << 20;
+  fs << "contour_size_low_th" << 5;
   fs << "contour_area_low_th" << 100;
   fs << "contour_area_high_th" << 10000;
-  fs << "bar_area_low_th" << 100;
-  fs << "bar_area_high_th" << 10000;
-  fs << "angle_high_th" << 60;
-  fs << "aspect_ratio_low_th" << 2;
-  fs << "aspect_ratio_high_th" << 6;
+  fs << "rect_area_low_th" << 100;
+  fs << "rect_area_high_th" << 500;
+  fs << "rect_ratio_low_th" << 0.4;
+  fs << "rect_ratio_high_th" << 2.5;
 
-  fs << "angle_diff_th" << 10;
-  fs << "length_diff_th" << 0.2;
-  fs << "height_diff_th" << 0.2;
-  fs << "area_diff_th" << 0.6;
-  fs << "center_dist_low_th" << 1;
-  fs << "center_dist_high_th" << 4;
   SPDLOG_DEBUG("Inited params.");
 }
 
@@ -52,18 +45,10 @@ bool BuffDetector::PrepareParams(const std::string &params_path) {
     params_.contour_size_low_th = int(fs["contour_size_low_th"]);
     params_.contour_area_low_th = fs["contour_area_low_th"];
     params_.contour_area_high_th = fs["contour_area_high_th"];
-    params_.bar_area_low_th = fs["bar_area_low_th"];
-    params_.bar_area_high_th = fs["bar_area_high_th"];
-    params_.angle_high_th = fs["angle_high_th"];
-    params_.aspect_ratio_low_th = fs["aspect_ratio_low_th"];
-    params_.aspect_ratio_high_th = fs["aspect_ratio_high_th"];
-
-    params_.angle_diff_th = fs["angle_diff_th"];
-    params_.length_diff_th = fs["length_diff_th"];
-    params_.height_diff_th = fs["height_diff_th"];
-    params_.area_diff_th = fs["area_diff_th"];
-    params_.center_dist_low_th = fs["center_dist_low_th"];
-    params_.center_dist_high_th = fs["center_dist_high_th"];
+    params_.rect_area_low_th = fs["rect_area_low_th"];
+    params_.rect_area_high_th = fs["rect_area_high_th"];
+    params_.rect_ratio_low_th = fs["rect_ratio_low_th"];
+    params_.rect_ratio_high_th = fs["rect_ratio_high_th"];
     return true;
   } else {
     SPDLOG_ERROR("Can not load params.");
@@ -80,29 +65,11 @@ BuffDetector::BuffDetector(const std::string &params_path) {
 
 BuffDetector::~BuffDetector() { SPDLOG_TRACE("Destructed."); }
 
-void BuffDetector::FindArmors(const cv::Mat &frame) {
+void BuffDetector::FindRects(const cv::Mat &frame) {
   const auto start = std::chrono::high_resolution_clock::now();
-  armors_.clear();
+  rects_.clear();
 
   frame_size_ = cv::Size(frame.cols, frame.rows);
-
-  cv::Mat channels[3];
-  cv::split(frame, channels);
-  cv::Mat img = channels[0] - channels[2];
-  // TODO
-
-  const auto stop = std::chrono::high_resolution_clock::now();
-  duration_armors_ =
-      std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-}
-
-void BuffDetector::FindContours(const cv::Mat &frame) {
-  const auto start = std::chrono::high_resolution_clock::now();
-  buff_.SetContours(std::vector<std::vector<cv::Point2f>>());
-
-  frame_size_ = cv::Size(frame.cols, frame.rows);
-
-  std::vector<std::vector<cv::Point2f>> contours;
 
   cv::Mat channels[3], img;
   cv::split(frame, channels);
@@ -124,22 +91,40 @@ void BuffDetector::FindContours(const cv::Mat &frame) {
 
   cv::dilate(img, img, kernel);
   cv::morphologyEx(img, img, cv::MORPH_CLOSE, kernel);
-  cv::findContours(img, contours, cv::MORPH_CLOSE, cv::CHAIN_APPROX_NONE);
+  cv::findContours(img, contours_, cv::MORPH_CLOSE, cv::CHAIN_APPROX_NONE);
+  contours_poly_.resize(contours_.size());
+  for (size_t k = 0; k < contours_.size(); ++k) {
+    cv::approxPolyDP(cv::Mat(contours_[k]), contours_poly_[k],
+                     params_.ap_erosion, true);
+  }
 
-  buff_.SetContours(contours);
+  for (const auto &contour : contours_poly_) {
+    if (contour.size() < params_.contour_size_low_th) continue;
+    cv::RotatedRect rect = cv::minAreaRect(contour);
+
+    double rect_area = rect.size.area();
+    if (rect_area < params_.rect_area_low_th) continue;
+    if (rect_area > params_.rect_area_high_th) continue;
+
+    double rect_ratio = rect.size.aspectRatio();
+    if (rect_ratio < params_.rect_ratio_low_th) continue;
+    if (rect_ratio > params_.rect_ratio_high_th) continue;
+
+    rects_.emplace_back(rect);
+  }
 
   const auto stop = std::chrono::high_resolution_clock::now();
-  duration_contours_ =
+  duration_rects_ =
       std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 }
 
 void BuffDetector::FindTrack(const cv::Mat &frame) {
   const auto start = std::chrono::high_resolution_clock::now();
-  buff_.SetRects(std::vector<cv::RotatedRect>());
+  buff_.SetTracks(std::vector<cv::RotatedRect>());
 
   // TODO
 
-  SPDLOG_DEBUG("Found tracks: {}", buff_.GetRects().size());
+  SPDLOG_DEBUG("Found tracks: {}", buff_.GetTracks().size());
 
   const auto stop = std::chrono::high_resolution_clock::now();
   duration_track_ =
@@ -147,14 +132,40 @@ void BuffDetector::FindTrack(const cv::Mat &frame) {
   SPDLOG_DEBUG("duration_track_: {} ms", duration_track_.count());
 }
 
-void BuffDetector::MatchArmors(const cv::Mat &frame) {
+void BuffDetector::MatchContours(const cv::Mat &frame) {
+  const auto start = std::chrono::high_resolution_clock::now();
+  buff_.SetContours(std::vector<std::vector<cv::Point2f>>());
+
   // TODO
+
+  SPDLOG_DEBUG("Found Contours: {}", buff_.GetContours().size());
+
+  const auto stop = std::chrono::high_resolution_clock::now();
+  duration_contours_ =
+      std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
   SPDLOG_DEBUG("Buff has been fould.");
 }
 
+void BuffDetector::MatchArmors(const cv::Mat &frame) {
+  const auto start = std::chrono::high_resolution_clock::now();
+  buff_.SetArmors(std::vector<Armor>());
+
+  frame_size_ = cv::Size(frame.cols, frame.rows);
+
+  cv::Mat channels[3];
+  cv::split(frame, channels);
+  cv::Mat img = channels[0] - channels[2];
+  // TODO
+
+  const auto stop = std::chrono::high_resolution_clock::now();
+  duration_armors_ =
+      std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+}
+
 void BuffDetector::VisualizeArmor(const cv::Mat &output, bool add_lable) {
-  if (!armors_.empty()) {
-    for (auto &armor : armors_) {
+  std::vector<Armor> armors = buff_.GetArmors();
+  if (!armors.empty()) {
+    for (auto &armor : armors) {
       auto vertices = armor.Vertices2D();
       for (std::size_t i = 0; i < vertices.size(); ++i)
         cv::line(output, vertices[i], vertices[(i + 1) % 4], kGREEN);
@@ -173,7 +184,7 @@ void BuffDetector::VisualizeArmor(const cv::Mat &output, bool add_lable) {
 void BuffDetector::VisualizeContour(const cv::Mat &output, bool add_lable) {
   std::vector<std::vector<cv::Point2f>> contours = buff_.GetContours();
   if (!contours.empty()) {
-    for (auto &contour : contours) {
+    for (const auto &contour : contours) {
       if (add_lable) {
         // TODO
         cv::drawContours(output, contour, -1, kGREEN);
@@ -183,9 +194,9 @@ void BuffDetector::VisualizeContour(const cv::Mat &output, bool add_lable) {
 }
 
 void BuffDetector::VisualizeTrack(const cv::Mat &output, bool add_lable) {
-  std::vector<cv::RotatedRect> rects = buff_.GetRects();
+  std::vector<cv::RotatedRect> rects = buff_.GetTracks();
   if (!rects.empty()) {
-    for (auto &rect : rects) {
+    for (const auto &rect : rects) {
       auto vertices = buff_.Vertices2D(rect);
       for (std::size_t i = 0; i < vertices.size(); ++i)
         cv::line(output, vertices[i], vertices[(i + 1) % 4], kGREEN);
@@ -203,8 +214,9 @@ void BuffDetector::VisualizeTrack(const cv::Mat &output, bool add_lable) {
 
 const std::vector<Buff> &BuffDetector::Detect(const cv::Mat &frame) {
   SPDLOG_DEBUG("Detecting");
-  FindArmors(frame);
-  FindContours(frame);
+  FindRects(frame);
+  MatchArmors(frame);
+  MatchContours(frame);
   SPDLOG_DEBUG("Detected.");
   return targets_;
 }
@@ -220,7 +232,7 @@ void BuffDetector::VisualizeResult(const cv::Mat &output, int verbose) {
     int baseLine;
     int v_pos = 0;
 
-    buf << armors_.size() << " armors in " << duration_armors_.count()
+    buf << buff_.GetArmors().size() << " armors in " << duration_armors_.count()
         << " ms.";
     cv::Size text_size =
         cv::getTextSize(buf.str(), kCV_FONT, 1.0, 2, &baseLine);
@@ -235,7 +247,7 @@ void BuffDetector::VisualizeResult(const cv::Mat &output, int verbose) {
     cv::putText(output, buf.str(), cv::Point(0, v_pos), kCV_FONT, 1.0, kGREEN);
 
     buf.str(std::string());
-    buf << buff_.GetRects().size() << " track in " << duration_track_.count()
+    buf << buff_.GetTracks().size() << " tracks in " << duration_track_.count()
         << " ms.";
     text_size = cv::getTextSize(buf.str(), kCV_FONT, 1.0, 2, &baseLine);
     v_pos += static_cast<int>(1.3 * text_size.height);
