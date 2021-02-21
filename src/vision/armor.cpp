@@ -15,6 +15,7 @@ const double kHIT_DEPTH = kARMOR_WIDTH / 2. * std::cos(75. / 180. * M_PI);
 const cv::Rect kSMALL_ARMOR_FACE(0, 0, kSMALL_ARMOR_LENGTH, kARMOR_WIDTH);
 const cv::Rect kBIG_ARMOR_FACE(0, 0, KBIG_ARMOR_LENGTH, kARMOR_WIDTH);
 
+/* clang-format off */
 const cv::Matx43d kCOORD_SMALL_ARMOR(
     -kSMALL_ARMOR_LENGTH / 2., -kARMOR_HEIGHT / 2, kARMOR_DEPTH,
     kSMALL_ARMOR_LENGTH / 2., -kARMOR_HEIGHT / 2, 0.,
@@ -26,6 +27,8 @@ const cv::Matx43d kCOORD_BIG_ARMOR(
     KBIG_ARMOR_LENGTH / 2., -kARMOR_HEIGHT / 2, 0.,
     KBIG_ARMOR_LENGTH / 2., kARMOR_HEIGHT / 2, 0.,
     -KBIG_ARMOR_LENGTH / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH);
+
+/* clang-format on */
 
 const cv ::Point3f kHIT_TARGET(0., 0., kHIT_DEPTH);
 
