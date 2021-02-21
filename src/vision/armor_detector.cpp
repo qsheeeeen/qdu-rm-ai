@@ -147,7 +147,8 @@ void ArmorDetector::MatchLightBars(const cv::Mat &frame) {
   const auto start = std::chrono::high_resolution_clock::now();
   for (auto iti = lightbars_.begin(); iti != lightbars_.end(); ++iti) {
     for (auto itj = iti + 1; itj != lightbars_.end(); ++itj) {
-      const double angle_diff = std::abs(iti->Angle() - itj->Angle());
+      const double angle_diff =
+          std::abs(iti->Angle() - itj->Angle()) / iti->Angle();
       if (angle_diff > params_.angle_diff_th) continue;
 
       const double length_diff =
