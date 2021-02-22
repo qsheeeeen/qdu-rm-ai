@@ -3,8 +3,8 @@
 #include <chrono>
 #include <vector>
 
-#include "armor_detector.hpp"
 #include "armor_classifier.hpp"
+#include "armor_detector.hpp"
 #include "buff.hpp"
 #include "detector.hpp"
 #include "opencv2/opencv.hpp"
@@ -25,13 +25,10 @@ struct BuffDetectorParam {
 class BuffDetector : private Detector<Buff, BuffDetectorParam> {
  private:
   Buff buff_;
-  //std::vector<Armor> armors_;
   std::vector<std::vector<cv::Point2f>> contours_, contours_poly_;
   std::vector<cv::RotatedRect> rects_;
-  ArmorClassifier armor_classifier_;
 
-  std::chrono::milliseconds duration_armors_, duration_contours_,
-      duration_track_, duration_rects_;
+  std::chrono::milliseconds duration_armors_, duration_tracks_, duration_rects_;
 
   void InitDefaultParams(const std::string &path);
   bool PrepareParams(const std::string &path);
@@ -39,9 +36,7 @@ class BuffDetector : private Detector<Buff, BuffDetectorParam> {
   void FindRects(const cv::Mat &frame);
   void FindTrack(const cv::Mat &frame);
   void MatchArmors(const cv::Mat &frame);
-  void MatchContours(const cv::Mat &frame);
 
-  void VisualizeContour(const cv::Mat &output, bool add_lable);
   void VisualizeArmor(const cv::Mat &output, bool add_lable);
   void VisualizeTrack(const cv::Mat &output, bool add_lable);
 

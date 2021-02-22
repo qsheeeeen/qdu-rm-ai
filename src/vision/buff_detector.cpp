@@ -127,23 +127,9 @@ void BuffDetector::FindTrack(const cv::Mat &frame) {
   SPDLOG_DEBUG("Found tracks: {}", buff_.GetTracks().size());
 
   const auto stop = std::chrono::high_resolution_clock::now();
-  duration_track_ =
+  duration_tracks_ =
       std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-  SPDLOG_DEBUG("duration_track_: {} ms", duration_track_.count());
-}
-
-void BuffDetector::MatchContours(const cv::Mat &frame) {
-  const auto start = std::chrono::high_resolution_clock::now();
-  buff_.SetContours(std::vector<std::vector<cv::Point2f>>());
-
-  // TODO
-
-  SPDLOG_DEBUG("Found Contours: {}", buff_.GetContours().size());
-
-  const auto stop = std::chrono::high_resolution_clock::now();
-  duration_contours_ =
-      std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-  SPDLOG_DEBUG("Buff has been fould.");
+  SPDLOG_DEBUG("duration_track_: {} ms", duration_tracks_.count());
 }
 
 void BuffDetector::MatchArmors(const cv::Mat &frame) {
@@ -181,31 +167,21 @@ void BuffDetector::VisualizeArmor(const cv::Mat &output, bool add_lable) {
   }
 }
 
-void BuffDetector::VisualizeContour(const cv::Mat &output, bool add_lable) {
-  std::vector<std::vector<cv::Point2f>> contours = buff_.GetContours();
-  if (!contours.empty()) {
-    for (const auto &contour : contours) {
-      if (add_lable) {
-        // TODO
-        cv::drawContours(output, contour, -1, kGREEN);
-      }
-    }
-  }
-}
-
 void BuffDetector::VisualizeTrack(const cv::Mat &output, bool add_lable) {
   std::vector<cv::RotatedRect> rects = buff_.GetTracks();
   if (!rects.empty()) {
     for (const auto &rect : rects) {
-      auto vertices = buff_.Vertices2D(rect);
+      std::vector<cv::Point2f> vertices(4);
+      rect.points(vertices.data());
+
       for (std::size_t i = 0; i < vertices.size(); ++i)
         cv::line(output, vertices[i], vertices[(i + 1) % 4], kGREEN);
 
-      cv::drawMarker(output, buff_.Center2D(rect), kGREEN, cv::MARKER_DIAMOND);
+      cv::drawMarker(output, rect.center, kGREEN, cv::MARKER_DIAMOND);
 
       if (add_lable) {
         std::ostringstream buf;
-        buf << buff_.Center2D(rect).x << ", " << buff_.Center2D(rect).y;
+        buf << rect.center.x << ", " << rect.center.y;
         cv::putText(output, buf.str(), vertices[1], kCV_FONT, 1.0, kGREEN);
       }
     }
@@ -216,15 +192,17 @@ const std::vector<Buff> &BuffDetector::Detect(const cv::Mat &frame) {
   SPDLOG_DEBUG("Detecting");
   FindRects(frame);
   MatchArmors(frame);
-  MatchContours(frame);
   SPDLOG_DEBUG("Detected.");
+  targets_.clear();
+  targets_.emplace_back(buff_);
   return targets_;
 }
 
 void BuffDetector::VisualizeResult(const cv::Mat &output, int verbose) {
   SPDLOG_DEBUG("Visualizeing Result.");
   if (verbose > 0) {
-    // TODO
+    cv::drawContours(output, contours_, -1, kRED);
+    cv::drawContours(output, contours_poly_, -1, kYELLOW);
   }
 
   if (verbose > 1) {
@@ -240,22 +218,19 @@ void BuffDetector::VisualizeResult(const cv::Mat &output, int verbose) {
     cv::putText(output, buf.str(), cv::Point(0, v_pos), kCV_FONT, 1.0, kGREEN);
 
     buf.str(std::string());
-    buf << buff_.GetContours().size() << " contours in "
-        << duration_contours_.count() << " ms.";
+    buf << rects_.size() << " rects in " << duration_rects_.count() << " ms.";
     text_size = cv::getTextSize(buf.str(), kCV_FONT, 1.0, 2, &baseLine);
     v_pos += static_cast<int>(1.3 * text_size.height);
     cv::putText(output, buf.str(), cv::Point(0, v_pos), kCV_FONT, 1.0, kGREEN);
 
     buf.str(std::string());
-    buf << buff_.GetTracks().size() << " tracks in " << duration_track_.count()
+    buf << buff_.GetTracks().size() << " tracks in " << duration_tracks_.count()
         << " ms.";
     text_size = cv::getTextSize(buf.str(), kCV_FONT, 1.0, 2, &baseLine);
     v_pos += static_cast<int>(1.3 * text_size.height);
     cv::putText(output, buf.str(), cv::Point(0, v_pos), kCV_FONT, 1.0, kGREEN);
   }
-
   VisualizeArmor(output, verbose);
-  VisualizeContour(output, verbose);
   VisualizeTrack(output, verbose);
   SPDLOG_DEBUG("Visualized.");
 }
