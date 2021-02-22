@@ -2,32 +2,14 @@
 
 #include <math.h>
 
-#include "opencv2/core/core.hpp"
 #include "opencv2/opencv.hpp"
 #include "spdlog/spdlog.h"
 
 namespace {
 
-const double kG = 9.8;                 // g = 9.8 m/s²
-const double kHEIGHT_ARMOR = 0.10213;  // h_armor = 0.10213 m
-const double kHEIGHT_SHELL = 0.34503;  // h_shell = 0.34503 m
-
-const double kSMALL_ARMOR_WIDTH = 135.;
-const double KBIG_ARMOR_WIDTH = 230.;
-const double kARMOR_HEIGHT = 120.74072829;
-const double kARMOR_DEPTH = 32.35238064;
-
-const std::vector<cv::Point3f> kCOORD_SMALL_ARMOR{
-    cv::Point3f(-kSMALL_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH),
-    cv::Point3f(kSMALL_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, 0.),
-    cv::Point3f(kSMALL_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, 0.),
-    cv::Point3f(-kSMALL_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH)};
-
-const std::vector<cv::Point3f> kCOORD_BIG_ARMOR{
-    cv::Point3f(-KBIG_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH),
-    cv::Point3f(KBIG_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, 0.),
-    cv::Point3f(KBIG_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, 0.),
-    cv::Point3f(-KBIG_ARMOR_WIDTH / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH)};
+const double kG = 9.8;
+const double kHEIGHT_ARMOR = 0.10213;
+const double kHEIGHT_SHELL = 0.34503;
 
 }  // namespace
 
@@ -48,11 +30,11 @@ void RangeEstimator::PnpEstimate(Armor& armor) {
   cv::Mat rotation, translation;
   if (armor.GetModel() == game::Model::kHERO ||
       armor.GetModel() == game::Model::kINFANTRY) {
-    cv::solvePnP(kCOORD_BIG_ARMOR, armor.Vertices2D(), cam_mat_, distor_coff_,
+    cv::solvePnP(GetCoordBigArmor(), armor.Vertices2D(), cam_mat_, distor_coff_,
                  rotation, translation, false, cv::SOLVEPNP_IPPE);
   } else {
-    cv::solvePnP(kCOORD_SMALL_ARMOR, armor.Vertices2D(), cam_mat_, distor_coff_,
-                 rotation, translation, false, cv::SOLVEPNP_IPPE);
+    cv::solvePnP(GetCoordSmallArmor(), armor.Vertices2D(), cam_mat_,
+                 distor_coff_, rotation, translation, false, cv::SOLVEPNP_IPPE);
   }
   rotations_.push_back(rotation);
   translations_.push_back(translation);
