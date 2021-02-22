@@ -30,7 +30,10 @@ const cv::Matx43d kCOORD_BIG_ARMOR(
 
 /* clang-format on */
 
-const cv ::Point3f kHIT_TARGET(0., 0., kHIT_DEPTH);
+const cv::Point3f kHIT_TARGET(0., 0., kHIT_DEPTH);
+
+cv::Matx43d GetCoordBigArmor() { return kCOORD_BIG_ARMOR; }
+cv::Matx43d GetCoordSmallArmor() { return kCOORD_SMALL_ARMOR; }
 
 }  // namespace
 
@@ -53,6 +56,11 @@ Armor::Armor(const LightBar &left_bar, const LightBar &right_bar) {
   SPDLOG_TRACE("Constructed.");
 }
 
+Armor::Armor(const cv::RotatedRect rect){
+  Init(rect);
+  SPDLOG_TRACE("Constructed.");
+}
+
 Armor::~Armor() { SPDLOG_TRACE("Destructed."); }
 
 void Armor::Init(const LightBar &left_bar, const LightBar &right_bar) {
@@ -60,6 +68,12 @@ void Armor::Init(const LightBar &left_bar, const LightBar &right_bar) {
   right_bar_ = right_bar;
 
   FormRect();
+  SPDLOG_DEBUG("Inited.");
+}
+
+void Armor::Init(cv::RotatedRect rect)
+{
+  rect_ = rect;
   SPDLOG_DEBUG("Inited.");
 }
 

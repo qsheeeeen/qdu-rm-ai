@@ -20,9 +20,11 @@ class Armor {
  public:
   Armor();
   Armor(const LightBar &left_bar, const LightBar &right_bar);
+  Armor(const cv::RotatedRect rect);
   ~Armor();
 
   void Init(const LightBar &left_bar, const LightBar &right_bar);
+  void Init(const cv::RotatedRect rect);
 
   game::Team GetTeam();
   void SetTeam(game::Team team);
@@ -49,3 +51,11 @@ class Armor {
   cv::Point3f HitTarget();
   const cv::Point3f WorldCoord();
 };
+
+double GetSmallArmorLength();
+double GetBigArmorLength();
+double GetArmorDepth();
+double GetArmorHeight();
+double GetArmorWidth();
+cv::Matx43d GetCoordSmallArmor();
+cv::Matx43d GetCoordBigArmor();
