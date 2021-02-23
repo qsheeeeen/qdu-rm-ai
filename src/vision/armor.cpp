@@ -32,10 +32,10 @@ const cv::Matx43d kCOORD_BIG_ARMOR(
 
 const cv::Point3f kHIT_TARGET(0., 0., kHIT_DEPTH);
 
+}  // namespace
+
 cv::Matx43d GetCoordBigArmor() { return kCOORD_BIG_ARMOR; }
 cv::Matx43d GetCoordSmallArmor() { return kCOORD_SMALL_ARMOR; }
-
-}  // namespace
 
 void Armor::FormRect() {
   cv::Point2f center = (left_bar_.Center() + right_bar_.Center()) / 2.;
@@ -56,7 +56,7 @@ Armor::Armor(const LightBar &left_bar, const LightBar &right_bar) {
   SPDLOG_TRACE("Constructed.");
 }
 
-Armor::Armor(const cv::RotatedRect rect){
+Armor::Armor(const cv::RotatedRect rect) {
   Init(rect);
   SPDLOG_TRACE("Constructed.");
 }
@@ -71,8 +71,9 @@ void Armor::Init(const LightBar &left_bar, const LightBar &right_bar) {
   SPDLOG_DEBUG("Inited.");
 }
 
-void Armor::Init(cv::RotatedRect rect)
-{
+void Armor::Init(cv::RotatedRect rect) {
+  if (rect.size.height > rect.size.width)
+    std::swap(rect.size.height, rect.size.width);
   rect_ = rect;
   SPDLOG_DEBUG("Inited.");
 }
