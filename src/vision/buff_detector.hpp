@@ -13,6 +13,8 @@ struct BuffDetectorParam {
   double binary_th;
   int se_erosion;    /* erosion in getStructuringElement */
   double ap_erosion; /* erosion in approxPolyDP */
+  int se_anchor;
+
   std::size_t contour_size_low_th;
   double contour_area_low_th;
   double contour_area_high_th;
@@ -20,12 +22,19 @@ struct BuffDetectorParam {
   double rect_area_high_th;
   double rect_ratio_low_th;
   double rect_ratio_high_th;
+
+  double contour_center_area_low_th;
+  double contour_center_area_high_th;
+  double rect_center_ratio_low_th;
+  double rect_center_ratio_high_th;
+  double rect_armor_area_low_th;
+  double rect_armor_area_high_th;
 };
 
 class BuffDetector : private Detector<Buff, BuffDetectorParam> {
  private:
   Buff buff_;
-  std::vector<std::vector<cv::Point2f>> contours_, contours_poly_;
+  std::vector<std::vector<cv::Point>> contours_, contours_poly_;
   std::vector<cv::RotatedRect> rects_;
 
   std::chrono::milliseconds duration_armors_, duration_tracks_, duration_rects_;
@@ -35,14 +44,14 @@ class BuffDetector : private Detector<Buff, BuffDetectorParam> {
 
   void FindRects(const cv::Mat &frame);
   void FindTrack(const cv::Mat &frame);
-  void MatchArmors(const cv::Mat &frame);
+  void MatchArmors();
 
   void VisualizeArmor(const cv::Mat &output, bool add_lable);
   void VisualizeTrack(const cv::Mat &output, bool add_lable);
 
  public:
   BuffDetector();
-  BuffDetector(const std::string &param_path);
+  BuffDetector(const std::string &param_path, game::Team buff_team);
   ~BuffDetector();
 
   const std::vector<Buff> &Detect(const cv::Mat &frame);

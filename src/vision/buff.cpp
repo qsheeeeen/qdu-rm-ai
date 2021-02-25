@@ -35,9 +35,9 @@ std::vector<cv::RotatedRect> Buff::GetTracks() {
 
 void Buff::SetTracks(std::vector<cv::RotatedRect> tracks) { tracks_ = tracks; }
 
-game::Team Armor::GetTeam() {
+game::Team Buff::GetTeam() {
   SPDLOG_DEBUG("team_: {}", team_);
   return team_;
 }
 
-void Armor::SetTeam(game::Team team) { team_ = team; }
+void Buff::SetTeam(game::Team team) { team_ = team; }

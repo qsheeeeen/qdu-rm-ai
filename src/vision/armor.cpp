@@ -72,8 +72,8 @@ void Armor::Init(const LightBar &left_bar, const LightBar &right_bar) {
 }
 
 void Armor::Init(cv::RotatedRect rect) {
-  if (rect.size.height > rect.size.width)
-    std::swap(rect.size.height, rect.size.width);
+  //if (rect.size.height > rect.size.width)
+  //  std::swap(rect.size.height, rect.size.width);
   rect_ = rect;
   SPDLOG_DEBUG("Inited.");
 }
