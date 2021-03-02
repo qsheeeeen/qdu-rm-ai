@@ -1,9 +1,6 @@
 names:
 - armor
-- base
-- watcher
-- car
-nc: 4
+nc: 1
 test: /home/qs/DJI ROCO/test.txt
 train: /home/qs/DJI ROCO/train.txt
 val: /home/qs/DJI ROCO/val.txt
