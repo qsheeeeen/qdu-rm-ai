@@ -164,7 +164,6 @@
 1. 第二阶段
     1. 使用基于pytorch的yolov5算法，训练得到的权重和模型导出到ONNX格式。
     1. 在妙算平台使用TensorRT运行导出的模型。
-    1. ONNX1.8发布后适配yolov5的master
     1. 添加Int8运行
 
 1. 第三阶段
