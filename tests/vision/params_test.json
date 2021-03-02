@@ -10,7 +10,7 @@
     "angle_high_th": 60,
     "aspect_ratio_low_th": 2,
     "aspect_ratio_high_th": 6,
-    "angle_diff_th": 10,
+    "angle_diff_th": 0.2,
     "length_diff_th": 0.2,
     "height_diff_th": 0.2,
     "area_diff_th": 0.6,

@@ -14,7 +14,7 @@ TEST(TestVision, TestArmorDetector) {
   EXPECT_EQ(armors.size(), 6) << "Can not detect armor in original image.";
 
   cv::Mat result = img.clone();
-  armor_detector.VisualizeResult(result, true);
+  armor_detector.VisualizeResult(result, 2);
   cv::imwrite("../../../image/test_origin.jpg", result);
 
   cv::resize(img, img, cv::Size(640, 426));
@@ -23,7 +23,7 @@ TEST(TestVision, TestArmorDetector) {
   EXPECT_EQ(armors.size(), 6) << "Can not detect armor in small image.";
 
   result = img.clone();
-  armor_detector.VisualizeResult(result, false);
+  armor_detector.VisualizeResult(result, 1);
   cv::imwrite("../../../image/test_resized.jpg", result);
 
   SUCCEED();

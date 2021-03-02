@@ -11,7 +11,7 @@ TEST(TestVision, TestBuffDetector) {
   ASSERT_FALSE(frame.empty()) << "Can not opening image.";
 
   std::vector<Buff> buffs = buff_detector.Detect(frame);
-  buff_detector.VisualizeResult(frame, -1);
+  buff_detector.VisualizeResult(frame, 2);
 
   cv::Mat result = frame.clone();
   cv::imwrite("../../../image/test_buff_result.jpg", result);
