@@ -173,7 +173,7 @@ void BuffDetector::MatchArmors() {
   cv::RotatedRect hammer;
   std::vector<Armor> armor_vec;
 
-  for (const auto rect : rects_) {
+  for (auto  &rect : rects_) {
     double rect_area = rect.size.area();
     SPDLOG_DEBUG("find area is {}", rect_area);
     if (rect_area > 1.5 * params_.rect_armor_area_high_th) {
