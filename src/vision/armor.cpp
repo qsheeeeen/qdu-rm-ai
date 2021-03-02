@@ -56,7 +56,7 @@ Armor::Armor(const LightBar &left_bar, const LightBar &right_bar) {
   SPDLOG_TRACE("Constructed.");
 }
 
-Armor::Armor(const cv::RotatedRect rect) {
+Armor::Armor(const cv::RotatedRect &rect) {
   Init(rect);
   SPDLOG_TRACE("Constructed.");
 }
@@ -71,8 +71,8 @@ void Armor::Init(const LightBar &left_bar, const LightBar &right_bar) {
   SPDLOG_DEBUG("Inited.");
 }
 
-void Armor::Init(cv::RotatedRect rect) {
-  //if (rect.size.height > rect.size.width)
+void Armor::Init(const cv::RotatedRect &rect) {
+  // if (rect.size.height > rect.size.width)
   //  std::swap(rect.size.height, rect.size.width);
   rect_ = rect;
   SPDLOG_DEBUG("Inited.");
@@ -168,8 +168,4 @@ cv::Point3f Armor::HitTarget() {
   auto point_mat = cv::Mat(kHIT_TARGET).reshape(1).t();
   cv::Point3f target(cv::Mat(point_mat * rot_mat_ + trans_vec_));
   return target;
-}
-
-const cv::Point3f Armor::WorldCoord() {
-  // world_coord_ =
 }

@@ -20,11 +20,11 @@ class Armor {
  public:
   Armor();
   Armor(const LightBar &left_bar, const LightBar &right_bar);
-  Armor(const cv::RotatedRect rect);
+  Armor(const cv::RotatedRect &rect);
   ~Armor();
 
   void Init(const LightBar &left_bar, const LightBar &right_bar);
-  void Init(const cv::RotatedRect rect);
+  void Init(const cv::RotatedRect &rect);
 
   game::Team GetTeam();
   void SetTeam(game::Team team);
