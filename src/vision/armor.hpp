@@ -52,10 +52,5 @@ class Armor {
   const cv::Point3f WorldCoord();
 };
 
-double GetSmallArmorLength();
-double GetBigArmorLength();
-double GetArmorDepth();
-double GetArmorHeight();
-double GetArmorWidth();
 cv::Matx43d GetCoordSmallArmor();
 cv::Matx43d GetCoordBigArmor();
