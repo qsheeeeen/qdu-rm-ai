@@ -57,10 +57,11 @@
 
   - Run `ldconfig` after install BehaviorTreeV3
 
-- 获得代码.
+- 获得代码
 
   ```sh
   git clone --recursive https://github.com/qsheeeeen/qdu-rm-ai
+  # or
   git clone --recursive https://gitee.com/qsheeeeen/qdu-rm-ai
   
   ```
@@ -75,7 +76,7 @@
   make -j8
   ```
 
-- 神经网络
+- 神经网络（可选）
 
   - 准备
 
@@ -107,37 +108,32 @@
   ```
 
 - 运行
-  - 暂时：使用VS Code运行，或者在repo跟目录里运行build里的二进制文件
-
-  - TODO：
-
   ```sh
-  #安装后直接使用
-  auto-aim
-  sentry
-  radar
+  cd qdu-rm-ai/runtime
+  # 根据应用选择程序
+  auto-aim # sentry radar
   ```
 
 ## 文件目录结构及文件用途说明
 
-| 文件夹 | 内容 |
-| ---- | ---- |
-| image | 图片。包含效果展示，程序运行时也会往里存图片 |
+| 文件夹 | 内容 | 备注 |
+| ---- | ---- | ---- |
+| image | 图片 | 包含效果展示，程序运行时也会往里存图片 |
 | logs | 程序运行日志 |
-| runtime | 程序的运行环境，包含运行所需文件，和运行过程产生的文件 |
+| runtime | 运行环境 | 包含运行所需文件，和运行过程产生的文件 | 
 | src | 源代码 |
 | tests | 测试代码 |
 | third_party | 第三方软件 |
-| utils | 辅助的脚本和文件 |
+| utils | 工具 | 辅助的脚本和文件 |
 
-| src内 | 内容 |
-| ----| ---- |
-| app | 应用。包含哨兵使用的全自动、步兵等使用的自瞄和雷达 |
-| behavior | 行为库。基于行为树开发的AI |
-| nn | nn |
-| demo | 样例。对相机和步兵进行样例化 |
-| device | 设备库。外接设备的抽象 |
-| vision | 视觉库。目标识别等代码 |
+| src内 | 内容 | 备注 |
+| ---- | ---- | ---- |
+| app | 应用 | 包含哨兵使用的全自动、步兵等使用的自瞄、雷达 |
+| behavior | 行为库 | 基于行为树开发的AI |
+| nn | 神经网络库 | 基于神经网络的算法 |
+| demo | 样例 | 演示用的例子 |
+| device | 设备库 | 外接设备的抽象 |
+| vision | 视觉库 | 目标识别等代码 |
 
 ## 系统介绍
 
@@ -152,8 +148,6 @@
 ## Roadmap
 
 近期：
-
-1. 添加 CInstall
 
 1. 实现类似多级流水线的视觉算法流程。[参考文章](https://opencv.org/hybrid-cv-dl-pipelines-with-opencv-4-4-g-api/)
 
