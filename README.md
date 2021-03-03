@@ -8,7 +8,7 @@
 
 本开源软件为青岛大学未来战队机器人的视觉和人工智能的代码。参考了其他战队代码和各种开源机器人项目，从零编写而成。中心思想：
 
-- 基于OpenCV的
+- 基于OpenCV的识别算法
 - 基于行为树设计哨兵的AI
 - 一个项目适配不同型号的机器人。
 
@@ -16,31 +16,25 @@
 
 ## 图片展示
 
-### YOLO识别效果
+| ![YOLO识别效果](./image/test_yolo.jpg?raw=true "YOLO识别效果") | 
+|:--:| 
+| *YOLO识别效果* |
 
-![YOLO识别效果](./image/test_yolo.jpg?raw=true "YOLO识别效果")
+| ![OpenCV灯条识别效果](./image/test_bars.jpg?raw=true "OpenCV灯条识别效果") | 
+|:--:| 
+| *OpenCV灯条识别效果* |
 
-### OpenCV灯条识别效果
+| ![装甲板匹配效果](./image/test_armor.jpg?raw=true "装甲板匹配效果") | 
+|:--:| 
+| *装甲板匹配效果* |
 
-![OpenCV灯条识别效果](./image/test_bars.jpg?raw=true "OpenCV灯条识别效果")
-
-### 装甲板匹配效果
-
-![装甲板匹配效果](./image/test_armor.jpg?raw=true "装甲板匹配效果")
-
-### TODO：TensorRT加速效果对比，可参考NVIDIA官方
-
-![TensorRT加速效果](./image/compare.jpg?raw=true "TensorRT加速效果")
+| ![TensorRT加速效果](./image/compare.jpg?raw=true "TensorRT加速效果") | 
+|:--:| 
+| *TODO：TensorRT加速效果* |
 
 ## 依赖&环境
 
-- 依赖：OpenCV、BehavoirTree.CPP、MVS SDK、spdlog、CUDA、TensorRT。
-- Linux平台，使用CMake和VS Code开发。未在Windows平台测试。
-
-## 使用说明
-
-- 安装依赖
-
+- 依赖
   - [OpenCV](https://docs.opencv.org/4.4.0/d7/d9f/tutorial_linux_install.html)
 
   - [BehavoirTree.CPP](https://github.com/BehaviorTree/BehaviorTree.CPP).
@@ -54,6 +48,14 @@
   - [TensorRT](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html)
 
   - [Google Test](https://github.com/google/googletest)
+
+- 开发测试环境
+  - Ubuntu
+  - WLS2
+
+## 使用说明
+
+- 安装依赖
 
   - Run `ldconfig` after install BehaviorTreeV3
 
@@ -95,40 +97,36 @@
 
   ```sh
   # 以下脚本涉及相对路径，需要在此文件夹内运行。
-  cd /path/to/qdu-rm-ai/utils
+  cd ./utils
 
   # 处理数据集
-  sh python3 roco2x.py ----dji-roco-dir=/path/to/DJI ROCO/
+  python3 roco2x.py --dji-roco-dir=path/to/DJI ROCO/
 
-  # 训练模型
+  # 训练导出模型
   sh ./train_vision.sh
-
-  # 导出模型
-  sh ./todo.sh
   ```
 
 - 运行
   ```sh
   cd qdu-rm-ai/runtime
   # 根据应用选择程序
-  auto-aim # sentry radar
+  auto-aim # sentry / radar ...
   ```
 
 ## 文件目录结构及文件用途说明
 
 | 文件夹 | 内容 | 备注 |
 | ---- | ---- | ---- |
-| image | 图片 | 包含效果展示，程序运行时也会往里存图片 |
-| logs | 程序运行日志 |
+| image | 图片 | 包含效果展示，测设产物 |
 | runtime | 运行环境 | 包含运行所需文件，和运行过程产生的文件 | 
 | src | 源代码 |
 | tests | 测试代码 |
 | third_party | 第三方软件 |
-| utils | 工具 | 辅助的脚本和文件 |
+| utils | 工具 | 脚本和文件 |
 
 | src内 | 内容 | 备注 |
 | ---- | ---- | ---- |
-| app | 应用 | 包含哨兵使用的全自动、步兵等使用的自瞄、雷达 |
+| app | 应用 | 包含哨兵程序、自瞄算法、雷达程序等 |
 | behavior | 行为库 | 基于行为树开发的AI |
 | nn | 神经网络库 | 基于神经网络的算法 |
 | demo | 样例 | 演示用的例子 |
