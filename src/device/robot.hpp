@@ -14,9 +14,9 @@ class Robot {
   bool thread_continue = false;
   std::thread thread_recv_, thread_trans_;
 
-  std::queue<Protocol_Data_AI_t> commandq_;
-  Protocol_Data_Referee_t ref_;
-  Protocol_Data_MCU_t mcu_;
+  std::queue<Protocol_DownData_t> commandq_;
+  Protocol_UpDataReferee_t ref_;
+  Protocol_UpDataMCU_t mcu_;
 
   std::mutex mutex_commandq_, mutex_ref_, mutex_mcu_;
 

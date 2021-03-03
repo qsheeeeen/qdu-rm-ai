@@ -5,9 +5,9 @@
 void Robot::ThreadRecv() {
   SPDLOG_DEBUG("[ThreadRecv] Started.");
 
-  uint16_t id;
-  Protocol_Referee_t ref;
-  Protocol_MCU_t robot;
+  Protocol_ID_t id;
+  Protocol_UpPackageReferee_t ref;
+  Protocol_UpPackageMCU_t robot;
 
   while (thread_continue) {
     serial_.Recv(&id, sizeof(id));
@@ -36,7 +36,7 @@ void Robot::ThreadRecv() {
 void Robot::ThreadTrans() {
   SPDLOG_DEBUG("[ThreadTrans] Started.");
 
-  Protocol_AI_t command;
+  Protocol_DownPackage_t command;
 
   while (thread_continue) {
     mutex_commandq_.lock();
