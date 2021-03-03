@@ -3,7 +3,7 @@
 #include "armor_detector.hpp"
 #include "ballistic_compensator.hpp"
 #include "camera.hpp"
-#include "mcu.hpp"
+#include "robot.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
@@ -31,13 +31,13 @@ int main(int argc, char const* argv[]) {
 
   SPDLOG_WARN("***** Running Auto Aim. *****");
 
-  MCU mcu("/dev/tty");
+  Robot robot("/dev/tty");
   Camera cam(0, 640, 480);
   cv::Mat frame;
 
 #if 0
   do {
-  } while (mcu.team != game::Team::kUNKNOWN);
+  } while (robot.Team() != game::Team::kUNKNOWN);
 #endif
 
   ArmorDetector detector("a.json", game::Team::kBLUE);
@@ -46,7 +46,7 @@ int main(int argc, char const* argv[]) {
     frame = cam.GetFrame();
     auto armors = detector.Detect(frame);
     // target = compensator.Compensate(frame, armors);
-    // mcu.Aim(target);
+    // robot.Aim(target);
   }
 
   return EXIT_SUCCESS;

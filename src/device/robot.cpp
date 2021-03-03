@@ -1,13 +1,13 @@
-#include "mcu.hpp"
+#include "robot.hpp"
 
 #include "spdlog/spdlog.h"
 
-void MCU::ThreadRecv() {
+void Robot::ThreadRecv() {
   SPDLOG_DEBUG("[ThreadRecv] Started.");
 
   uint16_t id;
   Protocol_Referee_t ref;
-  Protocol_MCU_t mcu;
+  Protocol_MCU_t robot;
 
   while (thread_continue) {
     serial_.Recv(&id, sizeof(id));
@@ -21,11 +21,11 @@ void MCU::ThreadRecv() {
         mutex_ref_.unlock();
       }
     } else if (AI_ID_MCU == id) {
-      serial_.Recv(&mcu, sizeof(mcu));
+      serial_.Recv(&robot, sizeof(robot));
 
       if (crc16::CRC16_Verify((uint8_t *)&mcu_, sizeof(mcu_))) {
         mutex_mcu_.lock();
-        std::memcpy(&mcu_, &(mcu.data), sizeof(mcu_));
+        std::memcpy(&mcu_, &(robot.data), sizeof(mcu_));
         mutex_mcu_.unlock();
       }
     }
@@ -33,7 +33,7 @@ void MCU::ThreadRecv() {
   SPDLOG_DEBUG("[ThreadRecv] Stoped.");
 }
 
-void MCU::ThreadTrans() {
+void Robot::ThreadTrans() {
   SPDLOG_DEBUG("[ThreadTrans] Started.");
 
   Protocol_AI_t command;
@@ -52,7 +52,7 @@ void MCU::ThreadTrans() {
   SPDLOG_DEBUG("[ThreadTrans] Stoped.");
 }
 
-MCU::MCU(const std::string &dev_path) {
+Robot::Robot(const std::string &dev_path) {
   serial_.Open(dev_path);
   serial_.Config();
   if (!serial_.IsOpen()) {
@@ -60,13 +60,13 @@ MCU::MCU(const std::string &dev_path) {
   }
 
   thread_continue = true;
-  thread_recv_ = std::thread(&MCU::ThreadRecv, this);
-  thread_trans_ = std::thread(&MCU::ThreadTrans, this);
+  thread_recv_ = std::thread(&Robot::ThreadRecv, this);
+  thread_trans_ = std::thread(&Robot::ThreadTrans, this);
 
   SPDLOG_TRACE("Constructed.");
 }
 
-MCU::~MCU() {
+Robot::~Robot() {
   serial_.Close();
 
   thread_continue = false;

@@ -8,7 +8,7 @@
 #include "protocol.h"
 #include "serial.hpp"
 
-class MCU {
+class Robot {
  private:
   Serial serial_;
   bool thread_continue = false;
@@ -24,7 +24,7 @@ class MCU {
   void ThreadTrans();
 
  public:
-  MCU(const std::string &dev_path);
-  ~MCU();
+  Robot(const std::string &dev_path);
+  ~Robot();
   void Command();
 };
