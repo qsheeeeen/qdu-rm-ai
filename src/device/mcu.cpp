@@ -10,7 +10,7 @@ void MCU::ThreadRecv() {
   Protocol_MCU_t mcu;
 
   while (thread_continue) {
-    serial_.Recv((uint16_t *)&id, sizeof(uint16_t));
+    serial_.Recv(&id, sizeof(id));
 
     if (AI_ID_REF == id) {
       serial_.Recv(&ref, sizeof(ref));
