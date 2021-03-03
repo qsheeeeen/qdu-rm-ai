@@ -2,58 +2,54 @@
 
 #include "spdlog/spdlog.h"
 
-void MCU::ComThread() {
-  SPDLOG_DEBUG("[ComThread] Started.");
+void MCU::ThreadRecv() {
+  SPDLOG_DEBUG("[ThreadRecv] Started.");
 
-  while (continue_parse_) {
-    uint16_t ID;
-    serial_.Recv((uint16_t *)&ID, sizeof(uint16_t));
+  uint16_t id;
+  Protocol_Referee_t ref;
+  Protocol_MCU_t mcu;
 
-    if (AI_ID_REF == ID) {
-      status_refe_.id = ID;
-      serial_.Recv((char *)&status_refe_.data, sizeof(status_refe_.data));
-      serial_.Recv((char *)&status_refe_.crc16, sizeof(status_refe_.crc16));
+  while (thread_continue) {
+    serial_.Recv((uint16_t *)&id, sizeof(uint16_t));
 
-      serial_.Recv((char *)&status_mcu_, sizeof(status_mcu_));
+    if (AI_ID_REF == id) {
+      serial_.Recv(&ref, sizeof(ref));
 
-      if (CRC16_Verify((const uint8_t *)&status_refe_, sizeof(status_refe_))) {
-        Protocol_AI_t result;
-        /**
-         * 运算部分
-         *
-         */
-        commandq_.push(result);
+      if (crc16::CRC16_Verify((uint8_t *)&ref_, sizeof(ref_))) {
+        mutex_ref_.lock();
+        std::memcpy(&ref_, &(ref.data), sizeof(ref_));
+        mutex_ref_.unlock();
       }
-    } else if (AI_ID_MCU == ID) {
-      status_mcu_.id = ID;
-      serial_.Recv((char *)&status_mcu_.data, sizeof(status_mcu_.data));
-      serial_.Recv((char *)&status_mcu_.crc16, sizeof(status_mcu_.crc16));
+    } else if (AI_ID_MCU == id) {
+      serial_.Recv(&mcu, sizeof(mcu));
 
-      if (CRC16_Verify((const uint8_t *)&status_mcu_, sizeof(status_mcu_))) {
-        Protocol_AI_t result;
-        /**
-         * 运算部分
-         *
-         */
-        commandq_.push(result);
+      if (crc16::CRC16_Verify((uint8_t *)&mcu_, sizeof(mcu_))) {
+        mutex_mcu_.lock();
+        std::memcpy(&mcu_, &(mcu.data), sizeof(mcu_));
+        mutex_mcu_.unlock();
       }
     }
-    commandq_mutex_.lock();
-    if (!commandq_.empty()) {
-      serial_.Trans((char *)&commandq_.front(), sizeof(Protocol_AI_t));
-      commandq_.pop();
-    }
-    commandq_mutex_.unlock();
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
-
-  SPDLOG_DEBUG("[ComThread] Stoped.");
+  SPDLOG_DEBUG("[ThreadRecv] Stoped.");
 }
 
-void MCU::CommandThread() {
-  SPDLOG_DEBUG("[CommandThread] Started.");
+void MCU::ThreadTrans() {
+  SPDLOG_DEBUG("[ThreadTrans] Started.");
 
-  SPDLOG_DEBUG("[CommandThread] Stoped.");
+  Protocol_AI_t command;
+
+  while (thread_continue) {
+    mutex_commandq_.lock();
+    if (!commandq_.empty()) {
+      command.data = commandq_.front();
+      command.crc16 = crc16::CRC16_Calc((uint8_t *)&command.data,
+                                        sizeof(command.data), UINT16_MAX);
+      serial_.Trans((char *)&command, sizeof(command));
+      commandq_.pop();
+    }
+    mutex_commandq_.unlock();
+  }
+  SPDLOG_DEBUG("[ThreadTrans] Stoped.");
 }
 
 MCU::MCU(const std::string &dev_path) {
@@ -63,8 +59,9 @@ MCU::MCU(const std::string &dev_path) {
     SPDLOG_ERROR("Can't open device.");
   }
 
-  continue_parse_ = true;
-  parse_thread_ = std::thread(&MCU::ComThread, this);
+  thread_continue = true;
+  thread_recv_ = std::thread(&MCU::ThreadRecv, this);
+  thread_trans_ = std::thread(&MCU::ThreadTrans, this);
 
   SPDLOG_TRACE("Constructed.");
 }
@@ -72,7 +69,8 @@ MCU::MCU(const std::string &dev_path) {
 MCU::~MCU() {
   serial_.Close();
 
-  continue_parse_ = false;
-  parse_thread_.join();
+  thread_continue = false;
+  thread_recv_.join();
+  thread_trans_.join();
   SPDLOG_TRACE("Destructed.");
 }

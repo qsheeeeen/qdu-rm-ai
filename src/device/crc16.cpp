@@ -1,8 +1,6 @@
 #include "crc16.hpp"
 
-namespace {
-  const int kCRC16_INIT = 0XFFFF;
-}
+namespace crc16 {
 
 static const uint16_t crc16_tab[256] = {
     0x0000, 0x1189, 0x2312, 0x329b, 0x4624, 0x57ad, 0x6536, 0x74bf, 0x8c48,
@@ -47,6 +45,8 @@ uint16_t CRC16_Calc(const uint8_t *buf, std::size_t len, uint16_t crc) {
 bool CRC16_Verify(const uint8_t *buf, std::size_t len) {
   if (len < 2) return false;
 
-  uint16_t expected = CRC16_Calc(buf, len - sizeof(uint16_t), kCRC16_INIT);
+  uint16_t expected = CRC16_Calc(buf, len - sizeof(uint16_t), UINT16_MAX);
   return expected == ((const uint16_t *)buf)[len / sizeof(uint16_t) - 1];
 }
+
+}  // namespace crc16
