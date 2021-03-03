@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "armor_detector.hpp"
+#include "ballistic_compensator.hpp"
 #include "camera.hpp"
 #include "mcu.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
@@ -30,6 +32,22 @@ int main(int argc, char const* argv[]) {
   SPDLOG_WARN("***** Running Auto Aim. *****");
 
   MCU mcu("/dev/tty");
+  Camera cam(0, 640, 480);
+  cv::Mat frame;
+
+#if 0
+  do {
+  } while (mcu.team != game::Team::kUNKNOWN);
+#endif
+
+  ArmorDetector detector("a.json", game::Team::kBLUE);
+  BallisticCompensator compensator;
+  while (true) {
+    frame = cam.GetFrame();
+    auto armors = detector.Detect(frame);
+    // target = compensator.Compensate(frame, armors);
+    // mcu.Aim(target);
+  }
 
   return EXIT_SUCCESS;
 }
