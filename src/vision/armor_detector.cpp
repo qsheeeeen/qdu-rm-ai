@@ -82,7 +82,11 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
   cv::split(frame, channels);
 
 #if 1
-  result = channels[0];
+  if (enemy_team_ == game::Team::kBLUE) {
+    result = channels[0];
+  } else if (enemy_team_ == game::Team::kRED) {
+    result = channels[2];
+  }
 #else
   if (enemy_team_ == game::Team::kBLUE) {
     result = channels[0] - channels[2];
@@ -101,14 +105,17 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
   cv::findContours(result, contours_, cv::RETR_LIST,
                    cv::CHAIN_APPROX_TC89_KCOS);
 
+#if 0
   contours_poly_.resize(contours_.size());
   for (size_t k = 0; k < contours_.size(); ++k) {
     cv::approxPolyDP(cv::Mat(contours_[k]), contours_poly_[k],
                      params_.ap_erosion, true);
   }
+#endif
+
   SPDLOG_DEBUG("Found contours: {}", contours_.size());
 
-  for (const auto &contour : contours_poly_) {
+  for (const auto &contour : contours_) {
     if (contour.size() < params_.contour_size_low_th) continue;
 
     const double c_area = cv::contourArea(contour);
