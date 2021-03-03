@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <string>
 
 /* 波特率 */
@@ -26,6 +27,7 @@ enum class DataLength {
 class Serial {
  private:
   int dev_;
+  std::mutex mutex_;
 
  public:
   /**
@@ -82,18 +84,18 @@ class Serial {
    *
    * @param buff 缓冲区地址
    * @param len 缓冲区长度
-   * @return ssize_t 已发送的长度
+   * @return std::size_t 已发送的长度
    */
-  ssize_t Trans(const void* buff, std::size_t len);
+  std::size_t Trans(const void* buff, std::size_t len);
 
   /**
    * @brief 接收
    *
    * @param buff 缓冲区地址
    * @param len 缓冲区长度
-   * @return ssize_t 已发送的长度
+   * @return std::size_t 已发送的长度
    */
-  ssize_t Recv(void* buff, std::size_t len);
+  std::size_t Recv(void* buff, std::size_t len);
 
   /**
    * @brief 关闭

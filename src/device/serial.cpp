@@ -82,8 +82,7 @@ bool Serial::Config(bool parity, StopBits stop_bit, DataLength data_length,
       parity, stop_bit, data_length, flow_ctrl, baud_rate);
 
   if (tcgetattr(dev_, &tty_cfg)) {
-    SPDLOG_ERROR("Error {} from tcgetattr: {}.", errno,
-                 std::strerror(errno));
+    SPDLOG_ERROR("Error {} from tcgetattr: {}.", errno, std::strerror(errno));
     return false;
   }
 
@@ -148,7 +147,8 @@ bool Serial::Config(bool parity, StopBits stop_bit, DataLength data_length,
  * @param len 缓冲区长度
  * @return ssize_t 已发送的长度
  */
-ssize_t Serial::Trans(const void* buff, std::size_t len) {
+std::size_t Serial::Trans(const void* buff, std::size_t len) {
+  std::lock_guard<std::mutex> lock(mutex_);
   return write(dev_, buff, len);
 }
 
@@ -159,7 +159,10 @@ ssize_t Serial::Trans(const void* buff, std::size_t len) {
  * @param len 缓冲区长度
  * @return ssize_t 已发送的长度
  */
-ssize_t Serial::Recv(void* buff, std::size_t len) { return read(dev_, buff, len); }
+std::size_t Serial::Recv(void* buff, std::size_t len) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  return read(dev_, buff, len);
+}
 
 /**
  * @brief 关闭
