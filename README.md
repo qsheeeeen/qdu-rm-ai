@@ -1,6 +1,6 @@
 # 青岛大学 RoboMaster 视觉 人工智能 代码开源
 
-***UNFINISHED.***
+***Developing.***
 
 软件正处在开发初期，只完成了视觉的核心部分，其余部分正在开发中。
 
@@ -12,7 +12,7 @@
 - 基于行为树设计哨兵的AI
 - 一个项目适配不同型号的机器人。
 
-这样做增加代码了的重用，减少了工作量。实现了通过DLA（深度学习加速器）加速妙算上模型的推断速度。利用行为树实现了可控的复杂行为。
+这样做增加代码了的重用，减少了工作量。实现了通过DLA(深度学习加速器)加速妙算上模型的推断速度。利用行为树实现了可控的复杂行为。
 
 ## 图片展示
 
@@ -32,92 +32,84 @@
 |:--:| 
 | *TODO：TensorRT加速效果* |
 
-## 依赖&环境
+## 依赖 & 环境
 
 - 依赖
-  - [OpenCV](https://docs.opencv.org/4.4.0/d7/d9f/tutorial_linux_install.html)
-
-  - [BehavoirTree.CPP](https://github.com/BehaviorTree/BehaviorTree.CPP).
-
-  - MVS SDK from [HIKROBOT](https://www.hikrobotics.com/service/download/0/0). Follow the instructions in INSTALL.
-
-  - [spdlog](https://github.com/gabime/spdlog).
-
-  - [CUDA](https://developer.nvidia.com/cuda-downloads)
-
-  - [TensorRT](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html)
-
-  - [Google Test](https://github.com/google/googletest)
+    - [OpenCV](https://docs.opencv.org/4.5.1/d7/d9f/tutorial_linux_install.html)
+    - [BehavoirTree.CPP](https://github.com/BehaviorTree/BehaviorTree.CPP).
+    - [MVS SDK from HIKROBOT](https://www.hikrobotics.com/service/download/0/0).
+    - [spdlog](https://github.com/gabime/spdlog).
+    - [Google Test](https://github.com/google/googletest)
+    - [CUDA](https://developer.nvidia.com/cuda-downloads)(可选)
+    - [TensorRT](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html)(可选)
 
 - 开发测试环境
-  - Ubuntu
-  - WLS2
+    - Ubuntu
+    - WSL2(不能使用工业相机) 
 
 ## 使用说明
 
-- 安装依赖
+1. 安装依赖
+    1. 根据上面链接安装相关依赖
+    1. 安装完成后运行`ldconfig`
 
-  - Run `ldconfig` after install BehaviorTreeV3
+1. 获得代码
 
-- 获得代码
+    ```sh
+    git clone --recursive https://github.com/qsheeeeen/qdu-rm-ai
+    # or
+    git clone --recursive https://gitee.com/qsheeeeen/qdu-rm-ai
+    
+    ```
 
-  ```sh
-  git clone --recursive https://github.com/qsheeeeen/qdu-rm-ai
-  # or
-  git clone --recursive https://gitee.com/qsheeeeen/qdu-rm-ai
-  
-  ```
+1. 编译 & 安装
 
-- 编译程序
+    ```sh
+    cd qdu-rm-ai
+    mkdir build
+    cd build
+    cmake ..
+    make -j8 # 根据CPU选择合适的数字
+    make install
+    ```
 
-  ```sh
-  cd qdu-rm-ai
-  mkdir build
-  cd build
-  cmake ..
-  make -j8
-  ```
+1. 神经网络(可选)
 
-- 神经网络（可选）
+    1. 准备
 
-  - 准备
+        ```sh
+        # 安装本项目需要的Python模块。
+        pip3 install -r qdu-rm-ai/requirements.txt
 
-  ```sh
-  # 以下脚本涉及相对路径，需要在此文件夹内运行。
-  cd ./third_party/yolov5
+        # 安装YOLOv5需要的Python模块
+        pip3 install -r qdu-rm-ai/third_party/yolov5/requirements.txt
+        ```
 
-  # 安装依赖的包
-  pip3 install -r requirements.txt
+    1. 训练
 
-  # 导出模型需要用到ONNX
-  pip3 install -U onnx
-  ```
+        ```sh
+        # 以下脚本涉及相对路径，需要在此文件夹内运行。
+        cd qdu-rm-ai/utils
 
-  - 训练
+        # 处理数据集
+        python3 roco2x.py --dji-roco-dir=path/to/DJI ROCO/
 
-  ```sh
-  # 以下脚本涉及相对路径，需要在此文件夹内运行。
-  cd ./utils
+        # 训练导出模型
+        sh ./train_vision.sh
+        ```
 
-  # 处理数据集
-  python3 roco2x.py --dji-roco-dir=path/to/DJI ROCO/
-
-  # 训练导出模型
-  sh ./train_vision.sh
-  ```
-
-- 运行
-  ```sh
-  cd qdu-rm-ai/runtime
-  # 根据应用选择程序
-  auto-aim # sentry / radar ...
-  ```
+1. 运行
+    ```sh
+    cd qdu-rm-ai/runtime
+    # 根据应用选择程序
+    auto-aim # sentry / radar ...
+    ```
 
 ## 文件目录结构及文件用途说明
 
 | 文件夹 | 内容 | 备注 |
 | ---- | ---- | ---- |
-| image | 图片 | 包含效果展示，测设产物 |
+| image | 图片 | 包含效果展示、测设产物等 |
 | runtime | 运行环境 | 包含运行所需文件，和运行过程产生的文件 | 
 | src | 源代码 |
 | tests | 测试代码 |

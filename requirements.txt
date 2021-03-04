@@ -1,6 +1,6 @@
 # Python requirements for utils.
 
 # pip3 install -r requirements.txt
-
+onnx
 onnxoptimizer
 onnx-simplifier
