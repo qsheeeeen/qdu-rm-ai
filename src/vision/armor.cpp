@@ -34,9 +34,6 @@ const cv::Point3f kHIT_TARGET(0., 0., kHIT_DEPTH);
 
 }  // namespace
 
-cv::Matx43d GetCoordBigArmor() { return kCOORD_BIG_ARMOR; }
-cv::Matx43d GetCoordSmallArmor() { return kCOORD_SMALL_ARMOR; }
-
 void Armor::FormRect() {
   cv::Point2f center = (left_bar_.Center() + right_bar_.Center()) / 2.;
   double width = cv::norm(left_bar_.Center() - right_bar_.Center());

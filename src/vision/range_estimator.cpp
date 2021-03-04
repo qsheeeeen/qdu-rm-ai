@@ -27,17 +27,11 @@ void RangeEstimator::LoadCameraMat(const std::string& path) {
 }
 
 void RangeEstimator::PnpEstimate(Armor& armor) {
-  cv::Mat rotation, translation;
-  if (armor.GetModel() == game::Model::kHERO ||
-      armor.GetModel() == game::Model::kINFANTRY) {
-    cv::solvePnP(GetCoordBigArmor(), armor.Vertices2D(), cam_mat_, distor_coff_,
-                 rotation, translation, false, cv::SOLVEPNP_IPPE);
-  } else {
-    cv::solvePnP(GetCoordSmallArmor(), armor.Vertices2D(), cam_mat_,
-                 distor_coff_, rotation, translation, false, cv::SOLVEPNP_IPPE);
-  }
-  rotations_.push_back(rotation);
-  translations_.push_back(translation);
+  cv::Mat rot_vec, trans_vec;
+  cv::solvePnP(armor.Vertices3D(), armor.Vertices2D(), cam_mat_, distor_coff_,
+               rot_vec, trans_vec, false, cv::SOLVEPNP_IPPE);
+  rotations_.push_back(rot_vec);
+  translations_.push_back(trans_vec);
 }
 
 double RangeEstimator::PinHoleEstimate(std::vector<cv::Point2f> target) {

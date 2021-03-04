@@ -51,6 +51,3 @@ class Armor {
   cv::Point3f HitTarget();
   const cv::Point3f WorldCoord();
 };
-
-cv::Matx43d GetCoordSmallArmor();
-cv::Matx43d GetCoordBigArmor();
