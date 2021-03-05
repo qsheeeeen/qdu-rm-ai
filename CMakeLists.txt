@@ -119,8 +119,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     message(STATUS "Install to: ${CMAKE_INSTALL_PREFIX}")
 
     install(
-        TARGETS auto_aim
-        EXPORT auto_aim
+        TARGETS auto-aim
+        EXPORT auto-aim
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
