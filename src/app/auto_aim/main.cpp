@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "armor_detector.hpp"
-#include "ballistic_compensator.hpp"
+#include "compensator.hpp"
 #include "camera.hpp"
 #include "robot.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
@@ -41,7 +41,7 @@ int main(int argc, char const* argv[]) {
 #endif
 
   ArmorDetector detector("a.json", game::Team::kBLUE);
-  BallisticCompensator compensator;
+  Compensator compensator;
   while (true) {
     frame = cam.GetFrame();
     auto armors = detector.Detect(frame);

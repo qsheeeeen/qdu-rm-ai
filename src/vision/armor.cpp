@@ -89,23 +89,23 @@ game::Model Armor::GetModel() {
 
 void Armor::SetModel(game::Model model) { model_ = model; }
 
-const cv::Point2f &Armor::Center2D() {
+const cv::Point2f &Armor::SurfaceCenter() {
   SPDLOG_DEBUG("rect_.center: ({}, {})", rect_.center.x, rect_.center.y);
   return rect_.center;
 }
 
-std::vector<cv::Point2f> Armor::Vertices2D() {
+std::vector<cv::Point2f> Armor::SurfaceVertices() {
   std::vector<cv::Point2f> vertices(4);
   rect_.points(vertices.data());
   return vertices;
 }
 
-double Armor::Angle2D() {
+double Armor::SurfaceAngle() {
   SPDLOG_DEBUG("rect_.angle: {}", rect_.angle);
   return rect_.angle;
 }
 
-cv::Mat Armor::Face2D(const cv::Mat &frame) {
+cv::Mat Armor::Face(const cv::Mat &frame) {
   cv::Rect dst_rect;
   if (game::HasBigArmor(GetModel())) {
     dst_rect = kBIG_ARMOR_FACE;
@@ -119,7 +119,8 @@ cv::Mat Armor::Face2D(const cv::Mat &frame) {
       dst_rect.br() - cv::Point(0, dst_rect.height),
       dst_rect.br(),
   };
-  cv::Mat trans_mat = cv::getPerspectiveTransform(Vertices2D(), dst_vertices);
+  cv::Mat trans_mat =
+      cv::getPerspectiveTransform(SurfaceVertices(), dst_vertices);
 
   cv::Mat perspective;
   cv::warpPerspective(frame, perspective, trans_mat, dst_rect.size());
@@ -142,9 +143,15 @@ void Armor::SetRotMat(const cv::Mat &rot_mat) {
   cv::Rodrigues(rot_mat_, rot_vec_);
 }
 
-cv::Mat &Armor::GetTransVec() { return trans_vec_; }
+const cv::Mat &Armor::GetTransVec() { return trans_vec_; }
 
 void Armor::SetTransVec(const cv::Mat &trans_vec) { trans_vec_ = trans_vec; }
+
+const cv::Point3f &Armor::GetWorldCoord() { return world_coord_; }
+
+void Armor::SetWorldCoord(const cv::Point3f &world_coord) {
+  world_coord_ = world_coord;
+}
 
 cv::Vec3d Armor::RotationAxis() {
   cv::Vec3d axis(rot_mat_.at<double>(2, 1) - rot_mat_.at<double>(1, 2),
@@ -153,7 +160,7 @@ cv::Vec3d Armor::RotationAxis() {
   return axis;
 }
 
-const cv::Mat Armor::Vertices3D() {
+const cv::Mat Armor::SolidVertices() {
   if (game::HasBigArmor(GetModel())) {
     return cv::Mat(kCOORD_BIG_ARMOR);
   } else {

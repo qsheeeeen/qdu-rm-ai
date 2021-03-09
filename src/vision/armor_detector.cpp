@@ -193,7 +193,8 @@ void ArmorDetector::VisualizeLightBar(const cv::Mat &output, bool add_lable) {
     for (auto &bar : lightbars_) {
       auto vertices = bar.Vertices();
       for (std::size_t i = 0; i < vertices.size(); ++i)
-        cv::line(output, vertices[i], vertices[(i + 1) % 4], kGREEN);
+        cv::line(output, vertices[i], vertices[(i + 1) % vertices.size()],
+                 kGREEN);
 
       cv::drawMarker(output, bar.Center(), kGREEN, cv::MARKER_CROSS);
 
@@ -209,15 +210,15 @@ void ArmorDetector::VisualizeLightBar(const cv::Mat &output, bool add_lable) {
 void ArmorDetector::VisualizeArmor(const cv::Mat &output, bool add_lable) {
   if (!targets_.empty()) {
     for (auto &armor : targets_) {
-      auto vertices = armor.Vertices2D();
-      for (std::size_t i = 0; i < vertices.size(); ++i)
+      auto vertices = armor.SurfaceVertices();
+      for (std::size_t i = 0; i < vertices.size(); ++i) {
         cv::line(output, vertices[i], vertices[(i + 1) % 4], kGREEN);
-
-      cv::drawMarker(output, armor.Center2D(), kGREEN, cv::MARKER_DIAMOND);
+      }
+      cv::drawMarker(output, armor.SurfaceCenter(), kGREEN, cv::MARKER_DIAMOND);
 
       if (add_lable) {
         std::ostringstream buf;
-        buf << armor.Center2D().x << ", " << armor.Center2D().y;
+        buf << armor.SurfaceCenter().x << ", " << armor.SurfaceCenter().y;
         cv::putText(output, buf.str(), vertices[1], kCV_FONT, 1.0, kGREEN);
       }
     }

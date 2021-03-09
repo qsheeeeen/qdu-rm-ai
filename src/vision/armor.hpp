@@ -8,12 +8,14 @@
 
 class Armor {
  private:
-  LightBar left_bar_, right_bar_;
   cv::RotatedRect rect_;
-  game::Team team_ = game::Team::kUNKNOWN;
-  game::Model model_ = game::Model::kUNKNOWN;
   cv::Mat face_, rot_vec_, rot_mat_, trans_vec_;
   cv::Point3f world_coord_;
+
+  game::Team team_ = game::Team::kUNKNOWN;
+  game::Model model_ = game::Model::kUNKNOWN;
+
+  LightBar left_bar_, right_bar_;
 
   void FormRect();
 
@@ -32,10 +34,11 @@ class Armor {
   game::Model GetModel();
   void SetModel(game::Model model);
 
-  const cv::Point2f &Center2D();
-  std::vector<cv::Point2f> Vertices2D();
-  double Angle2D();
-  cv::Mat Face2D(const cv::Mat &frame);
+  const cv::Point2f &SurfaceCenter();
+  std::vector<cv::Point2f> SurfaceVertices();
+  std::vector<cv::Point2f> SurfaceProjectedVertices();
+  double SurfaceAngle();
+  cv::Mat Face(const cv::Mat &frame);
 
   const cv::Mat &GetRotVec();
   void SetRotVec(const cv::Mat &rot_vec);
@@ -43,11 +46,13 @@ class Armor {
   const cv::Mat &GetRotMat();
   void SetRotMat(const cv::Mat &rot_mat);
 
-  cv::Mat &GetTransVec();
+  const cv::Mat &GetTransVec();
   void SetTransVec(const cv::Mat &trans_vec);
 
+  const cv::Point3f &GetWorldCoord();
+  void SetWorldCoord(const cv::Point3f &world_coord);
+
   cv::Vec3d RotationAxis();
-  const cv::Mat Vertices3D();
+  const cv::Mat SolidVertices();
   cv::Point3f HitTarget();
-  const cv::Point3f WorldCoord();
 };

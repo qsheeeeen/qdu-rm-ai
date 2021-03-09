@@ -172,7 +172,7 @@ void BuffDetector::MatchArmors() {
   cv::RotatedRect hammer;
   std::vector<Armor> armor_vec;
 
-  for (auto  &rect : rects_) {
+  for (auto &rect : rects_) {
     double rect_area = rect.size.area();
     SPDLOG_DEBUG("find area is {}", rect_area);
     if (rect_area > 1.5 * params_.rect_armor_area_high_th) {
@@ -188,8 +188,8 @@ void BuffDetector::MatchArmors() {
   if (armor_vec.size() > 0 && hammer.size.area()) {
     buff_.SetTarget(armor_vec[0]);
     for (auto armor : armor_vec) {
-      if (Dist(hammer.center, armor.Center2D()) <
-          Dist(buff_.GetTarget().Center2D(), hammer.center)) {
+      if (Dist(hammer.center, armor.SurfaceCenter()) <
+          Dist(buff_.GetTarget().SurfaceCenter(), hammer.center)) {
         buff_.SetTarget(armor);
       }
     }
@@ -206,21 +206,21 @@ void BuffDetector::VisualizeArmor(const cv::Mat &output, bool add_lable) {
   std::vector<Armor> armors = buff_.GetArmors();
   if (!armors.empty()) {
     for (auto &armor : armors) {
-      auto vertices = armor.Vertices2D();
+      auto vertices = armor.SurfaceVertices();
       for (std::size_t i = 0; i < vertices.size(); ++i)
         cv::line(output, vertices[i], vertices[(i + 1) % 4], kGREEN);
 
-      cv::drawMarker(output, armor.Center2D(), kGREEN, cv::MARKER_DIAMOND);
+      cv::drawMarker(output, armor.SurfaceCenter(), kGREEN, cv::MARKER_DIAMOND);
 
       if (add_lable) {
         std::ostringstream buf;
-        buf << armor.Center2D().x << ", " << armor.Center2D().y;
+        buf << armor.SurfaceCenter().x << ", " << armor.SurfaceCenter().y;
         cv::putText(output, buf.str(), vertices[1], kCV_FONT, 1.0, kGREEN);
       }
     }
   }
   Armor target = buff_.GetTarget();
-  auto vertices = target.Vertices2D();
+  auto vertices = target.SurfaceVertices();
   for (std::size_t i = 0; i < vertices.size(); ++i)
     cv::line(output, vertices[i], vertices[(i + 1) % 4], kRED);
 }
