@@ -26,5 +26,9 @@ TEST(TestVision, TestArmorDetector) {
   armor_detector.VisualizeResult(result, 1);
   cv::imwrite("../../../image/test_resized.jpg", result);
 
+  armor_detector.SetEnemyTeam(game::Team::kRED);
+  armors = armor_detector.Detect(img);
+  EXPECT_EQ(armors.size(), 0) << "Can not tell the enemy from ourselves.";
+
   SUCCEED();
 }
