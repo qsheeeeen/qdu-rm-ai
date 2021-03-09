@@ -8,9 +8,9 @@
 namespace {
 
 const auto kCV_FONT = cv::FONT_HERSHEY_SIMPLEX;
-const auto kGREEN = cv::Scalar(0., 255., 0.);
-const auto kRED = cv::Scalar(0., 0., 255.);
-const auto kYELLOW = cv::Scalar(0., 255., 255.);
+const cv::Scalar kGREEN(0., 255., 0.);
+const cv::Scalar kRED(0., 0., 255.);
+const cv::Scalar kYELLOW(0., 255., 255.);
 
 }  // namespace
 
