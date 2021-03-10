@@ -7,17 +7,21 @@ class Compensator {
   double ballet_speed_;
   cv::Mat cam_mat_, distor_coff_;
 
-  void Estimate3D(Armor& armor);
+  cv::Point3f EstimateWorldCoord(Armor& armor);
   double PinHoleEstimate(Armor& armor);
-  double SolveSurfaceLanchAngle(cv::Point2d target);
+  double SolveSurfaceLanchAngle(cv::Point2f target);
 
-  void VisualizeEstimate3D(const cv::Mat& output, int verbose);
+  void VisualizePnp(Armor& armor, const cv::Mat& output, bool add_lable);
 
  public:
   Compensator();
+  Compensator(const std::string& path);
   ~Compensator();
 
   void LoadCameraMat(const std::string& path);
 
-  void VisualizeResult(const cv::Mat& output, int verbose = 1);
+  void Apply(std::vector<Armor>& armors);
+
+  void VisualizeResult(std::vector<Armor>& armors, const cv::Mat& output,
+                       int verbose = 1);
 };
