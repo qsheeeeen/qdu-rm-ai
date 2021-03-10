@@ -28,7 +28,7 @@ void RangeEstimator::LoadCameraMat(const std::string& path) {
 
 void RangeEstimator::PnpEstimate(Armor& armor) {
   cv::Mat rot_vec, trans_vec;
-  cv::solvePnP(armor.SolidVertices(), armor.SurfaceVertices(), cam_mat_, distor_coff_,
+  cv::solvePnP(armor.ModelVertices(), armor.SurfaceVertices(), cam_mat_, distor_coff_,
                rot_vec, trans_vec, false, cv::SOLVEPNP_IPPE);
   rotations_.push_back(rot_vec);
   translations_.push_back(trans_vec);
