@@ -2,6 +2,10 @@
 
 #include <string>
 
+struct Euler {
+  double yaw, pitch, roll;
+};
+
 namespace game {
 
 enum class Team {
