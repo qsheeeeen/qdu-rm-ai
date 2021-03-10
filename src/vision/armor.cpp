@@ -89,6 +89,28 @@ game::Model Armor::GetModel() {
 
 void Armor::SetModel(game::Model model) { model_ = model; }
 
+const cv::Mat &Armor::GetRotVec() { return rot_vec_; }
+
+void Armor::SetRotVec(const cv::Mat &rot_vec) {
+  rot_vec_ = rot_vec;
+  cv::Rodrigues(rot_vec_, rot_mat_);
+}
+
+const cv::Mat &Armor::GetRotMat() { return rot_mat_; }
+
+void Armor::SetRotMat(const cv::Mat &rot_mat) {
+  rot_mat_ = rot_mat;
+  cv::Rodrigues(rot_mat_, rot_vec_);
+}
+
+const cv::Mat &Armor::GetTransVec() { return trans_vec_; }
+
+void Armor::SetTransVec(const cv::Mat &trans_vec) { trans_vec_ = trans_vec; }
+
+Euler Armor::GetAimEuler() { return aiming_euler_; }
+
+void Armor::SetAimEuler(const Euler &elur) { aiming_euler_ = elur; }
+
 const cv::Point2f &Armor::SurfaceCenter() {
   SPDLOG_DEBUG("rect_.center: ({}, {})", rect_.center.x, rect_.center.y);
   return rect_.center;
@@ -129,30 +151,6 @@ cv::Mat Armor::Face(const cv::Mat &frame) {
   return perspective;
 }
 
-const cv::Mat &Armor::GetRotVec() { return rot_vec_; }
-
-void Armor::SetRotVec(const cv::Mat &rot_vec) {
-  rot_vec_ = rot_vec;
-  cv::Rodrigues(rot_vec_, rot_mat_);
-}
-
-const cv::Mat &Armor::GetRotMat() { return rot_mat_; }
-
-void Armor::SetRotMat(const cv::Mat &rot_mat) {
-  rot_mat_ = rot_mat;
-  cv::Rodrigues(rot_mat_, rot_vec_);
-}
-
-const cv::Mat &Armor::GetTransVec() { return trans_vec_; }
-
-void Armor::SetTransVec(const cv::Mat &trans_vec) { trans_vec_ = trans_vec; }
-
-const cv::Point3f &Armor::GetWorldCoord() { return world_coord_; }
-
-void Armor::SetWorldCoord(const cv::Point3f &world_coord) {
-  world_coord_ = world_coord;
-}
-
 cv::Vec3d Armor::RotationAxis() {
   cv::Vec3d axis(rot_mat_.at<double>(2, 1) - rot_mat_.at<double>(1, 2),
                  rot_mat_.at<double>(0, 2) - rot_mat_.at<double>(2, 0),
@@ -160,16 +158,10 @@ cv::Vec3d Armor::RotationAxis() {
   return axis;
 }
 
-const cv::Mat Armor::SolidVertices() {
+const cv::Mat Armor::ModelVertices() {
   if (game::HasBigArmor(GetModel())) {
     return cv::Mat(kCOORD_BIG_ARMOR);
   } else {
     return cv::Mat(kCOORD_SMALL_ARMOR);
   }
-}
-
-cv::Point3f Armor::HitTarget() {
-  auto point_mat = cv::Mat(kHIT_TARGET).reshape(1).t();
-  cv::Point3f target(cv::Mat(point_mat * rot_mat_ + trans_vec_));
-  return target;
 }
