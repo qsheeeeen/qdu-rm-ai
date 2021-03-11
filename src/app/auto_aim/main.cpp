@@ -40,7 +40,7 @@ int main(int argc, char const* argv[]) {
   } while (robot.Team() != game::Team::kUNKNOWN);
 #endif
 
-  ArmorDetector detector("a.json", game::Team::kBLUE);
+  ArmorDetector detector("RMUL_Armor.json", game::Team::kBLUE);
   Compensator compensator;
   while (true) {
     frame = cam.GetFrame();
