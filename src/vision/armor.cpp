@@ -107,9 +107,9 @@ const cv::Mat &Armor::GetTransVec() { return trans_vec_; }
 
 void Armor::SetTransVec(const cv::Mat &trans_vec) { trans_vec_ = trans_vec; }
 
-Euler Armor::GetAimEuler() { return aiming_euler_; }
+common::Euler Armor::GetAimEuler() { return aiming_euler_; }
 
-void Armor::SetAimEuler(const Euler &elur) { aiming_euler_ = elur; }
+void Armor::SetAimEuler(const common::Euler &elur) { aiming_euler_ = elur; }
 
 const cv::Point2f &Armor::SurfaceCenter() {
   SPDLOG_DEBUG("rect_.center: ({}, {})", rect_.center.x, rect_.center.y);

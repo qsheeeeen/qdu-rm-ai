@@ -75,5 +75,5 @@ Robot::~Robot() {
   SPDLOG_TRACE("Destructed.");
 }
 
-void Robot::Aim(bool fire) {}
+void Robot::Aim(common::Euler aiming_eulr, bool auto_fire) {}
 void Robot::Move() {}

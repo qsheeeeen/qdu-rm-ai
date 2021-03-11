@@ -3,7 +3,6 @@
 #include <chrono>
 #include <vector>
 
-#include "game.hpp"
 #include "opencv2/opencv.hpp"
 #include "spdlog/spdlog.h"
 

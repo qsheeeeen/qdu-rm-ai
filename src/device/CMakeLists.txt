@@ -12,6 +12,7 @@ target_link_libraries(${PROJECT_NAME}
     MvCameraControl
     Threads::Threads
     spdlog::spdlog
+    common
 )
 
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
@@ -28,4 +29,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/../../third_party/qdu-rm-protocol
     /opt/MVS/include
+)
+
+add_dependencies(${PROJECT_NAME} 
+    common
 )

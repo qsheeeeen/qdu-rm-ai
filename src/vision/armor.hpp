@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "game.hpp"
+#include "common.hpp"
 #include "light_bar.hpp"
 #include "opencv2/opencv.hpp"
 
@@ -16,7 +16,7 @@ class Armor {
 
   LightBar left_bar_, right_bar_;
 
-  Euler aiming_euler_;
+  common::Euler aiming_euler_;
 
   void FormRect();
 
@@ -44,8 +44,8 @@ class Armor {
   const cv::Mat &GetTransVec();
   void SetTransVec(const cv::Mat &trans_vec);
 
-  Euler GetAimEuler();
-  void SetAimEuler(const Euler &elur);
+  common::Euler GetAimEuler();
+  void SetAimEuler(const common::Euler &elur);
   
   const cv::Point2f &SurfaceCenter();
   std::vector<cv::Point2f> SurfaceVertices();

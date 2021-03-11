@@ -7,6 +7,7 @@
 #include "crc16.hpp"
 #include "protocol.h"
 #include "serial.hpp"
+#include "common.hpp"
 
 class Robot {
  private:
@@ -27,6 +28,6 @@ class Robot {
   Robot(const std::string &dev_path);
   ~Robot();
   
-  void Aim(bool fire);
+  void Aim(common::Euler aiming_eulr, bool auto_fire);
   void Move();
 };

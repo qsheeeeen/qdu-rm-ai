@@ -1,4 +1,4 @@
-#include "game.hpp"
+#include "common.hpp"
 
 namespace game {
 

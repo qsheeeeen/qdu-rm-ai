@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "armor.hpp"
-#include "game.hpp"
+#include "common.hpp"
 #include "opencv2/ml.hpp"
 
 class ArmorClassifier {

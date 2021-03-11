@@ -2,9 +2,13 @@
 
 #include <string>
 
+namespace common {
+
 struct Euler {
   double yaw, pitch, roll;
 };
+
+}  // namespace common
 
 namespace game {
 

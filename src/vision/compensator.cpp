@@ -87,7 +87,7 @@ void Compensator::Apply(std::vector<Armor>& armors) {
   for (auto& armor : armors) {
     auto coord = EstimateWorldCoord(armor);
 
-    Euler aiming_eulr;
+    common::Euler aiming_eulr;
     cv::Point2f surface_target(
         std::sqrt(std::pow(coord.x, 2) + std::pow(coord.y, 2)), -coord.z);
     aiming_eulr.pitch = SolveSurfaceLanchAngle(surface_target);
