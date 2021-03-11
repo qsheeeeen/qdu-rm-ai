@@ -1,8 +1,8 @@
 #include <iostream>
 
 #include "armor_detector.hpp"
-#include "compensator.hpp"
 #include "camera.hpp"
+#include "compensator.hpp"
 #include "robot.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -45,8 +45,8 @@ int main(int argc, char const* argv[]) {
   while (true) {
     frame = cam.GetFrame();
     auto armors = detector.Detect(frame);
-    // target = compensator.Compensate(frame, armors);
-    // robot.Aim(target);
+    compensator.Apply(armors);
+    robot.Aim(armors.front().GetAimEuler(), false);
   }
 
   return EXIT_SUCCESS;
