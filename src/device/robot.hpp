@@ -26,5 +26,7 @@ class Robot {
  public:
   Robot(const std::string &dev_path);
   ~Robot();
-  void Command();
+  
+  void Aim(bool fire);
+  void Move();
 };

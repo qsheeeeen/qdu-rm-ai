@@ -74,3 +74,6 @@ Robot::~Robot() {
   thread_trans_.join();
   SPDLOG_TRACE("Destructed.");
 }
+
+void Robot::Aim(bool fire) {}
+void Robot::Move() {}
