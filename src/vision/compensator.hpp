@@ -20,7 +20,7 @@ class Compensator {
 
   void LoadCameraMat(const std::string& path);
 
-  void Apply(std::vector<Armor>& armors);
+  void Apply(std::vector<Armor>& armors, const cv::Mat &frame);
 
   void VisualizeResult(std::vector<Armor>& armors, const cv::Mat& output,
                        int verbose = 1);

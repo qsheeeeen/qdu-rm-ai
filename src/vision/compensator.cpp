@@ -83,7 +83,8 @@ void Compensator::LoadCameraMat(const std::string& path) {
   }
 }
 
-void Compensator::Apply(std::vector<Armor>& armors) {
+void Compensator::Apply(std::vector<Armor>& armors, const cv::Mat& frame) {
+  cv::Point2f frame_center(frame.cols / 2, frame.rows / 2);
   for (auto& armor : armors) {
     auto coord = EstimateWorldCoord(armor);
 
@@ -94,6 +95,11 @@ void Compensator::Apply(std::vector<Armor>& armors) {
     aiming_eulr.yaw = std::atan2(coord.x, coord.y);
     armor.SetAimEuler(aiming_eulr);
   }
+  std::sort(armors.begin(), armors.end(),
+            [frame_center](Armor& armor1, Armor& armor2) {
+              return cv::norm(armor1.SurfaceCenter() - frame_center) <
+                     cv::norm(armor2.SurfaceCenter() - frame_center);
+            });
 }
 
 void Compensator::VisualizeResult(std::vector<Armor>& armors,

@@ -42,10 +42,11 @@ int main(int argc, char const* argv[]) {
 
   ArmorDetector detector("RMUL_Armor.json", game::Team::kBLUE);
   Compensator compensator;
+
   while (true) {
     frame = cam.GetFrame();
     auto armors = detector.Detect(frame);
-    compensator.Apply(armors);
+    compensator.Apply(armors, frame);
     robot.Aim(armors.front().GetAimEuler(), false);
   }
 
