@@ -1,7 +1,5 @@
 #include "armor_detector.hpp"
 
-#include <ostream>
-
 #include "opencv2/opencv.hpp"
 #include "spdlog/spdlog.h"
 
@@ -199,9 +197,9 @@ void ArmorDetector::VisualizeLightBar(const cv::Mat &output, bool add_lable) {
       cv::drawMarker(output, bar.Center(), kGREEN, cv::MARKER_CROSS);
 
       if (add_lable) {
-        std::ostringstream buf;
-        buf << bar.Center().x << ", " << bar.Center().y;
-        cv::putText(output, buf.str(), vertices[1], kCV_FONT, 1.0, kGREEN);
+        cv::putText(output,
+                    cv::format("%.2f, %.2f", bar.Center().x, bar.Center().y),
+                    vertices[1], kCV_FONT, 1.0, kGREEN);
       }
     }
   }
@@ -217,9 +215,10 @@ void ArmorDetector::VisualizeArmor(const cv::Mat &output, bool add_lable) {
       cv::drawMarker(output, armor.SurfaceCenter(), kGREEN, cv::MARKER_DIAMOND);
 
       if (add_lable) {
-        std::ostringstream buf;
-        buf << armor.SurfaceCenter().x << ", " << armor.SurfaceCenter().y;
-        cv::putText(output, buf.str(), vertices[1], kCV_FONT, 1.0, kGREEN);
+        cv::putText(output,
+                    cv::format("%.2f, %.2f", armor.SurfaceCenter().x,
+                               armor.SurfaceCenter().y),
+                    vertices[1], kCV_FONT, 1.0, kGREEN);
       }
     }
   }
@@ -254,22 +253,19 @@ void ArmorDetector::VisualizeResult(const cv::Mat &output, int verbose) {
     cv::drawContours(output, contours_poly_, -1, kYELLOW);
   }
   if (verbose > 1) {
-    std::ostringstream buf;
-    buf << lightbars_.size() << " bars in " << duration_bars_.count() << " ms.";
+    int baseLine, v_pos = 0;
 
-    int baseLine;
-    int v_pos = 0;
-    cv::Size text_size =
-        cv::getTextSize(buf.str(), kCV_FONT, 1.0, 2, &baseLine);
+    std::string label = cv::format("%ld bars in %ld ms.", lightbars_.size(),
+                                   duration_bars_.count());
+    cv::Size text_size = cv::getTextSize(label, kCV_FONT, 1.0, 2, &baseLine);
     v_pos += static_cast<int>(1.3 * text_size.height);
-    cv::putText(output, buf.str(), cv::Point(0, v_pos), kCV_FONT, 1.0, kGREEN);
+    cv::putText(output, label, cv::Point(0, v_pos), kCV_FONT, 1.0, kGREEN);
 
-    buf.str(std::string());
-    buf << targets_.size() << " armors in " << duration_armors_.count()
-        << " ms.";
-    text_size = cv::getTextSize(buf.str(), kCV_FONT, 1.0, 2, &baseLine);
+    label = cv::format("%ld armors in %ld ms.", targets_.size(),
+                       duration_armors_.count());
+    text_size = cv::getTextSize(label, kCV_FONT, 1.0, 2, &baseLine);
     v_pos += static_cast<int>(1.3 * text_size.height);
-    cv::putText(output, buf.str(), cv::Point(0, v_pos), kCV_FONT, 1.0, kGREEN);
+    cv::putText(output, label, cv::Point(0, v_pos), kCV_FONT, 1.0, kGREEN);
   }
   VisualizeLightBar(output, verbose > 2);
   VisualizeArmor(output, verbose > 2);

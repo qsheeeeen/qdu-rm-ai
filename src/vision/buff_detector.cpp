@@ -1,7 +1,5 @@
 #include "buff_detector.hpp"
 
-#include <ostream>
-
 #include "opencv2/opencv.hpp"
 #include "spdlog/spdlog.h"
 
@@ -264,29 +262,25 @@ void BuffDetector::VisualizeResult(const cv::Mat &output, int verbose) {
   }
 
   if (verbose > 1) {
-    std::ostringstream buf;
-    int baseLine;
-    int v_pos = 0;
+    int baseLine, v_pos = 0;
 
-    buf << buff_.GetArmors().size() << " armors in " << duration_armors_.count()
-        << " ms.";
-    cv::Size text_size =
-        cv::getTextSize(buf.str(), kCV_FONT, 1.0, 2, &baseLine);
+    std::string label = cv::format("%ld armors in %ld ms.", targets_.size(),
+                                   duration_armors_.count());
+    cv::Size text_size = cv::getTextSize(label, kCV_FONT, 1.0, 2, &baseLine);
     v_pos += static_cast<int>(1.3 * text_size.height);
-    cv::putText(output, buf.str(), cv::Point(0, v_pos), kCV_FONT, 1.0, kGREEN);
+    cv::putText(output, label, cv::Point(0, v_pos), kCV_FONT, 1.0, kGREEN);
 
-    buf.str(std::string());
-    buf << rects_.size() << " rects in " << duration_rects_.count() << " ms.";
-    text_size = cv::getTextSize(buf.str(), kCV_FONT, 1.0, 2, &baseLine);
+    label = cv::format("%ld rects in %ld ms.", rects_.size(),
+                       duration_rects_.count());
+    text_size = cv::getTextSize(label, kCV_FONT, 1.0, 2, &baseLine);
     v_pos += static_cast<int>(1.3 * text_size.height);
-    cv::putText(output, buf.str(), cv::Point(0, v_pos), kCV_FONT, 1.0, kGREEN);
+    cv::putText(output, label, cv::Point(0, v_pos), kCV_FONT, 1.0, kGREEN);
 
-    buf.str(std::string());
-    buf << buff_.GetTracks().size() << " tracks in " << duration_tracks_.count()
-        << " ms.";
-    text_size = cv::getTextSize(buf.str(), kCV_FONT, 1.0, 2, &baseLine);
+    label = cv::format("%ld tracks in %ld ms.", buff_.GetTracks().size(),
+                       duration_tracks_.count());
+    text_size = cv::getTextSize(label, kCV_FONT, 1.0, 2, &baseLine);
     v_pos += static_cast<int>(1.3 * text_size.height);
-    cv::putText(output, buf.str(), cv::Point(0, v_pos), kCV_FONT, 1.0, kGREEN);
+    cv::putText(output, label, cv::Point(0, v_pos), kCV_FONT, 1.0, kGREEN);
   }
   VisualizeArmor(output, verbose);
   VisualizeTrack(output, verbose);
