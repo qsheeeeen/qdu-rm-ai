@@ -14,10 +14,15 @@ const cv::Scalar kYELLOW(0., 255., 255.);
 
 }  // namespace
 
+<<<<<<< HEAD
 ArmorClassifier::ArmorClassifier(const std::string model_path, int width,
                                  int height) {
   LoadModel(model_path);
   SetInputSize(width, height);
+=======
+ArmorClassifier::ArmorClassifier(const std::string model_path) {
+  LoadModel(model_path);
+>>>>>>> 2358ca7c67a428f4e1eddd89fbc2a93bcf87c411
   SPDLOG_TRACE("Constructed.");
 }
 
