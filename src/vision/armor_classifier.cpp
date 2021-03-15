@@ -1,20 +1,54 @@
 #include "armor_classifier.hpp"
 
+#include "opencv2/dnn.hpp"
+#include "opencv2/imgproc.hpp"
 #include "opencv2/opencv.hpp"
 #include "spdlog/spdlog.h"
 
-ArmorClassifier::ArmorClassifier() {}
-ArmorClassifier::~ArmorClassifier() {}
+namespace {
 
-void ArmorClassifier::StoreModel(const std::string& path) {}
-void ArmorClassifier::LoadModel(const std::string& path) {}
+const auto kCV_FONT = cv::FONT_HERSHEY_SIMPLEX;
+const cv::Scalar kGREEN(0., 255., 0.);
+const cv::Scalar kRED(0., 0., 255.);
+const cv::Scalar kYELLOW(0., 255., 255.);
 
-void ArmorClassifier::Train() {}
+}  // namespace
 
-void ArmorClassifier::ClassifyModel(Armor &armor, const cv::Mat &frame) {
-  armor.SetModel(game::Model::kINFANTRY);
+ArmorClassifier::ArmorClassifier(const std::string model_path) {
+  LoadModel(model_path);
+  SPDLOG_TRACE("Constructed.");
 }
 
-void ArmorClassifier::ClassifyTeam(Armor &armor, const cv::Mat &frame) {
-  armor.SetTeam(game::Team::kBLUE);
+ArmorClassifier::ArmorClassifier() { SPDLOG_TRACE("Constructed."); }
+ArmorClassifier::~ArmorClassifier() { SPDLOG_TRACE("Destructed."); }
+
+void ArmorClassifier::LoadModel(const std::string &path) {
+  net_ = cv::dnn::readNet(path);
+  net_.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
+  net_.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA);
+}
+
+void ArmorClassifier::LoadModel(const std::string &path) {
+  net_input_size_ = cv::Size(in_width_, in_height_);
+}
+
+void ArmorClassifier::ClassifyModel(Armor &armor) {
+  cv::Mat frame = armor.Face(frame);
+  cv::dnn::blobFromImage(frame, blob_, scale_, net_input_size_, mean_, true,
+                         false);
+  net_.setInput(blob_);
+  cv::Mat prob = net_.forward();
+  cv::Point class_point;
+  cv::minMaxLoc(prob.reshape(1, 1), nullptr, &conf_, nullptr, &class_point);
+  model_ = classes_[class_point.x];
+  armor.SetModel(model_);
+}
+
+void ArmorClassifier::VisualizeResult(const cv::Mat &output, int verbose) {
+  std::vector<double> layers_times;
+  double freq = cv::getTickFrequency() / 1000.;
+  double t = net_.getPerfProfile(layers_times) / freq;
+  std::string label = cv::format("%.2f ms, %s: %.4f", t,
+                                 game::ModelToString(model_).c_str(), conf_);
+  cv::putText(output, label, cv::Point(0, 0), kCV_FONT, 1., kGREEN);
 }
