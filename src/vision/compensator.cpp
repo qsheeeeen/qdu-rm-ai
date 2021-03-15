@@ -83,6 +83,10 @@ void Compensator::LoadCameraMat(const std::string& path) {
   }
 }
 
+cv::Point3f Compensator::GetCoord(Armor& armor){
+  return EstimateWorldCoord(armor);
+}
+
 void Compensator::Apply(std::vector<Armor>& armors, const cv::Mat& frame) {
   cv::Point2f frame_center(frame.cols / 2, frame.rows / 2);
   for (auto& armor : armors) {

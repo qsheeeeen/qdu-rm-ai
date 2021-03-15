@@ -18,9 +18,11 @@ class Compensator {
   Compensator(const std::string& path);
   ~Compensator();
 
+  cv::Point3f GetCoord(Armor& armor);
+
   void LoadCameraMat(const std::string& path);
 
-  void Apply(std::vector<Armor>& armors, const cv::Mat &frame);
+  void Apply(std::vector<Armor>& armors, const cv::Mat& frame);
 
   void VisualizeResult(std::vector<Armor>& armors, const cv::Mat& output,
                        int verbose = 1);
