@@ -1,14 +1,20 @@
 #include "buff_detector.hpp"
 
+#include <ostream>
+
+#include "compensator.hpp"
 #include "opencv2/opencv.hpp"
 #include "spdlog/spdlog.h"
 
 namespace {
 
 const auto kCV_FONT = cv::FONT_HERSHEY_SIMPLEX;
-const auto kGREEN = cv::Scalar(0., 255., 0.);
-const auto kRED = cv::Scalar(0., 0., 255.);
-const auto kYELLOW = cv::Scalar(0., 255., 255.);
+const cv::Scalar kGREEN(0., 255., 0.);
+const cv::Scalar kRED(0., 0., 255.);
+const cv::Scalar kYELLOW(0., 255., 255.);
+
+const int kR = 1400; 
+
 }  // namespace
 
 void BuffDetector::InitDefaultParams(const std::string &params_path) {
@@ -122,15 +128,6 @@ void BuffDetector::FindRects(const cv::Mat &frame) {
     if (rect_ratio < params_.rect_ratio_low_th) continue;
     if (rect_ratio > params_.rect_ratio_high_th) continue;
 
-    if (params_.contour_center_area_low_th < contour_area &&
-        contour_area < params_.contour_center_area_high_th) {
-      if (params_.rect_center_ratio_low_th < rect_ratio &&
-          rect_ratio < params_.rect_center_ratio_high_th) {
-        buff_.SetCenter(rect.center);
-        continue;
-      }
-    }
-
     if (contour_area > params_.contour_area_high_th) continue;
 
     double rect_area = rect.size.area();
@@ -145,13 +142,41 @@ void BuffDetector::FindRects(const cv::Mat &frame) {
       std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 }
 
+void BuffDetector::FindCenter() {
+  const auto start = std::chrono::high_resolution_clock::now();
+  buff_.SetCenter(cv::RotatedRect());
+
+  for (const auto &contour : contours_poly_) {
+    cv::RotatedRect rect = cv::minAreaRect(contour);
+    double rect_ratio = rect.size.aspectRatio();
+    double contour_area = cv::contourArea(contour);
+    if (params_.contour_center_area_low_th < contour_area &&
+        contour_area < params_.contour_center_area_high_th) {
+      if (params_.rect_center_ratio_low_th < rect_ratio &&
+          rect_ratio < params_.rect_center_ratio_high_th) {
+        buff_.SetCenter(rect);
+        continue;
+      }
+    }
+  }
+
+  const auto stop = std::chrono::high_resolution_clock::now();
+  duration_center_ =
+      std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+}
+
 double Dist(cv::Point2f a, cv::Point2f b) {
   return sqrt(powf(a.x - b.x, 2) + powf(a.y - b.y, 2));
 }
 
-void BuffDetector::FindTrack(const cv::Mat &frame) {
+void BuffDetector::FindTrack(const std::string &path) {
   const auto start = std::chrono::high_resolution_clock::now();
   buff_.SetTracks(std::vector<cv::RotatedRect>());
+  
+  double speed = buff_.GetSpeed();
+  Armor armor = buff_.GetTarget();
+  Compensator compensator(path);
+  cv::Point3f center_coord = compensator.GetCoord(armor);
 
   // TODO
 

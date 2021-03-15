@@ -14,12 +14,19 @@ std::vector<Armor> Buff::GetArmors() {
 
 void Buff::SetArmors(std::vector<Armor> armors) { armors_ = armors; }
 
-cv::Point2f Buff::GetCenter() {
-  SPDLOG_DEBUG("center_: {}, {}", center_.x, center_.y);
+cv::RotatedRect Buff::GetCenter() {
+  SPDLOG_DEBUG("center_: {}, {}", center_.center.x, center_.center.y);
   return center_;
 }
 
-void Buff::SetCenter(cv::Point2f center) { center_ = center; }
+void Buff::SetCenter(cv::RotatedRect center) { center_ = center; }
+
+double Buff::GetSpeed() {
+  SPDLOG_DEBUG("rects_: {}", speed_);
+  return speed_;
+}
+
+void Buff::SetSpeed(double time) { speed_ = 0.785 * sin(1.884 * time) + 1.305; }
 
 Armor Buff::GetTarget() {
   SPDLOG_DEBUG("Got it.");

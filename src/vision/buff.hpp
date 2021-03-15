@@ -4,12 +4,12 @@
 
 class Buff {
  private:
-  cv::Point2f center_;
+  cv::RotatedRect center_;
   std::vector<Armor> armors_;
   Armor target_;
   std::vector<cv::RotatedRect> tracks_;
   game::Team team_ = game::Team::kUNKNOWN;
-  cv::Point3f world_coord_;
+  double speed_, time_;
 
  public:
   Buff();
@@ -18,8 +18,11 @@ class Buff {
   std::vector<Armor> GetArmors();
   void SetArmors(std::vector<Armor> armors);
 
-  cv::Point2f GetCenter();
-  void SetCenter(cv::Point2f center);
+  cv::RotatedRect GetCenter();
+  void SetCenter(cv::RotatedRect center);
+
+  double GetSpeed();
+  void SetSpeed(double time);
 
   Armor GetTarget();
   void SetTarget(Armor target);
@@ -29,4 +32,5 @@ class Buff {
 
   game::Team GetTeam();
   void SetTeam(game::Team team);
+
 };
