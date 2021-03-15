@@ -172,8 +172,7 @@ void ArmorDetector::MatchLightBars(const cv::Mat &frame) {
       if (center_dist > l * params_.center_dist_high_th) continue;
 
       auto armor = Armor(*iti, *itj);
-      armor_classifier_.ClassifyModel(armor, frame);
-      armor_classifier_.ClassifyTeam(armor, frame);
+      armor_classifier_.ClassifyModel(armor);
       targets_.emplace_back(armor);
       break;
     }

@@ -5,8 +5,8 @@
 
 #include "armor.hpp"
 #include "armor_classifier.hpp"
-#include "detector.hpp"
 #include "common.hpp"
+#include "detector.hpp"
 #include "light_bar.hpp"
 
 struct ArmorDetectorParam {
