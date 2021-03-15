@@ -11,7 +11,7 @@ class ArmorClassifier {
   float scale_;
   double conf_;
   bool swap_rb_;
-  int in_width_, in_height_, class_id_;
+  int class_id_;
   std::vector<game::Model> classes_;
   cv::Scalar mean_;
   cv::dnn::Net net_;
