@@ -4,10 +4,11 @@
 #include <queue>
 #include <thread>
 
+#include "common.hpp"
 #include "crc16.hpp"
+#include "opencv2/opencv.hpp"
 #include "protocol.h"
 #include "serial.hpp"
-#include "common.hpp"
 
 class Robot {
  private:
@@ -27,7 +28,8 @@ class Robot {
  public:
   Robot(const std::string &dev_path);
   ~Robot();
-  
+
+  cv::Mat GetRotMat();
   void Aim(common::Euler aiming_eulr, bool auto_fire);
   void Move();
 };

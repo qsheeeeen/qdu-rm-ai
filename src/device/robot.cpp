@@ -1,5 +1,6 @@
 #include "robot.hpp"
 
+#include "opencv2/core/quaternion.hpp"
 #include "spdlog/spdlog.h"
 
 void Robot::ThreadRecv() {
@@ -73,6 +74,11 @@ Robot::~Robot() {
   thread_recv_.join();
   thread_trans_.join();
   SPDLOG_TRACE("Destructed.");
+}
+
+cv::Mat Robot::GetRotMat() {
+  cv::Quatf q(mcu_.quat.q0, mcu_.quat.q1, mcu_.quat.q2, mcu_.quat.q3);
+  return cv::Mat(q.toRotMat3x3(), true);
 }
 
 void Robot::Aim(common::Euler aiming_eulr, bool auto_fire) {}
