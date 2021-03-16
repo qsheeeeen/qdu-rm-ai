@@ -40,7 +40,7 @@ int main(int argc, char const* argv[]) {
   } while (robot.Team() != game::Team::kUNKNOWN);
 #endif
 
-  ArmorDetector detector("RMUL_Armor.json", game::Team::kBLUE);
+  ArmorDetector detector("RMUL2021_Armor.json", game::Team::kBLUE);
   Compensator compensator;
 
   while (true) {
