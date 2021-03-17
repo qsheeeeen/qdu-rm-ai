@@ -15,7 +15,11 @@ TEST(TestVision, TestArmorDetector) {
 
   cv::Mat result = img.clone();
   armor_detector.VisualizeResult(result, 2);
-  cv::imwrite("../../../image/test_origin.jpg", result);
+  cv::imwrite("../../../image/test_origin.png", result);
+
+  for (size_t i=0; i < armors.size(); ++i) {
+    cv::imwrite(cv::format("../../../image/p%ld.png", i), armors[i].Face(img));
+  }
 
   cv::resize(img, img, cv::Size(640, 426));
 
@@ -24,13 +28,9 @@ TEST(TestVision, TestArmorDetector) {
 
   result = img.clone();
   armor_detector.VisualizeResult(result, 1);
-  cv::imwrite("../../../image/test_resized.jpg", result);
-
-  SUCCEED() << "Generated images of test result";
+  cv::imwrite("../../../image/test_resized.png", result);
 
   armor_detector.SetEnemyTeam(game::Team::kRED);
   armors = armor_detector.Detect(img);
   EXPECT_EQ(armors.size(), 0) << "Can not tell the enemy from ourselves.";
-
-  armor_detector.ClassifyModel();
 }

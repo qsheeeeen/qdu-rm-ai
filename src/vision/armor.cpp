@@ -12,8 +12,12 @@ const double kARMOR_HEIGHT = kARMOR_WIDTH * std::sin(75. / 180. * M_PI);
 const double kARMOR_DEPTH = kARMOR_WIDTH * std::cos(75. / 180. * M_PI);
 const double kHIT_DEPTH = kARMOR_WIDTH / 2. * std::cos(75. / 180. * M_PI);
 
-const cv::Rect kSMALL_ARMOR_FACE(0, 0, kSMALL_ARMOR_LENGTH, kARMOR_WIDTH);
-const cv::Rect kBIG_ARMOR_FACE(0, 0, KBIG_ARMOR_LENGTH, kARMOR_WIDTH);
+std::vector<cv::Point2f> kDST_POV{
+    cv::Point(0, kARMOR_WIDTH),
+    cv::Point(0, 0),
+    cv::Point(kSMALL_ARMOR_LENGTH, 0),
+    cv::Point(kSMALL_ARMOR_LENGTH, kARMOR_WIDTH),
+};
 
 /* clang-format off */
 const cv::Matx43d kCOORD_SMALL_ARMOR(
@@ -128,27 +132,13 @@ double Armor::SurfaceAngle() {
 }
 
 cv::Mat Armor::Face(const cv::Mat &frame) {
-  cv::Rect dst_rect;
-  if (game::HasBigArmor(GetModel())) {
-    dst_rect = kBIG_ARMOR_FACE;
-  } else {
-    dst_rect = kSMALL_ARMOR_FACE;
-  }
-
-  std::vector<cv::Point2f> dst_vertices{
-      dst_rect.tl() + cv::Point(0, dst_rect.height),
-      dst_rect.tl(),
-      dst_rect.br() - cv::Point(0, dst_rect.height),
-      dst_rect.br(),
-  };
-  cv::Mat trans_mat =
-      cv::getPerspectiveTransform(SurfaceVertices(), dst_vertices);
-
-  cv::Mat perspective;
-  cv::warpPerspective(frame, perspective, trans_mat, dst_rect.size());
-  cv::adaptiveThreshold(perspective, perspective, 255,
-                        cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 3, 1);
-  return perspective;
+  cv::Mat p, t;
+  t = cv::getPerspectiveTransform(SurfaceVertices(), kDST_POV);
+  cv::warpPerspective(frame, p, t, cv::Size(kSMALL_ARMOR_LENGTH, kARMOR_WIDTH));
+  cv::cvtColor(p, p, cv::COLOR_RGB2GRAY);
+  cv::medianBlur(p, p, 3);
+  cv::threshold(p, p, 0., 255., cv::THRESH_BINARY | cv::THRESH_TRIANGLE);
+  return p;
 }
 
 cv::Vec3d Armor::RotationAxis() {

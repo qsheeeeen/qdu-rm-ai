@@ -246,9 +246,9 @@ const std::vector<Armor> &ArmorDetector::Detect(const cv::Mat &frame) {
   return targets_;
 }
 
-void ArmorDetector::ClassifyModel() {
+void ArmorDetector::ClassifyModel(const cv::Mat &frame) {
   for (auto &armor : targets_) {
-    armor_classifier_.ClassifyModel(armor);
+    armor_classifier_.ClassifyModel(armor, frame);
   }
 }
 

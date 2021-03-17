@@ -28,6 +28,6 @@ class ArmorClassifier {
   void SetInputSize(int width, int height);
 
   void Train();
-  void ClassifyModel(Armor &armor);
+  void ClassifyModel(Armor &armor, const cv::Mat &frame);
   void VisualizeResult(const cv::Mat &output, int verbose = 1);
 };
