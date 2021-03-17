@@ -14,6 +14,6 @@ TEST(TestVision, TestBuffDetector) {
   buff_detector.VisualizeResult(frame, 2);
 
   cv::Mat result = frame.clone();
-  cv::imwrite("../../../image/test_buff_result.jpg", result);
+  cv::imwrite("../../../image/test_buff_result.png", result);
   SUCCEED();
 }

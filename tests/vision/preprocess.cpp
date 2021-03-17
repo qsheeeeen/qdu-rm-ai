@@ -6,9 +6,9 @@ TEST(TestPreprocess, TestBlueOnly) {
   ASSERT_FALSE(img.empty()) << "Can not opening image.";
 
   cvtColor(img, img, cv::COLOR_BGR2GRAY);
-  cv::imwrite("../../../image/test_blue.jpg", img);
+  cv::imwrite("../../../image/test_blue.png", img);
 
-  cv::Mat blue = imread("../../../image/test_blue.jpg", cv::IMREAD_GRAYSCALE);
+  cv::Mat blue = imread("../../../image/test_blue.png", cv::IMREAD_GRAYSCALE);
   ASSERT_FALSE(blue.empty()) << "Can not opening image.";
 }
 
@@ -20,9 +20,9 @@ TEST(TestPreprocess, TestBlueMinusRed) {
   cv::split(img, channels);
 
   cv::Mat result = channels[0] - channels[2];
-  cv::imwrite("../../../image/test_b-r.jpg", result);
+  cv::imwrite("../../../image/test_b-r.png", result);
 
-  cv::Mat blue = imread("../../../image/test_b-r.jpg", cv::IMREAD_GRAYSCALE);
+  cv::Mat blue = imread("../../../image/test_b-r.png", cv::IMREAD_GRAYSCALE);
   ASSERT_FALSE(blue.empty()) << "Can not opening image.";
 }
 
