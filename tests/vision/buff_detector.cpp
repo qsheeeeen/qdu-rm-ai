@@ -4,7 +4,7 @@
 #include "opencv2/opencv.hpp"
 
 TEST(TestVision, TestBuffDetector) {
-  BuffDetector buff_detector("../../../runtime/RMUT_Buff.json",
+  BuffDetector buff_detector("../../../runtime/RMUT2021_Buff.json",
                              game::Team::kBLUE);
 
   cv::Mat frame = cv::imread("../../../image/test_buff.png", cv::IMREAD_COLOR);
