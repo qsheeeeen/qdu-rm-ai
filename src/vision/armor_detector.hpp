@@ -55,5 +55,6 @@ class ArmorDetector : private Detector<Armor, ArmorDetectorParam> {
   void SetEnemyTeam(game::Team enemy_team);
 
   const std::vector<Armor> &Detect(const cv::Mat &frame);
+  void ClassifyModel();
   void VisualizeResult(const cv::Mat &output, int verbose = 1);
 };

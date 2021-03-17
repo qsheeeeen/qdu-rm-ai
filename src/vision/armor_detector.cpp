@@ -172,7 +172,6 @@ void ArmorDetector::MatchLightBars(const cv::Mat &frame) {
       if (center_dist > l * params_.center_dist_high_th) continue;
 
       auto armor = Armor(*iti, *itj);
-      armor_classifier_.ClassifyModel(armor);
       targets_.emplace_back(armor);
       break;
     }
@@ -189,9 +188,9 @@ void ArmorDetector::VisualizeLightBar(const cv::Mat &output, bool add_lable) {
   if (!lightbars_.empty()) {
     for (auto &bar : lightbars_) {
       auto vertices = bar.Vertices();
-      for (std::size_t i = 0; i < vertices.size(); ++i)
-        cv::line(output, vertices[i], vertices[(i + 1) % vertices.size()],
-                 kGREEN);
+      auto num_vertices = vertices.size();
+      for (std::size_t i = 0; i < num_vertices; ++i)
+        cv::line(output, vertices[i], vertices[(i + 1) % num_vertices], kGREEN);
 
       cv::drawMarker(output, bar.Center(), kGREEN, cv::MARKER_CROSS);
 
@@ -208,8 +207,9 @@ void ArmorDetector::VisualizeArmor(const cv::Mat &output, bool add_lable) {
   if (!targets_.empty()) {
     for (auto &armor : targets_) {
       auto vertices = armor.SurfaceVertices();
-      for (std::size_t i = 0; i < vertices.size(); ++i) {
-        cv::line(output, vertices[i], vertices[(i + 1) % 4], kGREEN);
+      auto num_vertices = vertices.size();
+      for (std::size_t i = 0; i < num_vertices; ++i) {
+        cv::line(output, vertices[i], vertices[(i + 1) % num_vertices], kGREEN);
       }
       cv::drawMarker(output, armor.SurfaceCenter(), kGREEN, cv::MARKER_DIAMOND);
 
@@ -244,6 +244,12 @@ const std::vector<Armor> &ArmorDetector::Detect(const cv::Mat &frame) {
   MatchLightBars(frame);
   SPDLOG_DEBUG("Detected.");
   return targets_;
+}
+
+void ArmorDetector::ClassifyModel() {
+  for (auto &armor : targets_) {
+    armor_classifier_.ClassifyModel(armor);
+  }
 }
 
 void ArmorDetector::VisualizeResult(const cv::Mat &output, int verbose) {
