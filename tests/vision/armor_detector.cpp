@@ -4,7 +4,7 @@
 #include "opencv2/opencv.hpp"
 
 TEST(TestVision, TestArmorDetector) {
-  ArmorDetector armor_detector("../../../tests/vision/params_test.json",
+  ArmorDetector armor_detector("../../../tests/vision/test_params.json",
                                game::Team::kBLUE);
 
   cv::Mat img = imread("../../../image/test.jpg", cv::IMREAD_COLOR);
