@@ -16,36 +16,32 @@
 
 ## 图片展示
 
-| ![YOLO识别效果](./image/test_yolo.jpg?raw=true "YOLO识别效果") | 
-|:--:| 
+| ![YOLO识别效果](./image/test_yolo.jpg?raw=true "YOLO识别效果") |
+|:--:|
 | *YOLO识别效果* |
 
-| ![OpenCV灯条识别效果](./image/test_bars.jpg?raw=true "OpenCV灯条识别效果") | 
-|:--:| 
-| *OpenCV灯条识别效果* |
+| ![装甲板匹配效果](./image/test_origin.png?raw=true "装甲板匹配效果") |
+|:--:|
+| *本算法识别效果* |
 
-| ![装甲板匹配效果](./image/test_armor.jpg?raw=true "装甲板匹配效果") | 
-|:--:| 
-| *装甲板匹配效果* |
-
-| ![TensorRT加速效果](./image/compare.jpg?raw=true "TensorRT加速效果") | 
-|:--:| 
+| ![TensorRT加速效果](./image/compare.jpg?raw=true "TensorRT加速效果") |
+|:--:|
 | *TODO：TensorRT加速效果* |
 
 ## 依赖 & 环境
 
 - 依赖
-    - [OpenCV](https://docs.opencv.org/4.5.1/d7/d9f/tutorial_linux_install.html)
-    - [BehavoirTree.CPP](https://github.com/BehaviorTree/BehaviorTree.CPP).
-    - [MVS SDK from HIKROBOT](https://www.hikrobotics.com/service/download/0/0).
-    - [spdlog](https://github.com/gabime/spdlog).
-    - [Google Test](https://github.com/google/googletest)
-    - [CUDA](https://developer.nvidia.com/cuda-downloads)(可选)
-    - [TensorRT](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html)(可选)
+  - [OpenCV](https://docs.opencv.org/4.5.1/d7/d9f/tutorial_linux_install.html)
+  - [BehavoirTree.CPP](https://github.com/BehaviorTree/BehaviorTree.CPP).
+  - [MVS SDK from HIKROBOT](https://www.hikrobotics.com/service/download/0/0).
+  - [spdlog](https://github.com/gabime/spdlog).
+  - [Google Test](https://github.com/google/googletest)
+  - [CUDA](https://developer.nvidia.com/cuda-downloads)(可选)
+  - [TensorRT](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html)(可选)
 
 - 开发测试环境
-    - Ubuntu
-    - WSL2(不能使用工业相机) 
+  - Ubuntu
+  - WSL2(不能使用工业相机)
 
 ## 使用说明
 
@@ -99,6 +95,7 @@
         ```
 
 1. 运行
+
     ```sh
     cd qdu-rm-ai/runtime
     # 根据应用选择程序
@@ -110,7 +107,7 @@
 | 文件夹 | 内容 | 备注 |
 | ---- | ---- | ---- |
 | image | 图片 | 包含效果展示、测设产物等 |
-| runtime | 运行环境 | 包含运行所需文件，和运行过程产生的文件 | 
+| runtime | 运行环境 | 包含运行所需文件，和运行过程产生的文件 |
 | src | 源代码 |
 | tests | 测试代码 |
 | third_party | 第三方软件 |
@@ -129,14 +126,14 @@
 
 ### 软件流程图
 
-| ![步兵嵌入式硬件框图](./image/视觉程序框图.png?raw=true "步兵嵌入式硬件框图") | 
-|:--:| 
-| *步兵嵌入式硬件框图* |
+| ![视觉程序框图](./image/视觉程序框图.png?raw=true "步兵嵌入式硬件框图") |
+|:--:|
+| *视觉程序框图* |
 
 ### 行为树演示
 
-| ![行为树演示](./image/行为树演示.png?raw=true "行为树演示") | 
-|:--:| 
+| ![行为树演示](./image/行为树演示.png?raw=true "行为树演示") |
+|:--:|
 | *行为树演示* |
 
 ## Roadmap
