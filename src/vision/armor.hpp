@@ -51,6 +51,7 @@ class Armor {
   std::vector<cv::Point2f> SurfaceVertices();
   double SurfaceAngle();
   cv::Mat Face(const cv::Mat &frame);
+  double AspectRatio();
 
   cv::Vec3d RotationAxis();
   const cv::Mat ModelVertices();

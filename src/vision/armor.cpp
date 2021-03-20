@@ -6,31 +6,38 @@
 namespace {
 
 const double kARMOR_WIDTH = 125.;
-const double kSMALL_ARMOR_LENGTH = 135.;
-const double KBIG_ARMOR_LENGTH = 230.;
+const double kARMOR_LENGTH_SMALL = 135.;
+const double kARMOR_LENGTH_BIG = 230.;
 const double kARMOR_HEIGHT = kARMOR_WIDTH * std::sin(75. / 180. * M_PI);
 const double kARMOR_DEPTH = kARMOR_WIDTH * std::cos(75. / 180. * M_PI);
 const double kHIT_DEPTH = kARMOR_WIDTH / 2. * std::cos(75. / 180. * M_PI);
 
-std::vector<cv::Point2f> kDST_POV{
+std::vector<cv::Point2f> kDST_POV_SMALL{
     cv::Point(0, kARMOR_WIDTH),
     cv::Point(0, 0),
-    cv::Point(kSMALL_ARMOR_LENGTH, 0),
-    cv::Point(kSMALL_ARMOR_LENGTH, kARMOR_WIDTH),
+    cv::Point(kARMOR_LENGTH_SMALL, 0),
+    cv::Point(kARMOR_LENGTH_SMALL, kARMOR_WIDTH),
+};
+
+std::vector<cv::Point2f> kDST_POV_BIG{
+    cv::Point(0, kARMOR_WIDTH),
+    cv::Point(0, 0),
+    cv::Point(kARMOR_LENGTH_BIG, 0),
+    cv::Point(kARMOR_LENGTH_BIG, kARMOR_WIDTH),
 };
 
 /* clang-format off */
 const cv::Matx43d kCOORD_SMALL_ARMOR(
-    -kSMALL_ARMOR_LENGTH / 2., -kARMOR_HEIGHT / 2, kARMOR_DEPTH,
-    kSMALL_ARMOR_LENGTH / 2., -kARMOR_HEIGHT / 2, 0.,
-    kSMALL_ARMOR_LENGTH / 2., kARMOR_HEIGHT / 2, 0.,
-    -kSMALL_ARMOR_LENGTH / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH);
+    -kARMOR_LENGTH_SMALL / 2., -kARMOR_HEIGHT / 2, kARMOR_DEPTH,
+    kARMOR_LENGTH_SMALL / 2., -kARMOR_HEIGHT / 2, 0.,
+    kARMOR_LENGTH_SMALL / 2., kARMOR_HEIGHT / 2, 0.,
+    -kARMOR_LENGTH_SMALL / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH);
 
 const cv::Matx43d kCOORD_BIG_ARMOR(
-    -KBIG_ARMOR_LENGTH / 2., -kARMOR_HEIGHT / 2, kARMOR_DEPTH,
-    KBIG_ARMOR_LENGTH / 2., -kARMOR_HEIGHT / 2, 0.,
-    KBIG_ARMOR_LENGTH / 2., kARMOR_HEIGHT / 2, 0.,
-    -KBIG_ARMOR_LENGTH / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH);
+    -kARMOR_LENGTH_BIG / 2., -kARMOR_HEIGHT / 2, kARMOR_DEPTH,
+    kARMOR_LENGTH_BIG / 2., -kARMOR_HEIGHT / 2, 0.,
+    kARMOR_LENGTH_BIG / 2., kARMOR_HEIGHT / 2, 0.,
+    -kARMOR_LENGTH_BIG / 2., kARMOR_HEIGHT / 2, kARMOR_DEPTH);
 
 /* clang-format on */
 
@@ -133,14 +140,29 @@ double Armor::SurfaceAngle() {
 
 cv::Mat Armor::Face(const cv::Mat &frame) {
   cv::Mat p, t;
-  t = cv::getPerspectiveTransform(SurfaceVertices(), kDST_POV);
-  cv::warpPerspective(frame, p, t, cv::Size(kSMALL_ARMOR_LENGTH, kARMOR_WIDTH));
+  const bool is_big = AspectRatio() > 1.2;
+  if (is_big) {
+    t = cv::getPerspectiveTransform(SurfaceVertices(), kDST_POV_BIG);
+    cv::warpPerspective(frame, p, t, cv::Size(kARMOR_LENGTH_BIG, kARMOR_WIDTH));
+  } else {
+    t = cv::getPerspectiveTransform(SurfaceVertices(), kDST_POV_SMALL);
+    cv::warpPerspective(frame, p, t,
+                        cv::Size(kARMOR_LENGTH_SMALL, kARMOR_WIDTH));
+  }
+  p = p(cv::Rect((p.cols - kARMOR_WIDTH) / 2, (p.rows - kARMOR_WIDTH) / 2,
+                 kARMOR_WIDTH, kARMOR_WIDTH));
   cv::cvtColor(p, p, cv::COLOR_RGB2GRAY);
-  cv::medianBlur(p, p, 3);
+  cv::medianBlur(p, p, 1);
   cv::threshold(p, p, 0., 255., cv::THRESH_BINARY | cv::THRESH_TRIANGLE);
   return p;
 }
 
+double Armor::AspectRatio() {
+  double aspect_ratio = std::max(rect_.size.height, rect_.size.width) /
+                        std::min(rect_.size.height, rect_.size.width);
+  SPDLOG_DEBUG("aspect_ratio: {}", aspect_ratio);
+  return aspect_ratio;
+}
 cv::Vec3d Armor::RotationAxis() {
   cv::Vec3d axis(rot_mat_.at<double>(2, 1) - rot_mat_.at<double>(1, 2),
                  rot_mat_.at<double>(0, 2) - rot_mat_.at<double>(2, 0),
