@@ -19,6 +19,7 @@ class Robot {
   std::queue<Protocol_DownData_t> commandq_;
   Protocol_UpDataReferee_t ref_;
   Protocol_UpDataMCU_t mcu_;
+  Protocol_DownData_t data_;
 
   std::mutex mutex_commandq_, mutex_ref_, mutex_mcu_;
 
@@ -29,6 +30,7 @@ class Robot {
   Robot(const std::string &dev_path);
   ~Robot();
 
+  game::Team GetTeam();
   cv::Mat GetRotMat();
   void Aim(common::Euler aiming_eulr, bool auto_fire);
   void Move();

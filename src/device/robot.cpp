@@ -76,10 +76,23 @@ Robot::~Robot() {
   SPDLOG_TRACE("Destructed.");
 }
 
+game::Team Robot::GetTeam() {
+  if (ref_.team == AI_TEAM_RED) return game::Team::kBLUE;
+  else if (ref_.team == AI_TEAM_BLUE) return game::Team::kRED;
+  return game::Team::kUNKNOWN;
+}
+
 cv::Mat Robot::GetRotMat() {
   cv::Quatf q(mcu_.quat.q0, mcu_.quat.q1, mcu_.quat.q2, mcu_.quat.q3);
   return cv::Mat(q.toRotMat3x3(), true);
 }
 
-void Robot::Aim(common::Euler aiming_eulr, bool auto_fire) {}
+void Robot::Aim(common::Euler aiming_eulr, bool auto_fire) {
+  data_.gimbal.pit = aiming_eulr.pitch;
+  data_.gimbal.rol = aiming_eulr.roll;
+  data_.gimbal.yaw = aiming_eulr.yaw;
+
+  // if(auto_fire) data_.notice ^= AI_NOTICE_FIRE;
+}
+
 void Robot::Move() {}

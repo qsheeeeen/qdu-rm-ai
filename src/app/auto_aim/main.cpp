@@ -35,10 +35,9 @@ int main(int argc, char const* argv[]) {
   Camera cam(0, 640, 480);
   cv::Mat frame;
 
-#if 0
   do {
-  } while (robot.Team() != game::Team::kUNKNOWN);
-#endif
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  } while (robot.GetTeam() != game::Team::kUNKNOWN);
 
   ArmorDetector detector("RMUL2021_Armor.json", game::Team::kBLUE);
   Compensator compensator;
