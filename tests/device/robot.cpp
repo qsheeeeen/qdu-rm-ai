@@ -1,3 +1,11 @@
-#include "gtest/gtest.h"
+#include "robot.hpp"
 
-TEST(TestRobot, ExampleTest) { EXPECT_EQ(1, 1); }
+#include "gtest/gtest.h"
+#include "spdlog/spdlog.h"
+
+TEST(TestRobot, ExampleTest) {
+  Robot robot("/dev/ttyS0");
+  while (true) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  }
+}

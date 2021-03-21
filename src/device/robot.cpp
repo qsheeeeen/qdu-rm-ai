@@ -16,7 +16,7 @@ void Robot::ThreadRecv() {
     if (AI_ID_REF == id) {
       serial_.Recv(&ref, sizeof(ref));
 
-      if (crc16::CRC16_Verify((uint8_t *)&ref_, sizeof(ref_))) {
+      if (crc16::CRC16_Verify((uint8_t *)&ref, sizeof(ref))) {
         mutex_ref_.lock();
         std::memcpy(&ref_, &(ref.data), sizeof(ref_));
         mutex_ref_.unlock();
@@ -24,7 +24,7 @@ void Robot::ThreadRecv() {
     } else if (AI_ID_MCU == id) {
       serial_.Recv(&robot, sizeof(robot));
 
-      if (crc16::CRC16_Verify((uint8_t *)&mcu_, sizeof(mcu_))) {
+      if (crc16::CRC16_Verify((uint8_t *)&robot, sizeof(robot))) {
         mutex_mcu_.lock();
         std::memcpy(&mcu_, &(robot.data), sizeof(mcu_));
         mutex_mcu_.unlock();
@@ -77,8 +77,10 @@ Robot::~Robot() {
 }
 
 game::Team Robot::GetTeam() {
-  if (ref_.team == AI_TEAM_RED) return game::Team::kBLUE;
-  else if (ref_.team == AI_TEAM_BLUE) return game::Team::kRED;
+  if (ref_.team == AI_TEAM_RED)
+    return game::Team::kBLUE;
+  else if (ref_.team == AI_TEAM_BLUE)
+    return game::Team::kRED;
   return game::Team::kUNKNOWN;
 }
 
