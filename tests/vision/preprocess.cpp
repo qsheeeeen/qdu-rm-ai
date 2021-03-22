@@ -26,33 +26,17 @@ TEST(TestPreprocess, TestBlueMinusRed) {
   ASSERT_FALSE(blue.empty()) << "Can not opening image.";
 }
 
-TEST(TestPreprocess, TestJsonWR) {
+TEST(TestPreprocess, TestJsonRead) {
   cv::FileStorage fs;
-  fs.open("../../../tests/vision/test_cam_cali.json",
-          cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
-
-  cv::Mat m(2, 2, CV_8UC3, cv::Scalar(0, 0, 255));
+  fs.open("../../../runtime/MV-CA016-10UC-6mm.json",
+          cv::FileStorage::READ | cv::FileStorage::FORMAT_JSON);
 
   ASSERT_TRUE(fs.isOpened());
 
-  fs.startWriteStruct("MV-CA016-10UC-6mm", cv::FileNode::MAP);
-  fs.write("cam_mat", m);
-  fs.write("distor_coff", m);
-  fs.endWriteStruct();
-  fs.release();
-
-  fs.open("../../../tests/vision/test_cam_cali.json",
-          cv::FileStorage::READ | cv::FileStorage::FORMAT_JSON);
-
-  ASSERT_FALSE(fs["MV-CA016-10UC-6mm"].empty());
-  ASSERT_TRUE(fs["MV-CA016-10UC-6mm"].isMap());
-  ASSERT_FALSE(fs["MV-CA016-10UC-6mm"]["cam_mat"].empty());
-  ASSERT_TRUE(fs["MV-CA016-10UC-6mm"]["cam_mat"].isMap());
-
-  cv::Mat r = fs["MV-CA016-10UC-6mm"]["cam_mat"].mat();
-  ASSERT_FALSE(r.empty());
-
-  ASSERT_TRUE(cv::sum(m != r) == cv::Scalar(0, 0, 0));
+  ASSERT_FALSE(fs["cam_mat"].mat().empty());
+  ASSERT_TRUE(fs["cam_mat"].isMap());
+  ASSERT_FALSE(fs["distor_coff"].empty());
+  ASSERT_TRUE(fs["distor_coff"].isMap());
 
   fs.release();
 }
