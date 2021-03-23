@@ -1,10 +1,14 @@
+import json
+
+import onnx
+import onnxsim
+import pytorch_lightning as pl
 import torch
+from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from torch import nn
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split
 from torchvision import datasets, transforms
-import pytorch_lightning as pl
-from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
 pl.seed_everything(42)
 
@@ -13,16 +17,15 @@ class ArmorClassifier(pl.LightningModule):
     def __init__(self):
         super().__init__()
         self.cnn = nn.Sequential(
-            nn.Conv2d(1, 2, 4, 2, 1, bias=False),
+            nn.Conv2d(1, 2, 4, 2, 1),
             nn.LeakyReLU(0.2, inplace=True),
-            nn.Conv2d(2, 4, 4, 2, 1, bias=False),
+            nn.Conv2d(2, 4, 4, 2, 1),
             nn.BatchNorm2d(4),
             nn.LeakyReLU(0.2, inplace=True),
-            nn.Conv2d(4, 6, 4, 2, 1, bias=False),
+            nn.Conv2d(4, 6, 4, 2, 1),
             nn.BatchNorm2d(6),
             nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf*4) x 8 x 8
-            nn.Conv2d(6, 10, 3, 1, 0, bias=False),
+            nn.Conv2d(6, 10, 3, 1, 0),
             nn.Sigmoid(),
         )
 
@@ -49,27 +52,31 @@ class ArmorClassifier(pl.LightningModule):
         self.log("val_loss", loss)
 
 
-# data
-# train_trans = transforms.Compose(
-#     [
-#         transforms.RandomPerspective(),
-#         transforms.RandomRotation(),
-#         transforms.RandomAffine(),
-#         transforms.GaussianBlur(),
-#         transforms.RandomErasing(),
-#         transforms.ToTensor(),
-#     ]
-# )
-
-# dataset = datasets.ImageFolder("~rm")
-dataset = datasets.MNIST(
-    "~/dataset", train=True, download=True, transform=transforms.ToTensor()
+train_trans = transforms.Compose(
+    [
+        transforms.Grayscale(),
+        transforms.RandomPerspective(),
+        transforms.RandomRotation(5),
+        transforms.RandomAffine(5),
+        transforms.Resize((28, 28)),
+        transforms.ToTensor(),
+        transforms.GaussianBlur(1),
+        transforms.RandomErasing(),
+    ]
 )
 
-mnist_train, mnist_val = random_split(dataset, [55000, 5000])
+dataset = datasets.ImageFolder(
+    "~/dataset/armor_model",
+    transform=train_trans,
+)
 
-train_loader = DataLoader(mnist_train, batch_size=32, num_workers=8, pin_memory=True)
-val_loader = DataLoader(mnist_val, batch_size=32, num_workers=8, pin_memory=True)
+with open("armor_classifier_lable.json", "w+") as f:
+    json.dump(dataset.classes, f)
+
+train_set, val_set = random_split(dataset, [7, 6])
+
+train_loader = DataLoader(train_set, batch_size=32, num_workers=8, pin_memory=True)
+val_loader = DataLoader(val_set, batch_size=32, num_workers=8, pin_memory=True)
 
 # model
 model = ArmorClassifier()
@@ -90,7 +97,7 @@ trainer = pl.Trainer(
     callbacks=[
         EarlyStopping(
             monitor="val_loss",
-            patience=3,
+            patience=5,
             verbose=True,
             mode="min",
         )
@@ -99,9 +106,10 @@ trainer = pl.Trainer(
 
 trainer.fit(model, train_loader, val_loader)
 
-# ----------------------------------
 # onnx
-# ----------------------------------
 filepath = "armor_classifier.onnx"
 input_sample = torch.randn((1, 1, 28, 28))
 model.to_onnx(filepath, input_sample)
+model = onnx.load(filepath)
+model_simp, check = onnxsim.simplify(model)
+assert check, "Simplified ONNX model could not be validated"
