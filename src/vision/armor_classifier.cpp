@@ -14,10 +14,12 @@ const cv::Scalar kYELLOW(0., 255., 255.);
 
 }  // namespace
 
-ArmorClassifier::ArmorClassifier(const std::string model_path, int width,
-                                 int height) {
+ArmorClassifier::ArmorClassifier(const std::string model_path,
+                                 const std::string lable_path,
+                                 const cv::Size &input_size) {
   LoadModel(model_path);
-  SetInputSize(width, height);
+  LoadLable(lable_path);
+  SetInputSize(input_size);
   SPDLOG_TRACE("Constructed.");
 }
 
@@ -28,8 +30,19 @@ void ArmorClassifier::LoadModel(const std::string &path) {
   net_ = cv::dnn::readNet(path);
 }
 
-void ArmorClassifier::SetInputSize(int width, int height) {
-  net_input_size_ = cv::Size(width, height);
+void ArmorClassifier::LoadLable(const std::string &path) {
+  cv::FileStorage fs(path,
+                     cv::FileStorage::READ | cv::FileStorage::FORMAT_JSON);
+
+  cv::FileNode root = fs.root();
+  for (size_t i = 0; i < root.size(); ++i) {
+    SPDLOG_ERROR(std::string(root[std::to_string(i)]));
+    classes_.push_back(game::StringToModel(std::string(root[std::to_string(i)])));
+  }
+}
+
+void ArmorClassifier::SetInputSize(const cv::Size &input_size) {
+  net_input_size_ = input_size;
 }
 
 void ArmorClassifier::ClassifyModel(Armor &armor, const cv::Mat &frame) {

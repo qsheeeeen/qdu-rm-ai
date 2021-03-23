@@ -1,5 +1,9 @@
 #include "common.hpp"
 
+#include <algorithm>
+#include <cctype>
+#include <string>
+
 namespace game {
 
 std::string TeamToString(Team team) {
@@ -33,9 +37,39 @@ std::string ModelToString(Model model) {
       return std::string("Sentry");
     case Model::kBASE:
       return std::string("Base");
+    case Model::kOUTPOST:
+      return std::string("Outpost");
     default:
       return std::string("Unknown");
   }
+}
+
+Model StringToModel(std::string name) {
+  std::transform(name.begin(), name.end(), name.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
+  if (!name.compare("infantry") || !name.compare("3") || !name.compare("4") ||
+      !name.compare("5")) {
+    return Model::kINFANTRY;
+  }
+  if (!name.compare("hero") || !name.compare("1")) {
+    return Model::kHERO;
+  }
+  if (!name.compare("engineer") || !name.compare("2")) {
+    return Model::kENGINEER;
+  }
+  if (!name.compare("frone")) {
+    return Model::kDRONE;
+  }
+  if (!name.compare("sentry")) {
+    return Model::kSENTRY;
+  }
+  if (!name.compare("base")) {
+    return Model::kBASE;
+  }
+  if (!name.compare("outpost")) {
+    return Model::kOUTPOST;
+  }
+  return Model::kUNKNOWN;
 }
 
 bool HasBigArmor(Model model) {

@@ -11,7 +11,6 @@ class ArmorClassifier {
   double conf_;
   int class_id_;
   std::vector<game::Model> classes_;
-  cv::Scalar mean_;
   cv::dnn::Net net_;
   cv::Size net_input_size_;
   cv::Mat blob_;
@@ -19,11 +18,13 @@ class ArmorClassifier {
 
  public:
   ArmorClassifier();
-  ArmorClassifier(const std::string model_path, int width, int height);
+  ArmorClassifier(const std::string model_path, const std::string lable_path,
+                  const cv::Size &input_size);
   ~ArmorClassifier();
 
   void LoadModel(const std::string &path);
-  void SetInputSize(int width, int height);
+  void LoadLable(const std::string &path);
+  void SetInputSize(const cv::Size &input_size);
 
   void ClassifyModel(Armor &armor, const cv::Mat &frame);
 };

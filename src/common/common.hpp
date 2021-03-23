@@ -27,10 +27,12 @@ enum class Model {
   kDRONE,
   kSENTRY,
   kBASE,
+  kOUTPOST,
 };
 
 std::string TeamToString(Team team);
 std::string ModelToString(Model model);
+Model StringToModel(std::string name);
 
 bool HasBigArmor(Model model);
 

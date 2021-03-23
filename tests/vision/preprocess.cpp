@@ -27,9 +27,8 @@ TEST(TestPreprocess, TestBlueMinusRed) {
 }
 
 TEST(TestPreprocess, TestJsonRead) {
-  cv::FileStorage fs;
-  fs.open("../../../runtime/MV-CA016-10UC-6mm.json",
-          cv::FileStorage::READ | cv::FileStorage::FORMAT_JSON);
+  cv::FileStorage fs("../../../runtime/MV-CA016-10UC-6mm.json",
+                     cv::FileStorage::READ | cv::FileStorage::FORMAT_JSON);
 
   ASSERT_TRUE(fs.isOpened());
 

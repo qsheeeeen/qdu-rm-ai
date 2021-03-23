@@ -70,8 +70,10 @@ dataset = datasets.ImageFolder(
     transform=train_trans,
 )
 
+lable = {v: k for k, v in dataset.class_to_idx.items()}
+
 with open("armor_classifier_lable.json", "w+") as f:
-    json.dump(dataset.classes, f)
+    json.dump(lable, f, )
 
 train_set, val_set = random_split(dataset, [7, 6])
 

@@ -5,8 +5,9 @@
 #include "gtest/gtest.h"
 
 TEST(TestVision, TestArmorClassifier) {
-  ArmorClassifier armor_classifier("../../../runtime/armor_classifier.onnx", 28,
-                                   28);
+  ArmorClassifier armor_classifier(
+      "../../../runtime/armor_classifier.onnx",
+      "../../../runtime/armor_classifier_lable.json", cv::Size(28, 28));
   cv::Mat f = cv::imread("../../../image/p1.png");
   Armor armor(cv::RotatedRect(cv::Point2f(0, 0), cv::Point2f(f.cols, 0),
                               cv::Point2f(f.cols, f.rows)));
