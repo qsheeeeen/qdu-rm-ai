@@ -3,6 +3,12 @@
 #include "opencv2/core/quaternion.hpp"
 #include "spdlog/spdlog.h"
 
+namespace {
+
+const double kLIMIT = 0.04;
+
+}  // namespace
+
 void Robot::ThreadRecv() {
   SPDLOG_DEBUG("[ThreadRecv] Started.");
 
@@ -94,7 +100,21 @@ void Robot::Aim(common::Euler aiming_eulr, bool auto_fire) {
   data_.gimbal.rol = aiming_eulr.roll;
   data_.gimbal.yaw = aiming_eulr.yaw;
 
-  // if(auto_fire) data_.notice ^= AI_NOTICE_FIRE;
+  cv::Quatd q(mcu_.quat.q0, mcu_.quat.q1, mcu_.quat.q2, mcu_.quat.q3);
+  cv::Vec3d vec = q.toEulerAngles(cv::QuatEnum::EXT_XYZ);
+
+  if (!auto_fire)
+    data_.notice |= 0x00;
+  else {
+    if (fabs(vec[0] - aiming_eulr.pitch) >= kLIMIT)
+      ;
+    else if (fabs(vec[1] - aiming_eulr.roll) >= kLIMIT)
+      ;
+    else if (fabs(vec[2] - aiming_eulr.pitch) >= kLIMIT)
+      ;
+    else
+      data_.notice |= AI_NOTICE_FIRE;
+  }
 }
 
 void Robot::Move() {}
