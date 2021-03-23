@@ -2,6 +2,12 @@
 
 #include "armor.hpp"
 
+namespace rotation {
+
+enum class Direction { kUNKNOWN, kCLOCKWISE, kANTI };
+
+}  // namespace rotation
+
 class Buff {
  private:
   cv::RotatedRect center_;
@@ -9,7 +15,8 @@ class Buff {
   Armor target_;
   std::vector<cv::RotatedRect> tracks_;
   game::Team team_ = game::Team::kUNKNOWN;
-  double speed_, time_;
+  double speed_;
+  rotation::Direction direction_ = rotation::Direction::kUNKNOWN;
 
  public:
   Buff();
@@ -32,5 +39,4 @@ class Buff {
 
   game::Team GetTeam();
   void SetTeam(game::Team team);
-
 };

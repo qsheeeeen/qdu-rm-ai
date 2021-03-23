@@ -47,6 +47,8 @@ class BuffDetector : private Detector<Buff, BuffDetectorParam> {
   void FindTrack(const std::string& path);
   void FindCenter();
 
+  void MatchClockWise();
+  void MatchSpeed();
   void MatchArmors();
 
   void VisualizeArmor(const cv::Mat &output, bool add_lable);

@@ -13,7 +13,7 @@ const cv::Scalar kGREEN(0., 255., 0.);
 const cv::Scalar kRED(0., 0., 255.);
 const cv::Scalar kYELLOW(0., 255., 255.);
 
-const int kR = 1400; 
+const int kR = 1400;
 
 }  // namespace
 
@@ -165,19 +165,17 @@ void BuffDetector::FindCenter() {
       std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 }
 
-double Dist(cv::Point2f a, cv::Point2f b) {
-  return sqrt(powf(a.x - b.x, 2) + powf(a.y - b.y, 2));
-}
-
 void BuffDetector::FindTrack(const std::string &path) {
   const auto start = std::chrono::high_resolution_clock::now();
   buff_.SetTracks(std::vector<cv::RotatedRect>());
-  
+
   double speed = buff_.GetSpeed();
   Armor armor = buff_.GetTarget();
   Compensator compensator(path);
   cv::Point3f center_coord = compensator.GetCoord(armor);
-
+  if (buff_.GetTracks().size() > 2) {
+    // if(armor.SurfaceCenter().y<buff_.GetCenter().center.y){if()}
+  }
   // TODO
 
   SPDLOG_DEBUG("Found tracks: {}", buff_.GetTracks().size());
@@ -187,6 +185,14 @@ void BuffDetector::FindTrack(const std::string &path) {
       std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
   SPDLOG_DEBUG("duration_track_: {} ms", duration_tracks_.count());
 }
+
+double Dist(cv::Point2f a, cv::Point2f b) {
+  return sqrt(powf(a.x - b.x, 2) + powf(a.y - b.y, 2));
+}
+
+void BuffDetector::MatchClockWise() {}
+
+void BuffDetector::MatchSpeed() {}
 
 void BuffDetector::MatchArmors() {
   const auto start = std::chrono::high_resolution_clock::now();

@@ -26,7 +26,7 @@ double Buff::GetSpeed() {
   return speed_;
 }
 
-void Buff::SetSpeed(double time) { speed_ = 0.785 * sin(1.884 * time) + 1.305; }
+void Buff::SetSpeed(double speed) { speed_ = speed; }
 
 Armor Buff::GetTarget() {
   SPDLOG_DEBUG("Got it.");
