@@ -9,6 +9,7 @@ const double kG = 9.80665;
 const cv::Scalar kGREEN(0., 255., 0.);
 const cv::Scalar kRED(0., 0., 255.);
 const cv::Scalar kYELLOW(0., 255., 255.);
+const auto kCV_FONT = cv::FONT_HERSHEY_SIMPLEX;
 
 }  // namespace
 
@@ -53,7 +54,10 @@ void Compensator::VisualizePnp(Armor& armor, const cv::Mat& output,
                     armor.GetTransVec(), cam_mat_, distor_coff_, out_points);
   for (std::size_t i = 0; i < out_points.size(); ++i) {
     cv::line(output, out_points[i], out_points[(i + 1) % out_points.size()],
-             kGREEN);
+             kYELLOW);
+  }
+  if (add_lable) {
+    cv::putText(output, "PNP", out_points[0], kCV_FONT, 1.0, kYELLOW);
   }
 }
 
@@ -83,7 +87,7 @@ void Compensator::LoadCameraMat(const std::string& path) {
   }
 }
 
-cv::Point3f Compensator::GetCoord(Armor& armor){
+cv::Point3f Compensator::GetCoord(Armor& armor) {
   return EstimateWorldCoord(armor);
 }
 
