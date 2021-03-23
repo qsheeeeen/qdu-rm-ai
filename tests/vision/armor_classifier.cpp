@@ -7,9 +7,14 @@
 TEST(TestVision, TestArmorClassifier) {
   ArmorClassifier armor_classifier("../../../runtime/armor_classifier.onnx", 28,
                                    28);
-  cv::Mat f = cv::imread("../../../image/model_sticker/s2.png");
+  cv::Mat f = cv::imread("../../../image/p1.png");
   Armor armor(cv::RotatedRect(cv::Point2f(0, 0), cv::Point2f(f.cols, 0),
                               cv::Point2f(f.cols, f.rows)));
+
+  cv::imwrite("../../../image/test_face.jpg", armor.Face(f));
+  cv::Mat nn_input;
+  cv::resize(armor.Face(f), nn_input, cv::Size(28, 28));
+  cv::imwrite("../../../image/tset_nn_input.jpg", nn_input);
   armor_classifier.ClassifyModel(armor, f);
-  ASSERT_EQ(armor.GetModel(), game::Model::kINFANTRY);
+  ASSERT_EQ(armor.GetModel(), game::Model::kHERO);
 }
