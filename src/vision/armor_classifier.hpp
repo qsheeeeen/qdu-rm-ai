@@ -8,9 +8,7 @@
 
 class ArmorClassifier {
  private:
-  float scale_;
   double conf_;
-  bool swap_rb_;
   int class_id_;
   std::vector<game::Model> classes_;
   cv::Scalar mean_;
@@ -27,7 +25,5 @@ class ArmorClassifier {
   void LoadModel(const std::string &path);
   void SetInputSize(int width, int height);
 
-  void Train();
   void ClassifyModel(Armor &armor, const cv::Mat &frame);
-  void VisualizeResult(const cv::Mat &output, int verbose = 1);
 };
