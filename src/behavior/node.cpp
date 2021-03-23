@@ -54,6 +54,7 @@ namespace Condition {
 EnamyVisable::EnamyVisable(const std::string& name,
                            const BT::NodeConfiguration& node_cfg)
     : BT::ConditionNode(name, {}) {
+  (void)node_cfg;
   SPDLOG_DEBUG("[Condition::EnamyVisable] Constructe: {}.", name);
 }
 
@@ -68,6 +69,7 @@ BT::PortsList EnamyVisable::providedPorts() {
 
 LowHP::LowHP(const std::string& name, const BT::NodeConfiguration& node_cfg)
     : BT::ConditionNode(name, {}) {
+  (void)node_cfg;
   SPDLOG_DEBUG("[Condition::LowHP] Constructe: {}.", name);
 }
 
@@ -83,6 +85,7 @@ BT::PortsList LowHP::providedPorts() {
 UnderAttack::UnderAttack(const std::string& name,
                          const BT::NodeConfiguration& node_cfg)
     : BT::ConditionNode(name, {}) {
+  (void)node_cfg;
   SPDLOG_DEBUG("[Condition::LowHP] Constructe: {}.", name);
 }
 
@@ -97,6 +100,7 @@ BT::PortsList UnderAttack::providedPorts() {
 
 NoAmmo::NoAmmo(const std::string& name, const BT::NodeConfiguration& node_cfg)
     : BT::ConditionNode(name, {}) {
+  (void)node_cfg;
   SPDLOG_DEBUG("[Condition::NoAmmo] Constructe: {}.", name);
 }
 

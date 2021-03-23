@@ -42,7 +42,7 @@ class ArmorDetector : private Detector<Armor, ArmorDetectorParam> {
   bool PrepareParams(const std::string &path);
 
   void FindLightBars(const cv::Mat &frame);
-  void MatchLightBars(const cv::Mat &frame);
+  void MatchLightBars();
 
   void VisualizeLightBar(const cv::Mat &output, bool add_lable);
   void VisualizeArmor(const cv::Mat &output, bool add_lable);

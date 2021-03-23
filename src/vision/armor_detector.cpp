@@ -147,7 +147,7 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
   SPDLOG_DEBUG("duration_bars_: {} ms", duration_bars_.count());
 }
 
-void ArmorDetector::MatchLightBars(const cv::Mat &frame) {
+void ArmorDetector::MatchLightBars() {
   const auto start = std::chrono::high_resolution_clock::now();
   for (auto iti = lightbars_.begin(); iti != lightbars_.end(); ++iti) {
     for (auto itj = iti + 1; itj != lightbars_.end(); ++itj) {
@@ -241,7 +241,7 @@ void ArmorDetector::SetEnemyTeam(game::Team enemy_team) {
 const std::vector<Armor> &ArmorDetector::Detect(const cv::Mat &frame) {
   SPDLOG_DEBUG("Detecting");
   FindLightBars(frame);
-  MatchLightBars(frame);
+  MatchLightBars();
   SPDLOG_DEBUG("Detected.");
   return targets_;
 }
