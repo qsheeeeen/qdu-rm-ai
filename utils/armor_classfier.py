@@ -12,10 +12,43 @@ from torchvision import datasets, transforms
 
 pl.seed_everything(42)
 
+train_trans = transforms.Compose(
+    [
+        transforms.Grayscale(),
+        transforms.Resize((28, 28)),
+        transforms.RandomPerspective(0.1),
+        transforms.RandomRotation(10),
+        transforms.RandomAffine(10),
+        transforms.ToTensor(),
+        transforms.RandomAdjustSharpness(0.5),
+        transforms.RandomErasing(p=1, scale=(0.02, 0.1)),
+    ]
+)
+
+dataset = datasets.ImageFolder(
+    "~/dataset/armor_model",
+    transform=train_trans,
+)
+
+lable = {v: k for k, v in dataset.class_to_idx.items()}
+
+with open("armor_classifier_lable.json", "w+") as f:
+    json.dump(
+        lable,
+        f,
+    )
+
+print("Date set length: {}".format(len(dataset)))
+train_set, val_set = random_split(dataset, [32, 16])
+
+train_loader = DataLoader(train_set, batch_size=32, num_workers=8, pin_memory=True)
+val_loader = DataLoader(val_set, batch_size=32, num_workers=8, pin_memory=True)
+
 
 class ArmorClassifier(pl.LightningModule):
-    def __init__(self):
+    def __init__(self, num_classes: int):
         super().__init__()
+        self.num_classes = num_classes
         self.cnn = nn.Sequential(
             nn.Conv2d(1, 2, 4, 2, 1),
             nn.LeakyReLU(0.2, inplace=True),
@@ -25,7 +58,7 @@ class ArmorClassifier(pl.LightningModule):
             nn.Conv2d(4, 6, 4, 2, 1),
             nn.BatchNorm2d(6),
             nn.LeakyReLU(0.2, inplace=True),
-            nn.Conv2d(6, 10, 3, 1, 0),
+            nn.Conv2d(6, num_classes, 3, 1, 0),
             nn.Sigmoid(),
         )
 
@@ -40,7 +73,10 @@ class ArmorClassifier(pl.LightningModule):
     def training_step(self, train_batch, batch_idx):
         x, y = train_batch
         y_hat = self.cnn(x)
-        loss = F.mse_loss(F.one_hot(y, num_classes=10).float(), y_hat.view(-1, 10))
+        loss = F.cross_entropy(
+            y_hat.view(-1, self.num_classes),
+            y,
+        )
         self.log("train_loss", loss)
         return loss
 
@@ -48,40 +84,15 @@ class ArmorClassifier(pl.LightningModule):
         x, y = val_batch
         with torch.no_grad():
             y_hat = self.cnn(x)
-            loss = F.mse_loss(F.one_hot(y, num_classes=10).float(), y_hat.view(-1, 10))
+            loss = F.cross_entropy(
+                y_hat.view(-1, self.num_classes),
+                y,
+            )
         self.log("val_loss", loss)
 
 
-train_trans = transforms.Compose(
-    [
-        transforms.Grayscale(),
-        transforms.RandomPerspective(),
-        transforms.RandomRotation(5),
-        transforms.RandomAffine(5),
-        transforms.Resize((28, 28)),
-        transforms.ToTensor(),
-        transforms.GaussianBlur(1),
-        transforms.RandomErasing(),
-    ]
-)
-
-dataset = datasets.ImageFolder(
-    "~/dataset/armor_model",
-    transform=train_trans,
-)
-
-lable = {v: k for k, v in dataset.class_to_idx.items()}
-
-with open("armor_classifier_lable.json", "w+") as f:
-    json.dump(lable, f, )
-
-train_set, val_set = random_split(dataset, [7, 6])
-
-train_loader = DataLoader(train_set, batch_size=32, num_workers=8, pin_memory=True)
-val_loader = DataLoader(val_set, batch_size=32, num_workers=8, pin_memory=True)
-
 # model
-model = ArmorClassifier()
+model = ArmorClassifier(len(dataset.classes))
 
 # training
 trainer = pl.Trainer(
@@ -96,14 +107,14 @@ trainer = pl.Trainer(
     # limit_val_batches=0.2,
     # limit_test_batches=0.3,
     weights_summary="full",
-    callbacks=[
-        EarlyStopping(
-            monitor="val_loss",
-            patience=5,
-            verbose=True,
-            mode="min",
-        )
-    ],
+    # callbacks=[
+    #     EarlyStopping(
+    #         monitor="val_loss",
+    #         patience=10,
+    #         verbose=True,
+    #         mode="min",
+    #     )
+    # ],
 )
 
 trainer.fit(model, train_loader, val_loader)
@@ -114,4 +125,5 @@ input_sample = torch.randn((1, 1, 28, 28))
 model.to_onnx(filepath, input_sample)
 model = onnx.load(filepath)
 model_simp, check = onnxsim.simplify(model)
-assert check, "Simplified ONNX model could not be validated"
+assert check, "Simplified ONNX model could not be validated!"
+print("Simplified ONNX model exported.")
