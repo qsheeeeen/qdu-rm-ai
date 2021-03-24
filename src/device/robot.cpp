@@ -100,17 +100,34 @@ void Robot::Aim(common::Euler aiming_eulr, bool auto_fire) {
   data_.gimbal.rol = aiming_eulr.roll;
   data_.gimbal.yaw = aiming_eulr.yaw;
 
-  cv::Quatd q(mcu_.quat.q0, mcu_.quat.q1, mcu_.quat.q2, mcu_.quat.q3);
-  cv::Vec3d vec = q.toEulerAngles(cv::QuatEnum::EXT_XYZ);
+  // TODO
+
+  double w = mcu_.quat.q0, x = mcu_.quat.q1, y = mcu_.quat.q2, z = mcu_.quat.q3;
+  common::Euler euler;
+
+  const float sinr_cosp = 2.0f * (w * x + y * z);
+  const float cosr_cosp = 1.0f - 2.0f * (x * x + y * y);
+  euler.pitch = atan2f(sinr_cosp, cosr_cosp);
+
+  const float sinp = 2.0f * (w * y - z * x);
+
+  if (fabsf(sinp) >= 1.0f)
+    euler.roll = copysignf(CV_PI / 2.0f, sinp);
+  else
+    euler.roll = asinf(sinp);
+
+  const float siny_cosp = 2.0f * (w * z + x * y);
+  const float cosy_cosp = 1.0f - 2.0f * (y * y + z * z);
+  euler.yaw = atan2f(siny_cosp, cosy_cosp);
 
   if (!auto_fire)
-    data_.notice |= 0x00;
+    data_.notice &= 0xE0;
   else {
-    if (fabs(vec[0] - aiming_eulr.pitch) >= kLIMIT)
+    if (fabs(euler.pitch - aiming_eulr.pitch) >= kLIMIT)
       ;
-    else if (fabs(vec[1] - aiming_eulr.roll) >= kLIMIT)
+    else if (fabs(euler.roll - aiming_eulr.roll) >= kLIMIT)
       ;
-    else if (fabs(vec[2] - aiming_eulr.pitch) >= kLIMIT)
+    else if (fabs(euler.yaw - aiming_eulr.pitch) >= kLIMIT)
       ;
     else
       data_.notice |= AI_NOTICE_FIRE;

@@ -45,7 +45,7 @@ int main(int argc, char const* argv[]) {
   while (true) {
     frame = cam.GetFrame();
     auto armors = detector.Detect(frame);
-    compensator.Apply(armors, frame);
+    compensator.Apply(armors, frame, robot.GetRotMat());
     robot.Aim(armors.front().GetAimEuler(), false);
   }
 
