@@ -13,17 +13,6 @@ const auto kCV_FONT = cv::FONT_HERSHEY_SIMPLEX;
 
 }  // namespace
 
-cv::Point3f Compensator::EstimateWorldCoord(Armor& armor) {
-  cv::Mat rot_vec, trans_vec;
-  cv::solvePnP(armor.ModelVertices(), armor.SurfaceVertices(), cam_mat_,
-               distor_coff_, rot_vec, trans_vec, false, cv::SOLVEPNP_IPPE);
-  armor.SetRotVec(rot_vec), armor.SetTransVec(trans_vec);
-  cv::Mat world_coord =
-      ((cv::Vec2f(armor.SurfaceCenter()) * cam_mat_.inv() - trans_vec) *
-       armor.GetRotMat().inv());
-  return cv::Point3f(world_coord);
-}
-
 /**
  * @brief Angle θ required to hit coordinate (x, y)
  *
@@ -63,9 +52,9 @@ void Compensator::VisualizePnp(Armor& armor, const cv::Mat& output,
 
 Compensator::Compensator() { SPDLOG_TRACE("Constructed."); }
 
-Compensator::Compensator(const std::string& path) {
+Compensator::Compensator(const std::string& cam_mat_path) {
   SPDLOG_TRACE("Constructed.");
-  LoadCameraMat(path);
+  LoadCameraMat(cam_mat_path);
 }
 
 Compensator::~Compensator() { SPDLOG_TRACE("Destructed."); }
@@ -87,22 +76,32 @@ void Compensator::LoadCameraMat(const std::string& path) {
   }
 }
 
-cv::Point3f Compensator::GetCoord(Armor& armor) {
-  return EstimateWorldCoord(armor);
+cv::Vec3f Compensator::EstimateWorldCoord(Armor& armor) {
+  cv::Mat rot_vec, trans_vec;
+  cv::solvePnP(armor.ModelVertices(), armor.SurfaceVertices(), cam_mat_,
+               distor_coff_, rot_vec, trans_vec, false, cv::SOLVEPNP_IPPE);
+  armor.SetRotVec(rot_vec), armor.SetTransVec(trans_vec);
+  cv::Mat world_coord =
+      ((cv::Vec2f(armor.SurfaceCenter()) * cam_mat_.inv() - trans_vec) *
+       armor.GetRotMat().inv());
+  return cv::Vec3f(world_coord);
 }
 
-void Compensator::Apply(std::vector<Armor>& armors, const cv::Mat& frame) {
-  cv::Point2f frame_center(frame.cols / 2, frame.rows / 2);
+void Compensator::Apply(std::vector<Armor>& armors, const cv::Mat& frame,
+                        const cv::Mat& rot_mat) {
   for (auto& armor : armors) {
-    auto coord = EstimateWorldCoord(armor);
+    const auto cam_coord = EstimateWorldCoord(armor);
+    const cv::Point3f real_coord(cam_coord.dot(rot_mat));
 
     common::Euler aiming_eulr;
     cv::Point2f surface_target(
-        std::sqrt(std::pow(coord.x, 2) + std::pow(coord.y, 2)), -coord.z);
+        std::sqrt(std::pow(real_coord.x, 2) + std::pow(real_coord.y, 2)),
+        -real_coord.z);
     aiming_eulr.pitch = SolveSurfaceLanchAngle(surface_target);
-    aiming_eulr.yaw = std::atan2(coord.x, coord.y);
+    aiming_eulr.yaw = std::atan2(real_coord.x, real_coord.y);
     armor.SetAimEuler(aiming_eulr);
   }
+  cv::Point2f frame_center(frame.cols / 2, frame.rows / 2);
   std::sort(armors.begin(), armors.end(),
             [frame_center](Armor& armor1, Armor& armor2) {
               return cv::norm(armor1.SurfaceCenter() - frame_center) <

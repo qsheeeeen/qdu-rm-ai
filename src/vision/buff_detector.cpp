@@ -172,7 +172,7 @@ void BuffDetector::FindTrack(const std::string &path) {
   double speed = buff_.GetSpeed();
   Armor armor = buff_.GetTarget();
   Compensator compensator(path);
-  cv::Point3f center_coord = compensator.GetCoord(armor);
+  cv::Point3f center_coord = compensator.EstimateWorldCoord(armor);
   if (buff_.GetTracks().size() > 2) {
     // if(armor.SurfaceCenter().y<buff_.GetCenter().center.y){if()}
   }
