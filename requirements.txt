@@ -4,3 +4,4 @@
 onnx
 onnxoptimizer
 onnx-simplifier
+pytorch-lightning
