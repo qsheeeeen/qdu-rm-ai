@@ -45,46 +45,28 @@ const cv::Point3f kHIT_TARGET(0., 0., kHIT_DEPTH);
 
 }  // namespace
 
-void Armor::FormRect() {
-  cv::Point2f center = (left_bar_.Center() + right_bar_.Center()) / 2.;
-  double width = cv::norm(left_bar_.Center() - right_bar_.Center());
-  double height = (left_bar_.Length() + right_bar_.Length());
-
-  rect_ = cv::RotatedRect(center, cv::Size(width, height),
-                          (left_bar_.Angle() + right_bar_.Angle()) / 2.);
-
-  SPDLOG_DEBUG("center: ({}, {})", center.x, center.y);
-  SPDLOG_DEBUG("width, height:  ({}, {})", width, height);
+cv::RotatedRect Armor::FormRect(const LightBar &left_bar,
+                                const LightBar &right_bar) {
+  const cv::Point2f center = (left_bar.Center() + right_bar.Center()) / 2.;
+  const cv::Size size(cv::norm(left_bar.Center() - right_bar.Center()),
+                      (left_bar.Length() + right_bar.Length()));
+  const float angle = (left_bar.Angle() + right_bar.Angle()) / 2.f;
+  return cv::RotatedRect(center, size, angle);
 }
 
 Armor::Armor() { SPDLOG_TRACE("Constructed."); }
 
 Armor::Armor(const LightBar &left_bar, const LightBar &right_bar) {
-  Init(left_bar, right_bar);
+  rect_ = FormRect(left_bar, right_bar);
   SPDLOG_TRACE("Constructed.");
 }
 
 Armor::Armor(const cv::RotatedRect &rect) {
-  Init(rect);
+  rect_ = rect;
   SPDLOG_TRACE("Constructed.");
 }
 
 Armor::~Armor() { SPDLOG_TRACE("Destructed."); }
-
-void Armor::Init(const LightBar &left_bar, const LightBar &right_bar) {
-  left_bar_ = left_bar;
-  right_bar_ = right_bar;
-
-  FormRect();
-  SPDLOG_DEBUG("Inited.");
-}
-
-void Armor::Init(const cv::RotatedRect &rect) {
-  // if (rect.size.height > rect.size.width)
-  //  std::swap(rect.size.height, rect.size.width);
-  rect_ = rect;
-  SPDLOG_DEBUG("Inited.");
-}
 
 game::Team Armor::GetTeam() const {
   SPDLOG_DEBUG("team_: {}", team_);

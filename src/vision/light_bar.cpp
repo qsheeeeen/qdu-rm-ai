@@ -21,29 +21,29 @@ void LightBar::Init(const cv::RotatedRect &rect) {
   SPDLOG_DEBUG("Inited.");
 }
 
-const cv::Point2f &LightBar::Center() { return rect_.center; }
+const cv::Point2f &LightBar::Center() const { return rect_.center; }
 
-std::vector<cv::Point2f> LightBar::Vertices() {
+std::vector<cv::Point2f> LightBar::Vertices() const {
   std::vector<cv::Point2f> vertices(4);
   rect_.points(vertices.data());
   return vertices;
 }
 
-double LightBar::Angle() {
+double LightBar::Angle() const {
   SPDLOG_DEBUG("rect_.angle: {}", rect_.angle);
   return rect_.angle;
 }
 
-double LightBar::Area() { return rect_.size.area(); }
+double LightBar::Area() const { return rect_.size.area(); }
 
-double LightBar::AspectRatio() {
+double LightBar::AspectRatio() const {
   double aspect_ratio = std::max(rect_.size.height, rect_.size.width) /
-                       std::min(rect_.size.height, rect_.size.width);
+                        std::min(rect_.size.height, rect_.size.width);
   SPDLOG_DEBUG("aspect_ratio: {}", aspect_ratio);
   return aspect_ratio;
 }
 
-double LightBar::Length() {
+double LightBar::Length() const {
   SPDLOG_DEBUG("rect_.size (h,w): ({}, {})", rect_.size.height,
                rect_.size.width);
   return std::max(rect_.size.height, rect_.size.width);

@@ -18,16 +18,13 @@ class Armor {
 
   common::Euler aiming_euler_;
 
-  void FormRect();
+  cv::RotatedRect FormRect(const LightBar &left_bar, const LightBar &right_bar);
 
  public:
   Armor();
   Armor(const LightBar &left_bar, const LightBar &right_bar);
   Armor(const cv::RotatedRect &rect);
   ~Armor();
-
-  void Init(const LightBar &left_bar, const LightBar &right_bar);
-  void Init(const cv::RotatedRect &rect);
 
   game::Team GetTeam() const;
   void SetTeam(game::Team team);
