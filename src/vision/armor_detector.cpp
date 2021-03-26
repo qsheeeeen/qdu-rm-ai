@@ -115,15 +115,15 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
   for (const auto &contour : contours_) {
     if (contour.size() < params_.contour_size_low_th) continue;
 
-    const double c_area = cv::contourArea(contour);
+    const double c_area = cv::contourArea(contour) / frame_size_.area();
     if (c_area < params_.contour_area_low_th) continue;
     if (c_area > params_.contour_area_high_th) continue;
 
-    auto potential_bar = LightBar(cv::minAreaRect(contour));
+    LightBar potential_bar(cv::minAreaRect(contour));
 
     if (std::abs(potential_bar.Angle()) > params_.angle_high_th) continue;
 
-    const double b_area = potential_bar.Area();
+    const double b_area = potential_bar.Area() / frame_size_.area();
     if (b_area < params_.bar_area_low_th) continue;
     if (b_area > params_.bar_area_high_th) continue;
 
