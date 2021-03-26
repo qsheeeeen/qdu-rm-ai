@@ -20,16 +20,16 @@ void ArmorDetector::InitDefaultParams(const std::string &params_path) {
   fs << "se_erosion" << 5;
   fs << "ap_erosion" << 1.;
 
-  fs << "contour_size_low_th" << 20;
-  fs << "contour_area_low_th" << 100;
-  fs << "contour_area_high_th" << 10000;
-  fs << "bar_area_low_th" << 100;
-  fs << "bar_area_high_th" << 10000;
+  fs << "contour_size_low_th" << 0;
+  fs << "contour_area_low_th" << 0.00001;
+  fs << "contour_area_high_th" << 0.001;
+  fs << "bar_area_low_th" << 0.00001;
+  fs << "bar_area_high_th" << 0.001;
   fs << "angle_high_th" << 60;
   fs << "aspect_ratio_low_th" << 2;
   fs << "aspect_ratio_high_th" << 6;
 
-  fs << "angle_diff_th" << 10;
+  fs << "angle_diff_th" << 0.2;
   fs << "length_diff_th" << 0.2;
   fs << "height_diff_th" << 0.2;
   fs << "area_diff_th" << 0.6;
