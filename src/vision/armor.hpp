@@ -29,30 +29,30 @@ class Armor {
   void Init(const LightBar &left_bar, const LightBar &right_bar);
   void Init(const cv::RotatedRect &rect);
 
-  game::Team GetTeam();
+  game::Team GetTeam() const;
   void SetTeam(game::Team team);
 
-  game::Model GetModel();
+  game::Model GetModel() const;
   void SetModel(game::Model model);
 
-  const cv::Mat &GetRotVec();
+  const cv::Mat &GetRotVec() const;
   void SetRotVec(const cv::Mat &rot_vec);
 
-  const cv::Mat &GetRotMat();
+  const cv::Mat &GetRotMat() const;
   void SetRotMat(const cv::Mat &rot_mat);
 
-  const cv::Mat &GetTransVec();
+  const cv::Mat &GetTransVec() const;
   void SetTransVec(const cv::Mat &trans_vec);
 
-  common::Euler GetAimEuler();
+  common::Euler GetAimEuler() const;
   void SetAimEuler(const common::Euler &elur);
-  
-  const cv::Point2f &SurfaceCenter();
-  std::vector<cv::Point2f> SurfaceVertices();
-  double SurfaceAngle();
-  cv::Mat Face(const cv::Mat &frame);
-  double AspectRatio();
 
-  cv::Vec3d RotationAxis();
-  const cv::Mat ModelVertices();
+  const cv::Point2f &SurfaceCenter() const;
+  std::vector<cv::Point2f> SurfaceVertices() const;
+  double SurfaceAngle() const;
+  cv::Mat Face(const cv::Mat &frame) const;
+  double AspectRatio() const;
+
+  cv::Vec3d RotationAxis() const;
+  const cv::Mat ModelVertices() const;
 };
