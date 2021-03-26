@@ -32,7 +32,6 @@ struct ArmorDetectorParam {
 class ArmorDetector : private Detector<Armor, ArmorDetectorParam> {
  private:
   game::Team enemy_team_;
-  ArmorClassifier armor_classifier_;
   std::vector<std::vector<cv::Point> > contours_, contours_poly_;
   std::vector<LightBar> lightbars_;
 
@@ -55,6 +54,5 @@ class ArmorDetector : private Detector<Armor, ArmorDetectorParam> {
   void SetEnemyTeam(game::Team enemy_team);
 
   const std::vector<Armor> &Detect(const cv::Mat &frame);
-  void ClassifyModel(const cv::Mat &frame);
   void VisualizeResult(const cv::Mat &output, int verbose = 1);
 };

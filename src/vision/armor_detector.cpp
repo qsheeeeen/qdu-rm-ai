@@ -246,12 +246,6 @@ const std::vector<Armor> &ArmorDetector::Detect(const cv::Mat &frame) {
   return targets_;
 }
 
-void ArmorDetector::ClassifyModel(const cv::Mat &frame) {
-  for (auto &armor : targets_) {
-    armor_classifier_.ClassifyModel(armor, frame);
-  }
-}
-
 void ArmorDetector::VisualizeResult(const cv::Mat &output, int verbose) {
   if (verbose > 0) {
     cv::drawContours(output, contours_, -1, kRED);
