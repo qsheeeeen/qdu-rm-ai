@@ -17,7 +17,7 @@ TEST(TestVision, TestArmorDetector) {
   armor_detector.VisualizeResult(result, 2);
   cv::imwrite("../../../image/test_origin.png", result);
 
-  for (size_t i=0; i < armors.size(); ++i) {
+  for (size_t i = 0; i < armors.size(); ++i) {
     cv::imwrite(cv::format("../../../image/p%ld.png", i), armors[i].Face(img));
   }
 
