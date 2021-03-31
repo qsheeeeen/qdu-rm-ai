@@ -10,23 +10,27 @@ enum class Direction { kUNKNOWN, kCLOCKWISE, kANTI };
 
 class Buff {
  private:
-  cv::RotatedRect center_;
+  cv::Point2f center_;
   std::vector<Armor> armors_;
-  Armor target_;
-  std::vector<cv::RotatedRect> tracks_;
-  game::Team team_ = game::Team::kUNKNOWN;
+  Armor target_, predict_;
+  game::Team team_;
   double speed_;
-  rotation::Direction direction_ = rotation::Direction::kUNKNOWN;
+  rotation::Direction direction_;
 
  public:
   Buff();
   ~Buff();
 
+  void Init();
+
   std::vector<Armor> GetArmors();
   void SetArmors(std::vector<Armor> armors);
 
-  cv::RotatedRect GetCenter();
-  void SetCenter(cv::RotatedRect center);
+  cv::Point2f GetCenter();
+  void SetCenter(cv::Point2f center);
+
+  rotation::Direction GetDirection();
+  void SetDirection(rotation::Direction direction);
 
   double GetSpeed();
   void SetSpeed(double time);
@@ -34,8 +38,8 @@ class Buff {
   Armor GetTarget();
   void SetTarget(Armor target);
 
-  std::vector<cv::RotatedRect> GetTracks();
-  void SetTracks(std::vector<cv::RotatedRect> tracks);
+  Armor GetPredict();
+  void SetPridict(Armor target);
 
   game::Team GetTeam();
   void SetTeam(game::Team team);

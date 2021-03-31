@@ -14,8 +14,38 @@ const cv::Scalar kRED(0., 0., 255.);
 const cv::Scalar kYELLOW(0., 255., 255.);
 
 const int kR = 1400;
+const int kFRAME = 20;
+const double kDELTA_FRAME = 0.02;
+const double delta_time = 0.3;
 
 }  // namespace
+
+namespace cal {
+/**
+ * @brief 比赛规则旋转速度公式
+ *
+ * @param temp 输入值
+ * @param flag 计算方式，为真则正运算，为假则逆运算
+ */
+double Speed(double temp, bool flag) {
+  if (flag)
+    temp = 0.785 * sin(1.884 * temp) + 1.305;
+  else
+    temp = asin((temp - 1.305) / 1.884) / 0.785;
+  return temp;
+}
+
+double Dist(cv::Point2f a, cv::Point2f b) {
+  return sqrt(powf(a.x - b.x, 2) + powf(a.y - b.y, 2));
+}
+
+double Omige(cv::Point2f a, cv::Point2f b, cv::Point2f center) {
+  double theta1 = atan2((a.x - center.x), (a.y - center.y));
+  double theta2 = atan2((b.x - center.x), (b.y - center.y));
+  return (theta2 - theta1) / kDELTA_FRAME / CV_PI * 180;
+}
+
+}  // namespace cal
 
 void BuffDetector::InitDefaultParams(const std::string &params_path) {
   cv::FileStorage fs(params_path,
@@ -85,6 +115,11 @@ BuffDetector::BuffDetector(const std::string &params_path,
 
 BuffDetector::~BuffDetector() { SPDLOG_TRACE("Destructed."); }
 
+void BuffDetector::InitBuff() {
+  MatchDirection();
+  FixCenter();
+}
+
 void BuffDetector::FindRects(const cv::Mat &frame) {
   const auto start = std::chrono::high_resolution_clock::now();
   rects_.clear();
@@ -144,7 +179,6 @@ void BuffDetector::FindRects(const cv::Mat &frame) {
 
 void BuffDetector::FindCenter() {
   const auto start = std::chrono::high_resolution_clock::now();
-  buff_.SetCenter(cv::RotatedRect());
 
   for (const auto &contour : contours_poly_) {
     cv::RotatedRect rect = cv::minAreaRect(contour);
@@ -154,7 +188,13 @@ void BuffDetector::FindCenter() {
         contour_area < params_.contour_center_area_high_th) {
       if (params_.rect_center_ratio_low_th < rect_ratio &&
           rect_ratio < params_.rect_center_ratio_high_th) {
-        buff_.SetCenter(rect);
+        /*
+        if (buff_.GetCenter().x * buff_.GetCenter().y != 0) continue;
+        if (centers_.size() > kFRAME)
+          continue;
+        else
+          centers_.emplace_back(rect.center);
+        */
         continue;
       }
     }
@@ -165,41 +205,50 @@ void BuffDetector::FindCenter() {
       std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 }
 
-void BuffDetector::FindTrack(const std::string &path) {
-  const auto start = std::chrono::high_resolution_clock::now();
-  buff_.SetTracks(std::vector<cv::RotatedRect>());
-
-  double speed = buff_.GetSpeed();
-  Armor armor = buff_.GetTarget();
-  Compensator compensator(path);
-  cv::Point3f center_coord = compensator.EstimateWorldCoord(armor);
-  if (buff_.GetTracks().size() > 2) {
-    // if(armor.SurfaceCenter().y<buff_.GetCenter().center.y){if()}
+void BuffDetector::FixCenter() {
+  buff_.SetCenter(cv::Point2f(0, 0));
+  double x = 0, y = 0;
+  for (auto center : centers_) {
+    x += center.x;
+    y += center.y;
   }
-  // TODO
-
-  SPDLOG_DEBUG("Found tracks: {}", buff_.GetTracks().size());
-
-  const auto stop = std::chrono::high_resolution_clock::now();
-  duration_tracks_ =
-      std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-  SPDLOG_DEBUG("duration_track_: {} ms", duration_tracks_.count());
+  cv::Point2f point(x / centers_.size(), y / centers_.size());
+  buff_.SetCenter(point);
 }
 
-double Dist(cv::Point2f a, cv::Point2f b) {
-  return sqrt(powf(a.x - b.x, 2) + powf(a.y - b.y, 2));
+void BuffDetector::MatchDirection() {
+  cv::Point2f center = buff_.GetCenter();
+  double angle, sum = 0;
+  std::vector<double> angles;
+
+  if (points_.size() == 5) {
+    for (auto point : points_)
+      angle = atan2((point.y - center.y), (point.x - center.x));
+    if (angle < 0) angle += CV_PI;
+    angles.emplace_back(angle);
+  }
+
+  if (buff_.GetDirection() == rotation::Direction::kUNKNOWN)
+    for (int i = 4; i > 1; i--) {
+      double delta = angles[i] - angles[i - 1];
+      sum += delta;
+    }
+
+  if (sum > 0)
+    buff_.SetDirection(rotation::Direction::kANTI);
+  else if (sum == 0)
+    buff_.SetDirection(rotation::Direction::kUNKNOWN);
+  else
+    buff_.SetDirection(rotation::Direction::kCLOCKWISE);
 }
-
-void BuffDetector::MatchClockWise() {}
-
-void BuffDetector::MatchSpeed() {}
 
 void BuffDetector::MatchArmors() {
   const auto start = std::chrono::high_resolution_clock::now();
   buff_.SetArmors(std::vector<Armor>());
+  buff_.SetTarget(Armor());
 
   cv::RotatedRect hammer;
-  std::vector<Armor> armor_vec;
+  std::vector<Armor> armors;
 
   for (auto &rect : rects_) {
     double rect_area = rect.size.area();
@@ -210,19 +259,22 @@ void BuffDetector::MatchArmors() {
     }
     if (rect_area < params_.rect_armor_area_low_th) continue;
     if (rect_area > params_.rect_armor_area_high_th) continue;
-    armor_vec.emplace_back(Armor(rect));
+    armors.emplace_back(Armor(rect));
   }
-  SPDLOG_DEBUG("armor_vec.size is {}", armor_vec.size());
+
+  SPDLOG_DEBUG("armors.size is {}", armors.size());
   SPDLOG_DEBUG("the buff's hammer area is {}", hammer.size.area());
-  if (armor_vec.size() > 0 && hammer.size.area()) {
-    buff_.SetTarget(armor_vec[0]);
-    for (auto armor : armor_vec) {
-      if (Dist(hammer.center, armor.SurfaceCenter()) <
-          Dist(buff_.GetTarget().SurfaceCenter(), hammer.center)) {
+
+  if (armors.size() > 0 && hammer.size.area() != 0) {
+    for (auto armor : armors) {
+      if (cal::Dist(hammer.center, armor.SurfaceCenter()) <
+          cal::Dist(buff_.GetTarget().SurfaceCenter(), hammer.center)) {
         buff_.SetTarget(armor);
+        // TODO
+        points_.emplace_back(armor.SurfaceCenter());
       }
     }
-    buff_.SetArmors(armor_vec);
+    buff_.SetArmors(armors);
   } else {
     SPDLOG_WARN("can't find buff_armor");
   }
@@ -231,7 +283,7 @@ void BuffDetector::MatchArmors() {
       std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 }
 
-void BuffDetector::VisualizeArmor(const cv::Mat &output, bool add_lable) {
+void BuffDetector::VisualizeArmors(const cv::Mat &output, bool add_lable) {
   std::vector<Armor> armors = buff_.GetArmors();
   if (!armors.empty()) {
     for (auto &armor : armors) {
@@ -248,35 +300,21 @@ void BuffDetector::VisualizeArmor(const cv::Mat &output, bool add_lable) {
       }
     }
   }
+
   Armor target = buff_.GetTarget();
   auto vertices = target.SurfaceVertices();
   for (std::size_t i = 0; i < vertices.size(); ++i)
     cv::line(output, vertices[i], vertices[(i + 1) % 4], kRED);
-}
 
-void BuffDetector::VisualizeTrack(const cv::Mat &output, bool add_lable) {
-  std::vector<cv::RotatedRect> rects = buff_.GetTracks();
-  if (!rects.empty()) {
-    for (const auto &rect : rects) {
-      std::vector<cv::Point2f> vertices(4);
-      rect.points(vertices.data());
-
-      for (std::size_t i = 0; i < vertices.size(); ++i)
-        cv::line(output, vertices[i], vertices[(i + 1) % 4], kGREEN);
-
-      cv::drawMarker(output, rect.center, kGREEN, cv::MARKER_DIAMOND);
-
-      if (add_lable) {
-        std::ostringstream buf;
-        buf << rect.center.x << ", " << rect.center.y;
-        cv::putText(output, buf.str(), vertices[1], kCV_FONT, 1.0, kGREEN);
-      }
-    }
-  }
+  Armor predict = buff_.GetPredict();
+  vertices = predict.SurfaceVertices();
+  for (std::size_t i = 0; i < vertices.size(); ++i)
+    cv::line(output, vertices[i], vertices[(i + 1) % 4], kYELLOW);
 }
 
 const std::vector<Buff> &BuffDetector::Detect(const cv::Mat &frame) {
   SPDLOG_DEBUG("Detecting");
+  buff_.Init();
   FindRects(frame);
   MatchArmors();
   SPDLOG_DEBUG("Detected.");
@@ -306,14 +344,7 @@ void BuffDetector::VisualizeResult(const cv::Mat &output, int verbose) {
     text_size = cv::getTextSize(label, kCV_FONT, 1.0, 2, &baseLine);
     v_pos += static_cast<int>(1.3 * text_size.height);
     cv::putText(output, label, cv::Point(0, v_pos), kCV_FONT, 1.0, kGREEN);
-
-    label = cv::format("%ld tracks in %ld ms.", buff_.GetTracks().size(),
-                       duration_tracks_.count());
-    text_size = cv::getTextSize(label, kCV_FONT, 1.0, 2, &baseLine);
-    v_pos += static_cast<int>(1.3 * text_size.height);
-    cv::putText(output, label, cv::Point(0, v_pos), kCV_FONT, 1.0, kGREEN);
   }
-  VisualizeArmor(output, verbose);
-  VisualizeTrack(output, verbose);
+  VisualizeArmors(output, verbose);
   SPDLOG_DEBUG("Visualized.");
 }

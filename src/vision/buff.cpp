@@ -7,6 +7,12 @@ Buff::Buff() { SPDLOG_TRACE("Constructed."); }
 
 Buff::~Buff() { SPDLOG_TRACE("Destructed."); }
 
+void Buff::Init() {
+  center_ = cv::Point2f(0, 0);
+  team_ = game::Team::kUNKNOWN;
+  direction_ = rotation::Direction::kUNKNOWN;
+}
+
 std::vector<Armor> Buff::GetArmors() {
   SPDLOG_DEBUG("armors_: {}", armors_.size());
   return armors_;
@@ -14,15 +20,34 @@ std::vector<Armor> Buff::GetArmors() {
 
 void Buff::SetArmors(std::vector<Armor> armors) { armors_ = armors; }
 
-cv::RotatedRect Buff::GetCenter() {
-  SPDLOG_DEBUG("center_: {}, {}", center_.center.x, center_.center.y);
+cv::Point2f Buff::GetCenter() {
+  SPDLOG_DEBUG("center_: {}, {}", center_.x, center_.y);
   return center_;
 }
 
-void Buff::SetCenter(cv::RotatedRect center) { center_ = center; }
+void Buff::SetCenter(cv::Point2f center) { center_ = center; }
+
+rotation::Direction Buff::GetDirection() { return direction_; }
+
+void Buff::SetDirection(rotation::Direction direction) {
+  std::string rot;
+  switch (direction_) {
+    case rotation::Direction::kCLOCKWISE:
+      rot = "CLOCKWISE";
+      break;
+    case rotation::Direction::kANTI:
+      rot = "ANTICLOCKWISE";
+      break;
+    default:
+      rot = "UNKNOWN";
+      break;
+  }
+  SPDLOG_DEBUG("direction_: {}", rot);
+  direction_ = direction;
+}
 
 double Buff::GetSpeed() {
-  SPDLOG_DEBUG("rects_: {}", speed_);
+  SPDLOG_DEBUG("speed_: {}", speed_);
   return speed_;
 }
 
@@ -35,12 +60,12 @@ Armor Buff::GetTarget() {
 
 void Buff::SetTarget(Armor target) { target_ = target; }
 
-std::vector<cv::RotatedRect> Buff::GetTracks() {
-  SPDLOG_DEBUG("rects_: {}", tracks_.size());
-  return tracks_;
+Armor Buff::GetPredict() {
+  SPDLOG_DEBUG("Got it.");
+  return predict_;
 }
 
-void Buff::SetTracks(std::vector<cv::RotatedRect> tracks) { tracks_ = tracks; }
+void Buff::SetPridict(Armor target) { target_ = target; }
 
 game::Team Buff::GetTeam() {
   SPDLOG_DEBUG("team_: {}", team_);
