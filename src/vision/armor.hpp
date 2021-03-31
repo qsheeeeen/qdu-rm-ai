@@ -14,8 +14,6 @@ class Armor {
   game::Team team_ = game::Team::kUNKNOWN;
   game::Model model_ = game::Model::kUNKNOWN;
 
-  LightBar left_bar_, right_bar_;
-
   common::Euler aiming_euler_;
 
   cv::RotatedRect FormRect(const LightBar &left_bar, const LightBar &right_bar);
