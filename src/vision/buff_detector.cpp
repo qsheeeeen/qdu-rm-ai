@@ -14,9 +14,8 @@ const cv::Scalar kRED(0., 0., 255.);
 const cv::Scalar kYELLOW(0., 255., 255.);
 
 const int kR = 1400;
-const int kFRAME = 20;
-const double kDELTA_FRAME = 0.02;
-const double delta_time = 0.3;
+const int kFRAME = 20;      // FixCenter控制帧数
+const double kDELTA = 0.3;  //总延迟时间
 
 }  // namespace
 
@@ -35,14 +34,31 @@ double Speed(double temp, bool flag) {
   return temp;
 }
 
+/**
+ *$
+ *\quad \int^{t_1+\Delta t}_{t_1} 0.785\sin{1.884t}+1.305{\rm d}t \\
+ *= 1.305\Delta t+ \dfrac{0.785}{1.884} ( \cos{1.884t} - \cos{1.884(t+\Delta t)}
+ *\\ = \sqrt{2-2\cos{{1.884\Delta t}}}\sin({1.884t} +
+ *\arctan{\dfrac{1-\cos{{1.884\Delta t}}}{\sin{{1.884\Delta t}}}}) + 1.305
+ *\Delta t
+ * $
+ */
+double Delta_theta(double t) {
+  return 1.305 * kDELTA + sqrt(2 - 2 * cos(1.884 * kDELTA)) *
+                              sin(1.884 * t + atan((1 - cos(1.884 * kDELTA)) /
+                                                   sin(1.884 * kDELTA)));
+  // return 1.305 * kDELTA +
+  //      0.785 / 1.884 * (cos(1.884 * t) - cos(1.884 * (t + kDELTA)));
+}
+
 double Dist(cv::Point2f a, cv::Point2f b) {
   return sqrt(powf(a.x - b.x, 2) + powf(a.y - b.y, 2));
 }
 
-double Omige(cv::Point2f a, cv::Point2f b, cv::Point2f center) {
-  double theta1 = atan2((a.x - center.x), (a.y - center.y));
-  double theta2 = atan2((b.x - center.x), (b.y - center.y));
-  return (theta2 - theta1) / kDELTA_FRAME / CV_PI * 180;
+double Angle(cv::Point2f a, cv::Point2f center) {
+  double angle = atan2(a.y - center.y, a.x - center.x) / CV_PI * 180;
+  if (angle < 0) angle += 360;
+  return angle;
 }
 
 }  // namespace cal
@@ -221,10 +237,8 @@ void BuffDetector::MatchDirection() {
   double angle, sum = 0;
   std::vector<double> angles;
 
-  if (points_.size() == 5) {
-    for (auto point : points_)
-      angle = atan2((point.y - center.y), (point.x - center.x));
-    if (angle < 0) angle += CV_PI;
+  if (circumference_.size() == 5) {
+    for (auto point : circumference_) angle = cal::Angle(point, center);
     angles.emplace_back(angle);
   }
 
@@ -271,7 +285,7 @@ void BuffDetector::MatchArmors() {
           cal::Dist(buff_.GetTarget().SurfaceCenter(), hammer.center)) {
         buff_.SetTarget(armor);
         // TODO
-        points_.emplace_back(armor.SurfaceCenter());
+        circumference_.emplace_back(armor.SurfaceCenter());
       }
     }
     buff_.SetArmors(armors);
@@ -281,6 +295,28 @@ void BuffDetector::MatchArmors() {
   const auto stop = std::chrono::high_resolution_clock::now();
   duration_armors_ =
       std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+}
+
+void BuffDetector::MatchPredict() {
+  buff_.SetPridict(Armor());
+  cv::Point2f target_center = buff_.GetTarget().SurfaceCenter();
+  cv::Point2f center = buff_.GetCenter();
+  rotation::Direction direction = buff_.GetDirection();
+  Armor predict;
+
+  double angle = cal::Angle(target_center, center);
+  while (angle > 90) angle -= 90;
+  if (direction == rotation::Direction::kCLOCKWISE) angle = -angle;
+
+  double theta = cal::Delta_theta(buff_.GetSpeed());
+  cv::Matx22d rot(cos(theta), -sin(theta), sin(theta), cos(theta));
+  cv::Matx21d vec(target_center.x - center.x, target_center.y - center.y);
+  cv::Matx21d point = rot * vec;
+  cv::Point2f predict_center(point.val[0], point.val[1]);
+  cv::Size2d predict_size = rects_.back().size;
+  double predict_angle = angle + angle;
+  cv::RotatedRect predict_rect(predict_center, predict_size, predict_angle);
+  buff_.SetPridict(Armor(predict_rect));
 }
 
 void BuffDetector::VisualizeArmors(const cv::Mat &output, bool add_lable) {

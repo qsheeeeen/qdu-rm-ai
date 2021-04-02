@@ -65,7 +65,7 @@ Armor Buff::GetPredict() {
   return predict_;
 }
 
-void Buff::SetPridict(Armor target) { target_ = target; }
+void Buff::SetPridict(Armor predict) { predict_ = predict; }
 
 game::Team Buff::GetTeam() {
   SPDLOG_DEBUG("team_: {}", team_);

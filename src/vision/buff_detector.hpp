@@ -36,7 +36,7 @@ class BuffDetector : private Detector<Buff, BuffDetectorParam> {
   Buff buff_;
   std::vector<std::vector<cv::Point>> contours_, contours_poly_;
   std::vector<cv::RotatedRect> rects_;
-  std::vector<cv::Point2f> centers_, points_;
+  std::vector<cv::Point2f> centers_, circumference_;
 
   std::chrono::milliseconds duration_armors_, duration_center_,
       duration_tracks_, duration_rects_;
@@ -44,13 +44,16 @@ class BuffDetector : private Detector<Buff, BuffDetectorParam> {
   void InitDefaultParams(const std::string &path);
   bool PrepareParams(const std::string &path);
 
+  void InitBuff();
+  void FixCenter();
+
   void FindRects(const cv::Mat &frame);
   void FindCenter();
 
-  void MatchDirection();
-  void InitBuff();
   void MatchArmors();
-  void FixCenter();
+  void MatchDirection();
+ 
+  void MatchPredict();
 
   void VisualizeArmors(const cv::Mat &output, bool add_lable);
 
