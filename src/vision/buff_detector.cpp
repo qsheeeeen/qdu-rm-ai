@@ -14,7 +14,6 @@ const cv::Scalar kRED(0., 0., 255.);
 const cv::Scalar kYELLOW(0., 255., 255.);
 
 const int kR = 1400;
-const int kFRAME = 20;      // FixCenter控制帧数
 const double kDELTA = 0.3;  //总延迟时间
 
 }  // namespace
@@ -157,40 +156,25 @@ void BuffDetector::FindRects(const cv::Mat &frame) {
 
 void BuffDetector::FindCenter() {
   const auto start = std::chrono::high_resolution_clock::now();
+  buff_.SetCenter(cv::Point2f());
 
   for (const auto &contour : contours_poly_) {
+    
     cv::RotatedRect rect = cv::minAreaRect(contour);
     double rect_ratio = rect.size.aspectRatio();
     double contour_area = cv::contourArea(contour);
-    if (params_.contour_center_area_low_th < contour_area &&
-        contour_area < params_.contour_center_area_high_th) {
-      if (params_.rect_center_ratio_low_th < rect_ratio &&
-          rect_ratio < params_.rect_center_ratio_high_th) {
-        if (buff_.GetCenter().x * buff_.GetCenter().y != 0) continue;
-        if (centers_.size() > kFRAME)
-          continue;
-        else
-          centers_.emplace_back(rect.center);
 
-        continue;
-      }
-    }
+    if (contour_area < params_.contour_center_area_low_th) continue;
+    if (contour_area > params_.contour_area_high_th) continue;
+    if (rect_ratio > params_.rect_center_ratio_low_th) continue;
+    if (rect_ratio < params_.rect_center_ratio_high_th) continue;
+    
+    buff_.SetCenter(rect.center);
   }
 
   const auto stop = std::chrono::high_resolution_clock::now();
   duration_center_ =
       std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-}
-
-void BuffDetector::FixCenter() {
-  buff_.SetCenter(cv::Point2f(0, 0));
-  double x = 0, y = 0;
-  for (auto center : centers_) {
-    x += center.x;
-    y += center.y;
-  }
-  cv::Point2f point(x / centers_.size(), y / centers_.size());
-  buff_.SetCenter(point);
 }
 
 void BuffDetector::MatchDirection() {
@@ -248,8 +232,6 @@ void BuffDetector::MatchArmors() {
         // TODO
         if (circumference_.size() <= 5)
           circumference_.emplace_back(armor.SurfaceCenter());
-
-        circumference_.emplace_back(armor.SurfaceCenter());
       }
     }
     buff_.SetArmors(armors);
@@ -316,6 +298,7 @@ const std::vector<Buff> &BuffDetector::Detect(const cv::Mat &frame) {
   SPDLOG_DEBUG("Detecting");
   buff_.Init();
   FindRects(frame);
+  FindCenter();
   MatchArmors();
   MatchPredict();
   SPDLOG_DEBUG("Detected.");

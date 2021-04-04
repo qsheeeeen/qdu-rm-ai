@@ -44,15 +44,11 @@ class BuffDetector : private Detector<Buff, BuffDetectorParam> {
   void InitDefaultParams(const std::string &path);
   bool PrepareParams(const std::string &path);
 
-  void InitBuff();
-  void FixCenter();
-
   void FindRects(const cv::Mat &frame);
   void FindCenter();
 
   void MatchArmors();
   void MatchDirection();
- 
   void MatchPredict();
 
   void VisualizeArmors(const cv::Mat &output, bool add_lable);
