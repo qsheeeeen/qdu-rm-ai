@@ -30,28 +30,17 @@ void Buff::SetCenter(cv::Point2f center) { center_ = center; }
 rotation::Direction Buff::GetDirection() { return direction_; }
 
 void Buff::SetDirection(rotation::Direction direction) {
-  std::string rot;
-  switch (direction_) {
-    case rotation::Direction::kCLOCKWISE:
-      rot = "CLOCKWISE";
-      break;
-    case rotation::Direction::kANTI:
-      rot = "ANTICLOCKWISE";
-      break;
-    default:
-      rot = "UNKNOWN";
-      break;
-  }
+  std::string rot = rotation::DirectionToString(direction);
   SPDLOG_DEBUG("direction_: {}", rot);
   direction_ = direction;
 }
 
-double Buff::GetSpeed() {
-  SPDLOG_DEBUG("speed_: {}", speed_);
-  return speed_;
+double Buff::GetTime() {
+  SPDLOG_DEBUG("time_: {}", time_);
+  return time_;
 }
 
-void Buff::SetSpeed(double speed) { speed_ = speed; }
+void Buff::SetTime(double speed) { time_ = speed; }
 
 Armor Buff::GetTarget() {
   SPDLOG_DEBUG("Got it.");

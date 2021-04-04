@@ -19,50 +19,6 @@ const double kDELTA = 0.3;  //总延迟时间
 
 }  // namespace
 
-namespace cal {
-/**
- * @brief 比赛规则旋转速度公式
- *
- * @param temp 输入值
- * @param flag 计算方式，为真则正运算，为假则逆运算
- */
-double Speed(double temp, bool flag) {
-  if (flag)
-    temp = 0.785 * sin(1.884 * temp) + 1.305;
-  else
-    temp = asin((temp - 1.305) / 1.884) / 0.785;
-  return temp;
-}
-
-/**
- *$
- *\quad \int^{t_1+\Delta t}_{t_1} 0.785\sin{1.884t}+1.305{\rm d}t \\
- *= 1.305\Delta t+ \dfrac{0.785}{1.884} ( \cos{1.884t} - \cos{1.884(t+\Delta t)}
- *\\ = \sqrt{2-2\cos{{1.884\Delta t}}}\sin({1.884t} +
- *\arctan{\dfrac{1-\cos{{1.884\Delta t}}}{\sin{{1.884\Delta t}}}}) + 1.305
- *\Delta t
- * $
- */
-double Delta_theta(double t) {
-  return 1.305 * kDELTA + sqrt(2 - 2 * cos(1.884 * kDELTA)) *
-                              sin(1.884 * t + atan((1 - cos(1.884 * kDELTA)) /
-                                                   sin(1.884 * kDELTA)));
-  // return 1.305 * kDELTA +
-  //      0.785 / 1.884 * (cos(1.884 * t) - cos(1.884 * (t + kDELTA)));
-}
-
-double Dist(cv::Point2f a, cv::Point2f b) {
-  return sqrt(powf(a.x - b.x, 2) + powf(a.y - b.y, 2));
-}
-
-double Angle(cv::Point2f a, cv::Point2f center) {
-  double angle = atan2(a.y - center.y, a.x - center.x) / CV_PI * 180;
-  if (angle < 0) angle += 360;
-  return angle;
-}
-
-}  // namespace cal
-
 void BuffDetector::InitDefaultParams(const std::string &params_path) {
   cv::FileStorage fs(params_path,
                      cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
@@ -308,7 +264,7 @@ void BuffDetector::MatchPredict() {
   while (angle > 90) angle -= 90;
   if (direction == rotation::Direction::kCLOCKWISE) angle = -angle;
 
-  double theta = cal::Delta_theta(buff_.GetSpeed());
+  double theta = cal::DeltaTheta(buff_.GetTime(), kDELTA);
   cv::Matx22d rot(cos(theta), -sin(theta), sin(theta), cos(theta));
   cv::Matx21d vec(target_center.x - center.x, target_center.y - center.y);
   cv::Matx21d point = rot * vec;

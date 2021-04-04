@@ -1,12 +1,7 @@
 #include <vector>
 
 #include "armor.hpp"
-
-namespace rotation {
-
-enum class Direction { kUNKNOWN, kCLOCKWISE, kANTI };
-
-}  // namespace rotation
+#include "track.hpp"
 
 class Buff {
  private:
@@ -14,7 +9,7 @@ class Buff {
   std::vector<Armor> armors_;
   Armor target_, predict_;
   game::Team team_;
-  double speed_;
+  double time_;
   rotation::Direction direction_;
 
  public:
@@ -32,8 +27,8 @@ class Buff {
   rotation::Direction GetDirection();
   void SetDirection(rotation::Direction direction);
 
-  double GetSpeed();
-  void SetSpeed(double time);
+  double GetTime();
+  void SetTime(double time);
 
   Armor GetTarget();
   void SetTarget(Armor target);
