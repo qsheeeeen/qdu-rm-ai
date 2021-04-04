@@ -26,7 +26,6 @@ void BuffDetector::InitDefaultParams(const std::string &params_path) {
   fs << "binary_th" << 220;
   fs << "se_erosion" << 2;
   fs << "ap_erosion" << 1.;
-  fs << "se_anchor" << 2;
 
   fs << "contour_size_low_th" << 2;
   fs << "contour_area_low_th" << 100;
@@ -53,7 +52,6 @@ bool BuffDetector::PrepareParams(const std::string &params_path) {
     params_.binary_th = fs["binary_th"];
     params_.se_erosion = fs["se_erosion"];
     params_.ap_erosion = fs["ap_erosion"];
-    params_.se_anchor = fs["se_anchor"];
 
     params_.contour_size_low_th = int(fs["contour_size_low_th"]);
     params_.contour_area_low_th = fs["contour_area_low_th"];
@@ -108,10 +106,15 @@ void BuffDetector::FindRects(const cv::Mat &frame) {
     img = channels[2] - channels[0];
   }
 #else
-  img = channels[0];
+  if (buff_.GetTeam() == game::Team::kBLUE) {
+    result = channels[0] - channels[2];
+  } else if (buff_.GetTeam() == game::Team::kRED) {
+    result = channels[2] - channels[0];
+  }
 #endif
 
-  cv::threshold(img, img, 0, 255, cv::THRESH_OTSU);
+  cv::threshold(img, img, params_.binary_th, 255., cv::THRESH_BINARY);
+
   cv::Mat kernel = cv::getStructuringElement(
       cv::MORPH_RECT,
       cv::Size2i(2 * params_.se_erosion + 1, 2 * params_.se_erosion + 1),
@@ -119,12 +122,15 @@ void BuffDetector::FindRects(const cv::Mat &frame) {
 
   cv::dilate(img, img, kernel);
   cv::morphologyEx(img, img, cv::MORPH_CLOSE, kernel);
-  cv::findContours(img, contours_, cv::MORPH_CLOSE, cv::CHAIN_APPROX_NONE);
+  cv::findContours(img, contours_, cv::RETR_TREE, cv::CHAIN_APPROX_NONE);
+
+#if 1
   contours_poly_.resize(contours_.size());
-  for (size_t k = 0; k < contours_.size(); ++k) {
-    cv::approxPolyDP(cv::Mat(contours_[k]), contours_poly_[k],
+  for (size_t i = 0; i < contours_.size(); ++i) {
+    cv::approxPolyDP(cv::Mat(contours_[i]), contours_poly_[i],
                      params_.ap_erosion, true);
   }
+#endif
 
   for (const auto &contour : contours_poly_) {
     if (contour.size() < params_.contour_size_low_th) continue;
@@ -160,13 +166,12 @@ void BuffDetector::FindCenter() {
         contour_area < params_.contour_center_area_high_th) {
       if (params_.rect_center_ratio_low_th < rect_ratio &&
           rect_ratio < params_.rect_center_ratio_high_th) {
-        /*
         if (buff_.GetCenter().x * buff_.GetCenter().y != 0) continue;
         if (centers_.size() > kFRAME)
           continue;
         else
           centers_.emplace_back(rect.center);
-        */
+
         continue;
       }
     }
@@ -241,6 +246,9 @@ void BuffDetector::MatchArmors() {
           cal::Dist(buff_.GetTarget().SurfaceCenter(), hammer.center)) {
         buff_.SetTarget(armor);
         // TODO
+        if (circumference_.size() <= 5)
+          circumference_.emplace_back(armor.SurfaceCenter());
+
         circumference_.emplace_back(armor.SurfaceCenter());
       }
     }
@@ -309,6 +317,7 @@ const std::vector<Buff> &BuffDetector::Detect(const cv::Mat &frame) {
   buff_.Init();
   FindRects(frame);
   MatchArmors();
+  MatchPredict();
   SPDLOG_DEBUG("Detected.");
   targets_.clear();
   targets_.emplace_back(buff_);
