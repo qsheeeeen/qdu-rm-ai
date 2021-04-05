@@ -38,8 +38,7 @@ class BuffDetector : private Detector<Buff, BuffDetectorParam> {
   std::vector<cv::RotatedRect> rects_;
   std::vector<cv::Point2f> centers_, circumference_;
 
-  std::chrono::milliseconds duration_armors_, duration_center_,
-      duration_tracks_, duration_rects_;
+  std::chrono::milliseconds duration_armors_, duration_center_, duration_rects_;
 
   void InitDefaultParams(const std::string &path);
   bool PrepareParams(const std::string &path);

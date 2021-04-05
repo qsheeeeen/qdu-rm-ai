@@ -84,11 +84,6 @@ BuffDetector::BuffDetector(const std::string &params_path,
 
 BuffDetector::~BuffDetector() { SPDLOG_TRACE("Destructed."); }
 
-void BuffDetector::InitBuff() {
-  MatchDirection();
-  FixCenter();
-}
-
 void BuffDetector::FindRects(const cv::Mat &frame) {
   const auto start = std::chrono::high_resolution_clock::now();
   rects_.clear();
@@ -159,7 +154,6 @@ void BuffDetector::FindCenter() {
   buff_.SetCenter(cv::Point2f());
 
   for (const auto &contour : contours_poly_) {
-    
     cv::RotatedRect rect = cv::minAreaRect(contour);
     double rect_ratio = rect.size.aspectRatio();
     double contour_area = cv::contourArea(contour);
@@ -168,7 +162,7 @@ void BuffDetector::FindCenter() {
     if (contour_area > params_.contour_area_high_th) continue;
     if (rect_ratio > params_.rect_center_ratio_low_th) continue;
     if (rect_ratio < params_.rect_center_ratio_high_th) continue;
-    
+
     buff_.SetCenter(rect.center);
   }
 
