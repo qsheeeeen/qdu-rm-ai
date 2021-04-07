@@ -2,7 +2,6 @@
     "binary_th": 220,
     "se_erosion": 2,
     "ap_erosion": 1.0,
-    "se_anchor": 2,
     "contour_size_low_th": 2,
     "contour_area_low_th": 100,
     "contour_area_high_th": 6000,

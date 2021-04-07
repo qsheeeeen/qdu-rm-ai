@@ -78,6 +78,7 @@ BuffDetector::BuffDetector() { SPDLOG_TRACE("Constructed."); }
 BuffDetector::BuffDetector(const std::string &params_path,
                            game::Team buff_team) {
   LoadParams(params_path);
+  buff_.Init();
   buff_.SetTeam(buff_team);
   SPDLOG_TRACE("Constructed.");
 }
@@ -245,16 +246,17 @@ void BuffDetector::MatchPredict() {
   Armor predict;
 
   double angle = cal::Angle(target_center, center);
+  double theta = cal::DeltaTheta(buff_.GetTime(), kDELTA);
   while (angle > 90) angle -= 90;
   if (direction == rotation::Direction::kCLOCKWISE) angle = -angle;
-
-  double theta = cal::DeltaTheta(buff_.GetTime(), kDELTA);
+  double predict_angle = angle + theta;
+  
   cv::Matx22d rot(cos(theta), -sin(theta), sin(theta), cos(theta));
   cv::Matx21d vec(target_center.x - center.x, target_center.y - center.y);
   cv::Matx21d point = rot * vec;
   cv::Point2f predict_center(point.val[0], point.val[1]);
   cv::Size2d predict_size = rects_.back().size;
-  double predict_angle = angle + angle;
+
   cv::RotatedRect predict_rect(predict_center, predict_size, predict_angle);
   buff_.SetPridict(Armor(predict_rect));
 }
@@ -290,7 +292,6 @@ void BuffDetector::VisualizeArmors(const cv::Mat &output, bool add_lable) {
 
 const std::vector<Buff> &BuffDetector::Detect(const cv::Mat &frame) {
   SPDLOG_DEBUG("Detecting");
-  buff_.Init();
   FindRects(frame);
   FindCenter();
   MatchArmors();

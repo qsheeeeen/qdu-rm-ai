@@ -16,7 +16,7 @@ class Buff {
   Buff();
   ~Buff();
 
-  void Init();
+  void Init(game::Team team = game::Team::kUNKNOWN);
 
   std::vector<Armor> GetArmors();
   void SetArmors(std::vector<Armor> armors);

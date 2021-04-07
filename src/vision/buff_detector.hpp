@@ -13,7 +13,6 @@ struct BuffDetectorParam {
   double binary_th;
   int se_erosion;    /* erosion in getStructuringElement */
   double ap_erosion; /* erosion in approxPolyDP */
-  int se_anchor;
 
   std::size_t contour_size_low_th;
   double contour_area_low_th;

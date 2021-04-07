@@ -7,9 +7,9 @@ Buff::Buff() { SPDLOG_TRACE("Constructed."); }
 
 Buff::~Buff() { SPDLOG_TRACE("Destructed."); }
 
-void Buff::Init() {
+void Buff::Init(game::Team team = game::Team::kUNKNOWN) {
+  team_ = team;
   center_ = cv::Point2f(0, 0);
-  team_ = game::Team::kUNKNOWN;
   direction_ = rotation::Direction::kUNKNOWN;
 }
 
