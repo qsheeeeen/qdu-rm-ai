@@ -173,27 +173,27 @@ void BuffDetector::FindCenter() {
 }
 
 void BuffDetector::MatchDirection() {
-  cv::Point2f center = buff_.GetCenter();
-  double angle, sum = 0;
-  std::vector<double> angles;
+  if (buff_.GetDirection() != rotation::Direction::kUNKNOWN) {
+    cv::Point2f center = buff_.GetCenter();
+    double angle, sum = 0;
+    std::vector<double> angles;
 
-  if (circumference_.size() == 5) {
-    for (auto point : circumference_) angle = cal::Angle(point, center);
-    angles.emplace_back(angle);
-  }
-
-  if (buff_.GetDirection() == rotation::Direction::kUNKNOWN)
+    if (circumference_.size() == 5) {
+      for (auto point : circumference_) angle = cal::Angle(point, center);
+      angles.emplace_back(angle);
+    }
     for (int i = 4; i > 1; i--) {
       double delta = angles[i] - angles[i - 1];
       sum += delta;
     }
 
-  if (sum > 0)
-    buff_.SetDirection(rotation::Direction::kANTI);
-  else if (sum == 0)
-    buff_.SetDirection(rotation::Direction::kUNKNOWN);
-  else
-    buff_.SetDirection(rotation::Direction::kCLOCKWISE);
+    if (sum > 0)
+      buff_.SetDirection(rotation::Direction::kANTI);
+    else if (sum == 0)
+      buff_.SetDirection(rotation::Direction::kUNKNOWN);
+    else
+      buff_.SetDirection(rotation::Direction::kCLOCKWISE);
+  }
 }
 
 void BuffDetector::MatchArmors() {
@@ -250,7 +250,7 @@ void BuffDetector::MatchPredict() {
   while (angle > 90) angle -= 90;
   if (direction == rotation::Direction::kCLOCKWISE) angle = -angle;
   double predict_angle = angle + theta;
-  
+
   cv::Matx22d rot(cos(theta), -sin(theta), sin(theta), cos(theta));
   cv::Matx21d vec(target_center.x - center.x, target_center.y - center.y);
   cv::Matx21d point = rot * vec;
