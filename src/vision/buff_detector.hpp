@@ -15,10 +15,6 @@ struct BuffDetectorParam {
   double ap_erosion; /* erosion in approxPolyDP */
 
   std::size_t contour_size_low_th;
-  double contour_area_low_th;
-  double contour_area_high_th;
-  double rect_area_low_th;
-  double rect_area_high_th;
   double rect_ratio_low_th;
   double rect_ratio_high_th;
 
@@ -26,16 +22,15 @@ struct BuffDetectorParam {
   double contour_center_area_high_th;
   double rect_center_ratio_low_th;
   double rect_center_ratio_high_th;
-  double rect_armor_area_low_th;
-  double rect_armor_area_high_th;
 };
 
-class BuffDetector : private Detector<Buff, BuffDetectorParam> {
+class BuffDetector : private Detector<Armor, BuffDetectorParam> {
  private:
   Buff buff_;
   std::vector<std::vector<cv::Point>> contours_, contours_poly_;
   std::vector<cv::RotatedRect> rects_;
-  std::vector<cv::Point2f> centers_, circumference_;
+  std::vector<cv::Point2f> circumference_;
+  cv::RotatedRect hammer_;
 
   std::chrono::milliseconds duration_armors_, duration_center_, duration_rects_;
 
@@ -43,7 +38,6 @@ class BuffDetector : private Detector<Buff, BuffDetectorParam> {
   bool PrepareParams(const std::string &path);
 
   void FindRects(const cv::Mat &frame);
-  void FindCenter();
 
   void MatchArmors();
   void MatchDirection();
@@ -56,7 +50,7 @@ class BuffDetector : private Detector<Buff, BuffDetectorParam> {
   BuffDetector(const std::string &param_path, game::Team buff_team);
   ~BuffDetector();
 
-  const std::vector<Buff> &Detect(const cv::Mat &frame);
+  const std::vector<Armor> &Detect(const cv::Mat &frame);
 
   void VisualizeResult(const cv::Mat &frame, int verbose);
 };

@@ -9,6 +9,7 @@ Buff::~Buff() { SPDLOG_TRACE("Destructed."); }
 
 void Buff::Init(game::Team team) {
   team_ = team;
+  time_ = 0;
   center_ = cv::Point2f(0, 0);
   direction_ = rotation::Direction::kUNKNOWN;
 }
@@ -37,7 +38,7 @@ void Buff::SetDirection(rotation::Direction direction) {
 
 double Buff::GetTime() {
   SPDLOG_DEBUG("time_: {}", time_);
-  return time_;
+  return time_++;
 }
 
 void Buff::SetTime(double speed) { time_ = speed; }
