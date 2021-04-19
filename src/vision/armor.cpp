@@ -122,8 +122,7 @@ double Armor::SurfaceAngle() const {
 
 cv::Mat Armor::Face(const cv::Mat &frame) const {
   cv::Mat p, t;
-  const bool is_big = AspectRatio() > 1.2;
-  if (is_big) {
+  if (AspectRatio() > 1.2) {
     t = cv::getPerspectiveTransform(SurfaceVertices(), kDST_POV_BIG);
     cv::warpPerspective(frame, p, t, cv::Size(kARMOR_LENGTH_BIG, kARMOR_WIDTH));
   } else {
@@ -135,6 +134,9 @@ cv::Mat Armor::Face(const cv::Mat &frame) const {
                  kARMOR_WIDTH, kARMOR_WIDTH));
   cv::cvtColor(p, p, cv::COLOR_RGB2GRAY);
   cv::medianBlur(p, p, 1);
+#if 0 
+  cv::equalizeHist(p, p); /* Tried. No help. */
+#endif
   cv::threshold(p, p, 0., 255., cv::THRESH_BINARY | cv::THRESH_TRIANGLE);
   return p;
 }
