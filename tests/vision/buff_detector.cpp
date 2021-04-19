@@ -24,7 +24,7 @@ TEST(TestVision, TestVideo) {
 
   cv::VideoCapture cap("../../../../redbuff.avi");
   cv::Mat frame;
-  SPDLOG_WARN("cap.isOpened {}", cap.isOpened());
+  ASSERT_TRUE(cap.isOpened()) << "cap not opened";
   while (cap.isOpened()) {
     cap >> frame;
     ASSERT_FALSE(frame.empty()) << "Can not opening image.";
@@ -33,9 +33,4 @@ TEST(TestVision, TestVideo) {
     cv::imshow("win", frame);
     cv::waitKey(1);
   }
-
-  // cv::Mat result = frame.clone();
-
-  // cv::imwrite("../../../image/test_buff_result.png", result);
-  SUCCEED();
 }
