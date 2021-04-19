@@ -1,7 +1,6 @@
 #include "buff_detector.hpp"
 
 #include <cmath>
-#include <ostream>
 
 #include "compensator.hpp"
 #include "opencv2/opencv.hpp"
