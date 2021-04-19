@@ -46,7 +46,7 @@ bool ArmorDetector::PrepareParams(const std::string &params_path) {
     params_.se_erosion = fs["se_erosion"];
     params_.ap_erosion = fs["ap_erosion"];
 
-    params_.contour_size_low_th = int(fs["contour_size_low_th"]);
+    params_.contour_size_low_th = static_cast<int>(fs["contour_size_low_th"]);
     params_.contour_area_low_th = fs["contour_area_low_th"];
     params_.contour_area_high_th = fs["contour_area_high_th"];
     params_.bar_area_low_th = fs["bar_area_low_th"];
