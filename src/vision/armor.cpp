@@ -122,16 +122,19 @@ double Armor::SurfaceAngle() const {
 
 cv::Mat Armor::Face(const cv::Mat &frame) const {
   cv::Mat p, t;
+  double len;
   if (AspectRatio() > 1.2) {
     t = cv::getPerspectiveTransform(SurfaceVertices(), kDST_POV_BIG);
-    cv::warpPerspective(frame, p, t, cv::Size(kARMOR_LENGTH_BIG, kARMOR_WIDTH));
+    len = kARMOR_LENGTH_BIG;
   } else {
     t = cv::getPerspectiveTransform(SurfaceVertices(), kDST_POV_SMALL);
-    cv::warpPerspective(frame, p, t,
-                        cv::Size(kARMOR_LENGTH_SMALL, kARMOR_WIDTH));
+    len = kARMOR_LENGTH_SMALL;
   }
-  p = p(cv::Rect((p.cols - kARMOR_WIDTH) / 2, (p.rows - kARMOR_WIDTH) / 2,
-                 kARMOR_WIDTH, kARMOR_WIDTH));
+  cv::warpPerspective(frame, p, t, cv::Size(len, kARMOR_WIDTH));
+
+  const int offset_w = (p.cols - kARMOR_WIDTH) / 2;
+  const int offset_h = (p.rows - kARMOR_WIDTH) / 2;
+  p = p(cv::Rect(offset_w, offset_h, kARMOR_WIDTH, kARMOR_WIDTH));
   cv::cvtColor(p, p, cv::COLOR_RGB2GRAY);
   cv::medianBlur(p, p, 1);
 #if 0 
