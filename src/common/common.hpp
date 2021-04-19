@@ -8,6 +8,10 @@ struct Euler {
   double yaw, pitch, roll;
 };
 
+enum class Direction { kUNKNOWN, kCW, kCCW };
+
+std::string DirectionToString(Direction direction);
+
 }  // namespace common
 
 namespace game {

@@ -4,6 +4,23 @@
 #include <cctype>
 #include <string>
 
+namespace common {
+
+std::string DirectionToString(Direction direction) {
+  switch (direction) {
+    case Direction::kUNKNOWN:
+      return std::string("Unknown");
+    case Direction::kCW:
+      return std::string("Clockwise");
+    case Direction::kCCW:
+      return std::string("Anticlockwise");
+    default:
+      return std::string("Unknown");
+  }
+}
+
+}  // namespace common
+
 namespace game {
 
 std::string TeamToString(Team team) {

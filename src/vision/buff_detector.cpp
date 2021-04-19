@@ -1,5 +1,6 @@
 #include "buff_detector.hpp"
 
+#include <cmath>
 #include <ostream>
 
 #include "compensator.hpp"
@@ -17,6 +18,36 @@ const int kR = 1400;
 const double kDELTA = 0.3;  //总延迟时间
 
 }  // namespace
+
+static double Angle(const cv::Point2f &p, const cv::Point2f &ctr) {
+  auto rel = p - ctr;
+  return std::atan2(rel.x, rel.y);
+}
+
+double Speed(double temp, bool flag) {
+  if (flag)
+    temp = 0.785 * std::sin(1.884 * temp) + 1.305;
+  else
+    temp = std::asin((temp - 1.305) / 1.884) / 0.785;
+  return temp;
+}
+
+/**
+ * $
+ * \quad \int^{t_1+\Delta t}_{t_1} 0.785\sin{1.884t}+1.305{\rm d}t \\
+ * = 1.305\Delta t+ \dfrac{0.785}{1.884} ( \cos{1.884t} - \cos{1.884(t+\Delta
+ * t)}) \\ = \sqrt{2-2\cos{{1.884\Delta t}}}\sin({1.884t} +
+ *\arctan{\dfrac{1-\cos{{1.884\Delta t}}}{\sin{{1.884\Delta t}}}}) + 1.305
+ *\Delta t
+ * $
+ */
+double DeltaTheta(double t, double kDELTA) {
+  // return 1.305 * kDELTA + sqrt(2 - 2 * cos(1.884 * kDELTA)) *
+  //                          sin(1.884 * t + atan((1 - cos(1.884 * kDELTA)) /
+  //                                             sin(1.884 * kDELTA)));
+  return 1.305 * kDELTA +
+         0.785 / 1.884 * (cos(1.884 * t) - cos(1.884 * (t + kDELTA)));
+}
 
 void BuffDetector::InitDefaultParams(const std::string &params_path) {
   cv::FileStorage fs(params_path,
@@ -170,13 +201,13 @@ void BuffDetector::FindRects(const cv::Mat &frame) {
 
 void BuffDetector::MatchDirection() {
   SPDLOG_DEBUG("start MatchDirection");
-  if (buff_.GetDirection() == rotation::Direction::kUNKNOWN) {
+  if (buff_.GetDirection() == common::Direction::kUNKNOWN) {
     cv::Point2f center = buff_.GetCenter();
     double angle, sum = 0;
     std::vector<double> angles;
 
     if (circumference_.size() == 5) {
-      for (auto point : circumference_) angle = cal::Angle(point, center);
+      for (auto point : circumference_) angle = Angle(point, center);
       angles.emplace_back(angle);
     }
 
@@ -186,11 +217,11 @@ void BuffDetector::MatchDirection() {
     }
 
     if (sum > 0)
-      buff_.SetDirection(rotation::Direction::kANTI);
+      buff_.SetDirection(common::Direction::kCCW);
     else if (sum == 0)
-      buff_.SetDirection(rotation::Direction::kUNKNOWN);
+      buff_.SetDirection(common::Direction::kUNKNOWN);
     else
-      buff_.SetDirection(rotation::Direction::kCLOCKWISE);
+      buff_.SetDirection(common::Direction::kCW);
 
     SPDLOG_DEBUG("buff_'s getDirection is {}", buff_.GetDirection());
   }
@@ -213,8 +244,8 @@ void BuffDetector::MatchArmors() {
   if (armors.size() > 0 && hammer_.size.area() > 0) {
     buff_.SetTarget(armors[0]);
     for (auto armor : armors) {
-      if (cal::Dist(hammer_.center, armor.SurfaceCenter()) <
-          cal::Dist(hammer_.center, buff_.GetTarget().SurfaceCenter())) {
+      if (cv::norm(hammer_.center - armor.SurfaceCenter()) <
+          cv::norm(hammer_.center - buff_.GetTarget().SurfaceCenter())) {
         buff_.SetTarget(armor);
         // TODO
         if (circumference_.size() <= 5)
@@ -238,13 +269,13 @@ void BuffDetector::MatchPredict() {
   cv::Point2f target_center = buff_.GetTarget().SurfaceCenter();
   cv::Point2f center = buff_.GetCenter();
   SPDLOG_WARN("center is {},{}", buff_.GetCenter().x, buff_.GetCenter().y);
-  rotation::Direction direction = buff_.GetDirection();
+  common::Direction direction = buff_.GetDirection();
   Armor predict;
 
-  double angle = cal::Angle(target_center, center);
-  double theta = cal::DeltaTheta(buff_.GetTime(), kDELTA);
+  double angle = Angle(target_center, center);
+  double theta = DeltaTheta(buff_.GetTime(), kDELTA);
   while (angle > 90) angle -= 90;
-  if (direction == rotation::Direction::kCLOCKWISE) theta = -theta;
+  if (direction == common::Direction::kCW) theta = -theta;
   double predict_angle = angle + theta;
 
   theta = theta / 180 * CV_PI;

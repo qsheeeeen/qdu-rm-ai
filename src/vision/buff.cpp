@@ -11,7 +11,7 @@ void Buff::Init(game::Team team) {
   team_ = team;
   time_ = 0;
   center_ = cv::Point2f(0, 0);
-  direction_ = rotation::Direction::kUNKNOWN;
+  direction_ = common::Direction::kUNKNOWN;
 }
 
 std::vector<Armor> Buff::GetArmors() {
@@ -28,11 +28,10 @@ cv::Point2f Buff::GetCenter() {
 
 void Buff::SetCenter(cv::Point2f center) { center_ = center; }
 
-rotation::Direction Buff::GetDirection() { return direction_; }
+common::Direction Buff::GetDirection() { return direction_; }
 
-void Buff::SetDirection(rotation::Direction direction) {
-  std::string rot = rotation::DirectionToString(direction);
-  SPDLOG_DEBUG("direction_: {}", rot);
+void Buff::SetDirection(common::Direction direction) {
+  SPDLOG_DEBUG("direction_: {}", common::DirectionToString(direction));
   direction_ = direction;
 }
 

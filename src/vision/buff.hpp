@@ -1,7 +1,7 @@
 #include <vector>
 
 #include "armor.hpp"
-#include "track.hpp"
+#include "common.hpp"
 
 class Buff {
  private:
@@ -10,7 +10,7 @@ class Buff {
   Armor target_, predict_;
   game::Team team_;
   double time_;
-  rotation::Direction direction_;
+  common::Direction direction_;
 
  public:
   Buff();
@@ -24,8 +24,8 @@ class Buff {
   cv::Point2f GetCenter();
   void SetCenter(cv::Point2f center);
 
-  rotation::Direction GetDirection();
-  void SetDirection(rotation::Direction direction);
+  common::Direction GetDirection();
+  void SetDirection(common::Direction direction);
 
   double GetTime();
   void SetTime(double time);
