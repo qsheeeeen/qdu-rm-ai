@@ -64,6 +64,7 @@ void BuffDetector::InitDefaultParams(const std::string &params_path) {
   fs << "contour_center_area_high_th" << 1000;
   fs << "rect_center_ratio_low_th" << 0.6;
   fs << "rect_center_ratio_high_th" << 1.67;
+  SPDLOG_DEBUG("Inited params.");
 }
 
 bool BuffDetector::PrepareParams(const std::string &params_path) {
@@ -74,7 +75,7 @@ bool BuffDetector::PrepareParams(const std::string &params_path) {
     params_.se_erosion = fs["se_erosion"];
     params_.ap_erosion = fs["ap_erosion"];
 
-    params_.contour_size_low_th = int(fs["contour_size_low_th"]);
+    params_.contour_size_low_th = static_cast<int>(fs["contour_size_low_th"]);
     params_.rect_ratio_low_th = fs["rect_ratio_low_th"];
     params_.rect_ratio_high_th = fs["rect_ratio_high_th"];
 
@@ -88,18 +89,6 @@ bool BuffDetector::PrepareParams(const std::string &params_path) {
     return false;
   }
 }
-
-BuffDetector::BuffDetector() { SPDLOG_TRACE("Constructed."); }
-
-BuffDetector::BuffDetector(const std::string &params_path,
-                           game::Team buff_team) {
-  LoadParams(params_path);
-  buff_.Init();
-  buff_.SetTeam(buff_team);
-  SPDLOG_TRACE("Constructed.");
-}
-
-BuffDetector::~BuffDetector() { SPDLOG_TRACE("Destructed."); }
 
 void BuffDetector::FindRects(const cv::Mat &frame) {
   const auto start = std::chrono::high_resolution_clock::now();
@@ -325,6 +314,17 @@ void BuffDetector::VisualizeArmors(const cv::Mat &output, bool add_lable) {
   for (std::size_t i = 0; i < vertices.size(); ++i)
     cv::line(output, vertices[i], vertices[(i + 1) % 4], kYELLOW, 8);
 }
+
+BuffDetector::BuffDetector() { SPDLOG_TRACE("Constructed."); }
+
+BuffDetector::BuffDetector(const std::string &params_path,
+                           game::Team buff_team) {
+  LoadParams(params_path);
+  buff_.SetTeam(buff_team);
+  SPDLOG_TRACE("Constructed.");
+}
+
+BuffDetector::~BuffDetector() { SPDLOG_TRACE("Destructed."); }
 
 const std::vector<Armor> &BuffDetector::Detect(const cv::Mat &frame) {
   SPDLOG_DEBUG("Detecting");

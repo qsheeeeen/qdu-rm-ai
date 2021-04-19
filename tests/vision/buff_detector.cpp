@@ -18,11 +18,11 @@ TEST(TestVision, TestBuffDetector) {
   SUCCEED();
 }
 
-TEST(TestVision, TestVideo) {
+TEST(TestVision, TestBuffDetectorVideo) {
   BuffDetector buff_detector("../../../../runtime/RMUT2021_Buff.json",
                              game::Team::kRED);
 
-  cv::VideoCapture cap("../../../../redbuff.avi");
+  cv::VideoCapture cap("../../../redbuff.avi");
   cv::Mat frame;
   ASSERT_TRUE(cap.isOpened()) << "cap not opened";
   while (cap.isOpened()) {
@@ -30,7 +30,7 @@ TEST(TestVision, TestVideo) {
     ASSERT_FALSE(frame.empty()) << "Can not opening image.";
     buff_detector.Detect(frame);
     buff_detector.VisualizeResult(frame, 10);
-    cv::imshow("win", frame);
+    cv::imshow("result", frame);
     cv::waitKey(1);
   }
 }

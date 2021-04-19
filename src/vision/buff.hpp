@@ -9,14 +9,13 @@ class Buff {
   std::vector<Armor> armors_;
   Armor target_, predict_;
   game::Team team_;
-  double time_;
-  common::Direction direction_;
+  double time_ = 0;
+  common::Direction direction_ = common::Direction::kUNKNOWN;
 
  public:
   Buff();
+  Buff(game::Team team);
   ~Buff();
-
-  void Init(game::Team team = game::Team::kUNKNOWN);
 
   std::vector<Armor> GetArmors();
   void SetArmors(std::vector<Armor> armors);
