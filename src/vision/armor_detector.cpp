@@ -73,9 +73,11 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
   lightbars_.clear();
   targets_.clear();
 
-  frame_size_ = cv::Size(frame.cols, frame.rows);
+  frame_size_ = frame.size();
+  const double frame_area = frame_size_.area();
 
-  cv::Mat channels[3], result;
+  std::vector<cv::Mat> channels(3);
+  cv::Mat result;
   cv::split(frame, channels);
 
 #if 1
@@ -102,7 +104,7 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
   cv::findContours(result, contours_, cv::RETR_LIST,
                    cv::CHAIN_APPROX_TC89_KCOS);
 
-#if 0
+#if 0 /* 平滑轮廓应该有用，但是这里简化轮廓没用 */
   contours_poly_.resize(contours_.size());
   for (size_t k = 0; k < contours_.size(); ++k) {
     cv::approxPolyDP(cv::Mat(contours_[k]), contours_poly_[k],
@@ -112,48 +114,65 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
 
   SPDLOG_DEBUG("Found contours: {}", contours_.size());
 
+  /* 检查轮廓是否为灯条 */
   for (const auto &contour : contours_) {
+    /* 通过轮廓大小先排除明显不是的 */
     if (contour.size() < params_.contour_size_low_th) continue;
 
-    const double c_area = cv::contourArea(contour) / frame_size_.area();
+    /* 只留下轮廓大小在一定比例内的 */
+    const double c_area = cv::contourArea(contour) / frame_area;
     if (c_area < params_.contour_area_low_th) continue;
     if (c_area > params_.contour_area_high_th) continue;
 
     LightBar potential_bar(cv::minAreaRect(contour));
 
+    /* 灯条倾斜角度不能太大 */
     if (std::abs(potential_bar.Angle()) > params_.angle_high_th) continue;
 
-    const double b_area = potential_bar.Area() / frame_size_.area();
-    if (b_area < params_.bar_area_low_th) continue;
-    if (b_area > params_.bar_area_high_th) continue;
+    /* 灯条在画面中的大小要满足条件 */
+    const double bar_area = potential_bar.Area() / frame_area;
+    if (bar_area < params_.bar_area_low_th) continue;
+    if (bar_area > params_.bar_area_high_th) continue;
 
-    const double ar = potential_bar.AspectRatio();
-    if (ar < params_.aspect_ratio_low_th) continue;
-    if (ar > params_.aspect_ratio_high_th) continue;
+    /* 灯条的长宽比要满足条件 */
+    const double aspect_ratio = potential_bar.AspectRatio();
+    if (aspect_ratio < params_.aspect_ratio_low_th) continue;
+    if (aspect_ratio > params_.aspect_ratio_high_th) continue;
 
     lightbars_.emplace_back(potential_bar);
   }
 
-  SPDLOG_DEBUG("Found light bars: {}", lightbars_.size());
-
+  /* 从左到右排列找到的灯条 */
   std::sort(lightbars_.begin(), lightbars_.end(),
             [](LightBar &bar1, LightBar &bar2) {
               return bar1.Center().x < bar2.Center().x;
             });
+
+  /* 记录运行时间 */
   const auto stop = std::chrono::high_resolution_clock::now();
   duration_bars_ =
       std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 
-  SPDLOG_DEBUG("duration_bars_: {} ms", duration_bars_.count());
+  SPDLOG_DEBUG("Found {} light bars in {} ms.", lightbars_.size(),
+               duration_bars_.count());
 }
 
 void ArmorDetector::MatchLightBars() {
   const auto start = std::chrono::high_resolution_clock::now();
   for (auto iti = lightbars_.begin(); iti != lightbars_.end(); ++iti) {
     for (auto itj = iti + 1; itj != lightbars_.end(); ++itj) {
+      /* 两灯条角度差异 */
       const double angle_diff =
           std::abs(iti->Angle() - itj->Angle()) / iti->Angle();
-      if (angle_diff > params_.angle_diff_th) continue;
+
+      /* 灯条是否朝同一侧倾斜 */
+      const bool same_side = (iti->Angle() * itj->Angle()) > 0;
+
+      if (same_side) {
+        if (angle_diff > params_.angle_diff_th) continue;
+      } else {
+        if (angle_diff > (params_.angle_diff_th / 2.)) continue;
+      }
 
       const double length_diff =
           std::abs(iti->Length() - itj->Length()) / iti->Length();
@@ -176,12 +195,11 @@ void ArmorDetector::MatchLightBars() {
       break;
     }
   }
-  SPDLOG_DEBUG("Found armors: {}", targets_.size());
-
   const auto stop = std::chrono::high_resolution_clock::now();
   duration_armors_ =
       std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-  SPDLOG_DEBUG("duration_armors_: {} ms", duration_armors_.count());
+  SPDLOG_DEBUG("Found {} armors in {} ms.", targets_.size(),
+               duration_armors_.count());
 }
 
 void ArmorDetector::VisualizeLightBar(const cv::Mat &output, bool add_lable) {

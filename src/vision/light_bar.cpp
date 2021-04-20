@@ -30,8 +30,13 @@ std::vector<cv::Point2f> LightBar::Vertices() const {
 }
 
 double LightBar::Angle() const {
-  SPDLOG_DEBUG("rect_.angle: {}", rect_.angle);
-  return rect_.angle;
+  if (rect_.angle > 90.) {
+    return rect_.angle - 180.;
+  } else if (rect_.angle > 270.) {
+    return 360. - rect_.angle;
+  } else {
+    return rect_.angle;
+  }
 }
 
 double LightBar::Area() const { return rect_.size.area(); }
