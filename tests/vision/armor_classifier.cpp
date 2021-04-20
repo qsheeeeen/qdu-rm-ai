@@ -17,10 +17,14 @@ game::Model Classify(const std::string& path) {
 }
 
 TEST(TestVision, TestArmorClassifier) {
-  ASSERT_EQ(Classify("../../../image/p2.png"), game::Model::kINFANTRY);
-  ASSERT_EQ(Classify("../../../image/p3.png"), game::Model::kENGINEER);
-  ASSERT_EQ(Classify("../../../image/p4.png"), game::Model::kHERO);
-  ASSERT_EQ(Classify("../../../image/p6.png"), game::Model::kHERO);
+  ASSERT_EQ(Classify("../../../image/test_classifier_0.png"),
+            game::Model::kINFANTRY);
+  ASSERT_EQ(Classify("../../../image/test_classifier_1.png"),
+            game::Model::kENGINEER);
+  ASSERT_EQ(Classify("../../../image/test_classifier_2.png"),
+            game::Model::kHERO);
+  ASSERT_EQ(Classify("../../../image/test_classifier_3.png"),
+            game::Model::kHERO);
 }
 
 TEST(TestVision, TestArmorClassifierInput) {
