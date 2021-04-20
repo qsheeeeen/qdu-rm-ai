@@ -19,7 +19,7 @@ TEST(TestVision, TestBuffDetector) {
 }
 
 TEST(TestVision, TestBuffDetectorVideo) {
-  BuffDetector buff_detector("../../../../runtime/RMUT2021_Buff.json",
+  BuffDetector buff_detector("../../../runtime/RMUT2021_Buff.json",
                              game::Team::kRED);
 
   cv::VideoCapture cap("../../../redbuff.avi");
