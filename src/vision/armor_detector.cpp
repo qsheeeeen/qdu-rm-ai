@@ -96,11 +96,13 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
 
   cv::threshold(result, result, params_.binary_th, 255., cv::THRESH_BINARY);
 
-  cv::Mat kernel = cv::getStructuringElement(
-      cv::MORPH_ELLIPSE,
-      cv::Size(2 * params_.se_erosion + 1, 2 * params_.se_erosion + 1));
+  if (params_.se_erosion >= 0.) {
+    cv::Mat kernel = cv::getStructuringElement(
+        cv::MORPH_ELLIPSE,
+        cv::Size(2 * params_.se_erosion + 1, 2 * params_.se_erosion + 1));
+    cv::morphologyEx(result, result, cv::MORPH_OPEN, kernel);
+  }
 
-  cv::morphologyEx(result, result, cv::MORPH_OPEN, kernel);
   cv::findContours(result, contours_, cv::RETR_LIST,
                    cv::CHAIN_APPROX_TC89_KCOS);
 
@@ -163,7 +165,7 @@ void ArmorDetector::MatchLightBars() {
     for (auto itj = iti + 1; itj != lightbars_.end(); ++itj) {
       /* 两灯条角度差异 */
       const double angle_diff =
-          std::abs(iti->Angle() - itj->Angle()) / iti->Angle();
+          algo::RelativeDifference(iti->Angle(), itj->Angle());
 
       /* 灯条是否朝同一侧倾斜 */
       const bool same_side = (iti->Angle() * itj->Angle()) > 0;
@@ -175,14 +177,15 @@ void ArmorDetector::MatchLightBars() {
       }
 
       const double length_diff =
-          std::abs(iti->Length() - itj->Length()) / iti->Length();
+          algo::RelativeDifference(iti->Length(), itj->Length());
       if (length_diff > params_.length_diff_th) continue;
 
-      const double height_diff = std::abs(iti->Center().y - itj->Center().y);
+      const double height_diff =
+          algo::RelativeDifference(iti->Center().y, itj->Center().y);
       if (height_diff > (params_.height_diff_th * frame_size_.height)) continue;
 
       const double area_diff =
-          std::abs(iti->Area() - itj->Area()) / iti->Area();
+          algo::RelativeDifference(iti->Area(), itj->Area());
       if (area_diff > params_.area_diff_th) continue;
 
       const double center_dist = cv::norm(iti->Center() - itj->Center());
