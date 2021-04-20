@@ -173,21 +173,26 @@ void ArmorDetector::MatchLightBars() {
       if (same_side) {
         if (angle_diff > params_.angle_diff_th) continue;
       } else {
+        /* 两侧时限制更严格 */
         if (angle_diff > (params_.angle_diff_th / 2.)) continue;
       }
 
+      /* 灯条长度差异 */
       const double length_diff =
           algo::RelativeDifference(iti->Length(), itj->Length());
       if (length_diff > params_.length_diff_th) continue;
 
+      /* 灯条高度差异 */
       const double height_diff =
           algo::RelativeDifference(iti->Center().y, itj->Center().y);
       if (height_diff > (params_.height_diff_th * frame_size_.height)) continue;
 
+      /* 灯条面积差异 */
       const double area_diff =
           algo::RelativeDifference(iti->Area(), itj->Area());
       if (area_diff > params_.area_diff_th) continue;
 
+      /* 灯条中心距离 */
       const double center_dist = cv::norm(iti->Center() - itj->Center());
       const double l = (iti->Length() + itj->Length()) / 2.;
       if (center_dist < l * params_.center_dist_low_th) continue;
