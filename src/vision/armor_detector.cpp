@@ -189,7 +189,7 @@ void ArmorDetector::MatchLightBars() {
       if (area_diff > params_.area_diff_th) continue;
 
       const double center_dist = cv::norm(iti->Center() - itj->Center());
-      const double l = iti->Length();
+      const double l = (iti->Length() + itj->Length()) / 2.;
       if (center_dist < l * params_.center_dist_low_th) continue;
       if (center_dist > l * params_.center_dist_high_th) continue;
 
