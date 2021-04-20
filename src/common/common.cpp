@@ -94,3 +94,13 @@ bool HasBigArmor(Model model) {
 }
 
 }  // namespace game
+
+namespace algo {
+
+double RelativeDifference(double a, double b) {
+  double diff = std::abs(a - b);
+  double base = std::max(std::abs(a), std::abs(b));
+  return diff / base;
+}
+
+}  // namespace algo

@@ -41,3 +41,9 @@ Model StringToModel(std::string name);
 bool HasBigArmor(Model model);
 
 }  // namespace game
+
+namespace algo {
+
+double RelativeDifference(double a, double b);
+
+}  // namespace algo
