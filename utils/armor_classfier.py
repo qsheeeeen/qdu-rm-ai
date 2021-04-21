@@ -16,12 +16,13 @@ train_trans = transforms.Compose(
     [
         transforms.Grayscale(),
         transforms.Resize((28, 28)),
-        transforms.RandomPerspective(0.1),
-        transforms.RandomRotation(10),
-        transforms.RandomAffine(10),
         transforms.ToTensor(),
+        transforms.RandomPerspective(0.1),
+        transforms.RandomAffine(10),
+        transforms.RandomRotation(10),
+        transforms.ColorJitter(0.5, 0.5, 0.5),
         transforms.RandomAdjustSharpness(0.5),
-        transforms.RandomErasing(p=1, scale=(0.02, 0.1)),
+        transforms.RandomErasing(p=0.9, scale=(0.02, 0.1)),
     ]
 )
 
