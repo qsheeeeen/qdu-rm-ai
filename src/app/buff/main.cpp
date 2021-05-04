@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "buff_detector.hpp"
+#include "camera.hpp"
 #include "opencv2/opencv.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -33,10 +34,15 @@ int main(int argc, char const* argv[]) {
   cv::Mat frame;
   BuffDetector buff_detector("../../../../runtime/RMUT2021_Buff.json",
                              game::Team::kRED);
-  while (cap.isOpened()) {
-    cap >> frame;
-    buff_detector.Detect(frame);
-    buff_detector.VisualizeResult(frame, 5);
+  Camera cam(0, 640, 480);
+  while (1) {
+    frame = cam.GetFrame();
+    if (frame.empty()) {
+      SPDLOG_ERROR("cam.GetFrame is null");
+      continue;
+    }
+    // buff_detector.Detect(frame);
+    // buff_detector.VisualizeResult(frame, 5);
     cv::imshow("win", frame);
     if (' ' == cv::waitKey(5)) {
       cv::waitKey(0);

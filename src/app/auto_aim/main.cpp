@@ -31,7 +31,7 @@ int main(int argc, char const* argv[]) {
 
   SPDLOG_WARN("***** Running Auto Aim. *****");
 
-  Robot robot("/dev/tty");
+  Robot robot("/dev/ttyTHS2");
   Camera cam(0, 640, 480);
   cv::Mat frame;
 
@@ -44,9 +44,13 @@ int main(int argc, char const* argv[]) {
 
   while (true) {
     frame = cam.GetFrame();
+    if (frame.empty()) continue;
     auto armors = detector.Detect(frame);
-    compensator.Apply(armors, frame, robot.GetRotMat());
-    robot.Aim(armors.front().GetAimEuler(), false);
+    // compensator.Apply(armors, frame, robot.GetRotMat());
+    // robot.Aim(armors.front().GetAimEuler(), false);
+    detector.VisualizeResult(frame, 10);
+    cv::imshow("show", frame);
+    cv::waitKey(1);
   }
 
   return EXIT_SUCCESS;
