@@ -5,7 +5,7 @@
 #include "gtest/gtest.h"
 #include "opencv2/opencv.hpp"
 
-const std::string img_path = "../../../image/test_capture.png";
+const std::string img_path = "../../../image/test.png";
 
 TEST(TestCamera, TestCapture) {
   Camera cam;
