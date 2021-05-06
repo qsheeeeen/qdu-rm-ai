@@ -12,7 +12,6 @@ class Detector {
   cv::Size frame_size_;
   std::vector<Target> targets_;
   Param params_;
-  std::chrono::milliseconds duration_robots_;
 
   virtual void InitDefaultParams(const std::string &path) = 0;
   virtual bool PrepareParams(const std::string &path) = 0;
