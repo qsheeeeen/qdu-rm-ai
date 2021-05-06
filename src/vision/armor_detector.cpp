@@ -3,6 +3,9 @@
 #include "opencv2/opencv.hpp"
 #include "spdlog/spdlog.h"
 
+using std::chrono::duration_cast;
+using std::chrono::high_resolution_clock;
+
 namespace {
 
 const auto kCV_FONT = cv::FONT_HERSHEY_SIMPLEX;
@@ -69,7 +72,7 @@ bool ArmorDetector::PrepareParams(const std::string &params_path) {
 }
 
 void ArmorDetector::FindLightBars(const cv::Mat &frame) {
-  const auto start = std::chrono::high_resolution_clock::now();
+  const auto start = high_resolution_clock::now();
   lightbars_.clear();
   targets_.clear();
 
@@ -151,16 +154,15 @@ void ArmorDetector::FindLightBars(const cv::Mat &frame) {
             });
 
   /* 记录运行时间 */
-  const auto stop = std::chrono::high_resolution_clock::now();
-  duration_bars_ =
-      std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+  const auto stop = high_resolution_clock::now();
+  duration_bars_ = duration_cast<std::chrono::milliseconds>(stop - start);
 
   SPDLOG_DEBUG("Found {} light bars in {} ms.", lightbars_.size(),
                duration_bars_.count());
 }
 
 void ArmorDetector::MatchLightBars() {
-  const auto start = std::chrono::high_resolution_clock::now();
+  const auto start = high_resolution_clock::now();
   for (auto iti = lightbars_.begin(); iti != lightbars_.end(); ++iti) {
     for (auto itj = iti + 1; itj != lightbars_.end(); ++itj) {
       /* 两灯条角度差异 */
@@ -203,9 +205,8 @@ void ArmorDetector::MatchLightBars() {
       break;
     }
   }
-  const auto stop = std::chrono::high_resolution_clock::now();
-  duration_armors_ =
-      std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+  const auto stop = high_resolution_clock::now();
+  duration_armors_ = duration_cast<std::chrono::milliseconds>(stop - start);
   SPDLOG_DEBUG("Found {} armors in {} ms.", targets_.size(),
                duration_armors_.count());
 }

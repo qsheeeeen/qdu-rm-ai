@@ -6,6 +6,9 @@
 #include "opencv2/opencv.hpp"
 #include "spdlog/spdlog.h"
 
+using std::chrono::duration_cast;
+using std::chrono::high_resolution_clock;
+
 namespace {
 
 const auto kCV_FONT = cv::FONT_HERSHEY_SIMPLEX;
@@ -91,7 +94,7 @@ bool BuffDetector::PrepareParams(const std::string &params_path) {
 }
 
 void BuffDetector::FindRects(const cv::Mat &frame) {
-  const auto start = std::chrono::high_resolution_clock::now();
+  const auto start = high_resolution_clock::now();
   float center_rect_area = params_.contour_center_area_low_th * 1.5;
   rects_.clear();
   hammer_ = cv::RotatedRect();
@@ -182,9 +185,8 @@ void BuffDetector::FindRects(const cv::Mat &frame) {
     rects_.emplace_back(rect);
   }
 
-  const auto stop = std::chrono::high_resolution_clock::now();
-  duration_rects_ =
-      std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+  const auto stop = high_resolution_clock::now();
+  duration_rects_ = duration_cast<std::chrono::milliseconds>(stop - start);
 }
 
 void BuffDetector::MatchDirection() {
@@ -216,7 +218,7 @@ void BuffDetector::MatchDirection() {
 }
 
 void BuffDetector::MatchArmors() {
-  const auto start = std::chrono::high_resolution_clock::now();
+  const auto start = high_resolution_clock::now();
   buff_.SetArmors(std::vector<Armor>());
   buff_.SetTarget(Armor());
 
@@ -244,9 +246,8 @@ void BuffDetector::MatchArmors() {
   } else {
     SPDLOG_WARN("can't find buff_armor");
   }
-  const auto stop = std::chrono::high_resolution_clock::now();
-  duration_armors_ =
-      std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+  const auto stop = high_resolution_clock::now();
+  duration_armors_ = duration_cast<std::chrono::milliseconds>(stop - start);
 }
 
 void BuffDetector::MatchPredict() {
