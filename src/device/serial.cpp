@@ -93,10 +93,10 @@ bool Serial::Config(bool parity, StopBits stop_bit, DataLength data_length,
 
   switch (stop_bit) {
     case StopBits::kSTOP_BITS_1:
-      tty_cfg.c_cflag |= CSTOPB;
+      tty_cfg.c_cflag &= ~CSTOPB;
       break;
     case StopBits::kSTOP_BITS_2:
-      tty_cfg.c_cflag &= ~CSTOPB;
+      tty_cfg.c_cflag |= CSTOPB;
       break;
   }
 
@@ -113,6 +113,10 @@ bool Serial::Config(bool parity, StopBits stop_bit, DataLength data_length,
     case BaudRate::kBAUD_RATE_115200:
       cfsetispeed(&tty_cfg, B115200);
       cfsetospeed(&tty_cfg, B115200);
+      break;
+    case BaudRate::kBAUD_RATE_460800:
+      cfsetispeed(&tty_cfg, B460800);
+      cfsetospeed(&tty_cfg, B460800);
       break;
   }
 

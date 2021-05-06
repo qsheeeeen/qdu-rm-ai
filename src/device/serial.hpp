@@ -7,6 +7,7 @@
 enum class BaudRate {
   kBAUD_RATE_9600,
   kBAUD_RATE_115200,
+  kBAUD_RATE_460800
 };
 
 /* 停止位数量 */
@@ -77,7 +78,7 @@ class Serial {
   bool Config(bool parity = false, StopBits stop_bit = StopBits::kSTOP_BITS_1,
               DataLength data_length = DataLength::kDATA_LEN_8,
               bool flow_ctrl = false,
-              BaudRate baud_rate = BaudRate::kBAUD_RATE_115200);
+              BaudRate baud_rate = BaudRate::kBAUD_RATE_460800);
 
   /**
    * @brief 发送
