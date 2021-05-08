@@ -1,7 +1,6 @@
 #pragma once
 
 #include <chrono>
-#include <vector>
 
 #include "armor.hpp"
 #include "armor_classifier.hpp"
@@ -32,8 +31,8 @@ struct ArmorDetectorParam {
 class ArmorDetector : private Detector<Armor, ArmorDetectorParam> {
  private:
   game::Team enemy_team_;
-  std::vector<std::vector<cv::Point> > contours_, contours_poly_;
-  std::vector<LightBar> lightbars_;
+  std::vector<std::vector<cv::Point>> contours_, contours_poly_;
+  tbb::concurrent_vector<LightBar> lightbars_;
 
   std::chrono::milliseconds duration_bars_, duration_armors_;
 
