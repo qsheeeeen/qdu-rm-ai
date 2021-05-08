@@ -265,7 +265,8 @@ void ArmorDetector::SetEnemyTeam(game::Team enemy_team) {
   enemy_team_ = enemy_team;
 }
 
-const std::vector<Armor> &ArmorDetector::Detect(const cv::Mat &frame) {
+const tbb::concurrent_vector<Armor> &ArmorDetector::Detect(
+    const cv::Mat &frame) {
   SPDLOG_DEBUG("Detecting");
   FindLightBars(frame);
   MatchLightBars();

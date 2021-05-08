@@ -50,7 +50,7 @@ class BuffDetector : private Detector<Armor, BuffDetectorParam> {
   BuffDetector(const std::string &param_path, game::Team buff_team);
   ~BuffDetector();
 
-  const std::vector<Armor> &Detect(const cv::Mat &frame);
+  const tbb::concurrent_vector<Armor> &Detect(const cv::Mat &frame);
 
   void VisualizeResult(const cv::Mat &frame, int verbose);
 };

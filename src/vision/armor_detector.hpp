@@ -54,6 +54,6 @@ class ArmorDetector : private Detector<Armor, ArmorDetectorParam> {
 
   void SetEnemyTeam(game::Team enemy_team);
 
-  const std::vector<Armor> &Detect(const cv::Mat &frame);
+  const tbb::concurrent_vector<Armor> &Detect(const cv::Mat &frame);
   void VisualizeResult(const cv::Mat &output, int verbose = 1);
 };

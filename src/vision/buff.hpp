@@ -2,11 +2,12 @@
 
 #include "armor.hpp"
 #include "common.hpp"
+#include "tbb/concurrent_vector.h"
 
 class Buff {
  private:
   cv::Point2f center_;
-  std::vector<Armor> armors_;
+  tbb::concurrent_vector<Armor> armors_;
   Armor target_, predict_;
   game::Team team_;
   double time_ = 0;
@@ -17,8 +18,8 @@ class Buff {
   Buff(game::Team team);
   ~Buff();
 
-  std::vector<Armor> GetArmors();
-  void SetArmors(std::vector<Armor> armors);
+  tbb::concurrent_vector<Armor> GetArmors();
+  void SetArmors(tbb::concurrent_vector<Armor> armors);
 
   cv::Point2f GetCenter();
   void SetCenter(cv::Point2f center);

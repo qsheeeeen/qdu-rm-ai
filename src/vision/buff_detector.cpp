@@ -219,10 +219,10 @@ void BuffDetector::MatchDirection() {
 
 void BuffDetector::MatchArmors() {
   const auto start = high_resolution_clock::now();
-  buff_.SetArmors(std::vector<Armor>());
+  buff_.SetArmors(tbb::concurrent_vector<Armor>());
   buff_.SetTarget(Armor());
 
-  std::vector<Armor> armors;
+  tbb::concurrent_vector<Armor> armors;
 
   for (auto &rect : rects_) {
     armors.emplace_back(Armor(rect));
@@ -280,7 +280,7 @@ void BuffDetector::MatchPredict() {
 }
 
 void BuffDetector::VisualizeArmors(const cv::Mat &output, bool add_lable) {
-  std::vector<Armor> armors = buff_.GetArmors();
+  tbb::concurrent_vector<Armor> armors = buff_.GetArmors();
   if (!armors.empty()) {
     for (auto &armor : armors) {
       auto vertices = armor.SurfaceVertices();
@@ -327,7 +327,8 @@ BuffDetector::BuffDetector(const std::string &params_path,
 
 BuffDetector::~BuffDetector() { SPDLOG_TRACE("Destructed."); }
 
-const std::vector<Armor> &BuffDetector::Detect(const cv::Mat &frame) {
+const tbb::concurrent_vector<Armor> &BuffDetector::Detect(
+    const cv::Mat &frame) {
   SPDLOG_DEBUG("Detecting");
   FindRects(frame);
   MatchArmors();

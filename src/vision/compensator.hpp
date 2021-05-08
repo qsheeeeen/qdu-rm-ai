@@ -1,6 +1,7 @@
 #pragma once
 
 #include "armor.hpp"
+#include "tbb/concurrent_vector.h"
 
 class Compensator {
  private:
@@ -21,9 +22,9 @@ class Compensator {
 
   void LoadCameraMat(const std::string& path);
 
-  void Apply(std::vector<Armor>& armors, const cv::Mat& frame,
+  void Apply(tbb::concurrent_vector<Armor>& armors, const cv::Mat& frame,
              const cv::Mat& rot_mat);
 
-  void VisualizeResult(std::vector<Armor>& armors, const cv::Mat& output,
-                       int verbose = 1);
+  void VisualizeResult(tbb::concurrent_vector<Armor>& armors,
+                       const cv::Mat& output, int verbose = 1);
 };
