@@ -36,7 +36,7 @@
   - [MVS SDK from HIKROBOT](https://www.hikrobotics.com/service/download/0/0).
   - [spdlog](https://github.com/gabime/spdlog).
   - [Google Test](https://github.com/google/googletest)
-  - `libtbb-dev`
+  - [oneTBB](https://github.com/oneapi-src/oneTBB) or `libtbb-dev`
   - 可选
     - [CUDA](https://developer.nvidia.com/cuda-downloads)
     - [TensorRT](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html)
