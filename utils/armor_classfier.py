@@ -12,19 +12,17 @@ from torchvision import datasets, transforms
 
 pl.seed_everything(42)
 
-train_trans = transforms.Compose(
-    [
-        transforms.Grayscale(),
-        transforms.Resize((28, 28)),
-        transforms.ToTensor(),
-        transforms.RandomPerspective(0.1),
-        transforms.RandomAffine(10),
-        transforms.RandomRotation(10),
-        transforms.ColorJitter(0.5, 0.5, 0.5),
-        transforms.RandomAdjustSharpness(0.5),
-        transforms.RandomErasing(p=0.9, scale=(0.02, 0.1)),
-    ]
-)
+train_trans = transforms.Compose([
+    transforms.Grayscale(),
+    transforms.Resize((28, 28)),
+    transforms.ToTensor(),
+    transforms.RandomPerspective(0.1),
+    transforms.RandomAffine(10),
+    transforms.RandomRotation(10),
+    transforms.ColorJitter(0.5, 0.5, 0.5),
+    transforms.RandomAdjustSharpness(0.5),
+    transforms.RandomErasing(p=0.9, scale=(0.02, 0.1)),
+])
 
 dataset = datasets.ImageFolder(
     "~/dataset/armor_model",
@@ -42,7 +40,10 @@ with open("armor_classifier_lable.json", "w+") as f:
 print("Date set length: {}".format(len(dataset)))
 train_set, val_set = random_split(dataset, [32, 16])
 
-train_loader = DataLoader(train_set, batch_size=32, num_workers=8, pin_memory=True)
+train_loader = DataLoader(train_set,
+                          batch_size=32,
+                          num_workers=8,
+                          pin_memory=True)
 val_loader = DataLoader(val_set, batch_size=32, num_workers=8, pin_memory=True)
 
 
