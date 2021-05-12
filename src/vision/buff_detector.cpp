@@ -26,7 +26,7 @@ static double Angle(const cv::Point2f &p, const cv::Point2f &ctr) {
   return std::atan2(rel.x, rel.y);
 }
 
-double Speed(double temp, bool flag) {
+static double Speed(double temp, bool flag) {
   if (flag)
     temp = 0.785 * std::sin(1.884 * temp) + 1.305;
   else
@@ -43,7 +43,7 @@ double Speed(double temp, bool flag) {
  *\Delta t
  * $
  */
-double DeltaTheta(double t, double kDELTA) {
+static double DeltaTheta(double t, double kDELTA) {
   // return 1.305 * kDELTA + sqrt(2 - 2 * cos(1.884 * kDELTA)) *
   //                          sin(1.884 * t + atan((1 - cos(1.884 * kDELTA)) /
   //                                             sin(1.884 * kDELTA)));
@@ -219,9 +219,6 @@ void BuffDetector::MatchDirection() {
 
 void BuffDetector::MatchArmors() {
   const auto start = high_resolution_clock::now();
-  buff_.SetArmors(tbb::concurrent_vector<Armor>());
-  buff_.SetTarget(Armor());
-
   tbb::concurrent_vector<Armor> armors;
 
   for (auto &rect : rects_) {
