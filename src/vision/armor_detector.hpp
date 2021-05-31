@@ -32,7 +32,7 @@ class ArmorDetector : private Detector<Armor, ArmorDetectorParam> {
  private:
   game::Team enemy_team_;
   std::vector<std::vector<cv::Point>> contours_, contours_poly_;
-  tbb::concurrent_vector<LightBar> lightbars_;
+  std::vector<LightBar> lightbars_;
 
   std::chrono::milliseconds duration_bars_, duration_armors_;
 
@@ -53,6 +53,6 @@ class ArmorDetector : private Detector<Armor, ArmorDetectorParam> {
 
   void SetEnemyTeam(game::Team enemy_team);
 
-  const tbb::concurrent_vector<Armor> &Detect(const cv::Mat &frame);
+  const std::vector<Armor> &Detect(const cv::Mat &frame);
   void VisualizeResult(const cv::Mat &output, int verbose = 1);
 };

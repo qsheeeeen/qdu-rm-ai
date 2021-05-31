@@ -75,13 +75,11 @@ find_package(CUDA)
 find_package(OpenCV REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(Threads REQUIRED)
-find_package(TBB REQUIRED)
 
 message(STATUS "BehaviorTreeV3 version: ${BehaviorTreeV3_VERSION}")
 message(STATUS "CUDA version: ${CUDA_VERSION}")
 message(STATUS "OpenCV version: ${OpenCV_VERSION}")
 message(STATUS "spdlog version: ${spdlog_VERSION}")
-message(STATUS "TBB version: ${TBB_VERSION}")
 
 option(BUILD_NN "Build nn" OFF)
 

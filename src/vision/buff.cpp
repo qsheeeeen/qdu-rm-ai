@@ -12,12 +12,12 @@ Buff::Buff(game::Team team) : center_(cv::Point2f(0, 0)) {
 
 Buff::~Buff() { SPDLOG_TRACE("Destructed."); }
 
-tbb::concurrent_vector<Armor> Buff::GetArmors() {
+std::vector<Armor> Buff::GetArmors() {
   SPDLOG_DEBUG("armors_: {}", armors_.size());
   return armors_;
 }
 
-void Buff::SetArmors(tbb::concurrent_vector<Armor> armors) { armors_ = armors; }
+void Buff::SetArmors(std::vector<Armor> armors) { armors_ = armors; }
 
 cv::Point2f Buff::GetCenter() {
   SPDLOG_DEBUG("center_: {}, {}", center_.x, center_.y);

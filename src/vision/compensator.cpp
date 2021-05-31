@@ -87,7 +87,7 @@ cv::Vec3f Compensator::EstimateWorldCoord(Armor& armor) {
   return cv::Vec3f(world_coord);
 }
 
-void Compensator::Apply(tbb::concurrent_vector<Armor>& armors,
+void Compensator::Apply(std::vector<Armor>& armors,
                         const cv::Mat& frame, const cv::Mat& rot_mat) {
   for (auto& armor : armors) {
     const auto cam_coord = EstimateWorldCoord(armor);
@@ -109,7 +109,7 @@ void Compensator::Apply(tbb::concurrent_vector<Armor>& armors,
             });
 }
 
-void Compensator::VisualizeResult(tbb::concurrent_vector<Armor>& armors,
+void Compensator::VisualizeResult(std::vector<Armor>& armors,
                                   const cv::Mat& output, int verbose) {
   for (auto& armor : armors) {
     VisualizePnp(armor, output, verbose > 1);
