@@ -16,7 +16,6 @@ const cv::Scalar kGREEN(0., 255., 0.);
 const cv::Scalar kRED(0., 0., 255.);
 const cv::Scalar kYELLOW(0., 255., 255.);
 
-const int kR = 1400;
 const double kDELTA = 0.3;  //总延迟时间
 
 }  // namespace
@@ -43,7 +42,7 @@ static double Speed(double temp, bool flag) {
  *\Delta t
  * $
  */
-static double DeltaTheta(double t, double kDELTA) {
+static double DeltaTheta(double t) {
   // return 1.305 * kDELTA + sqrt(2 - 2 * cos(1.884 * kDELTA)) *
   //                          sin(1.884 * t + atan((1 - cos(1.884 * kDELTA)) /
   //                                             sin(1.884 * kDELTA)));
@@ -259,7 +258,7 @@ void BuffDetector::MatchPredict() {
   Armor predict;
 
   double angle = Angle(target_center, center);
-  double theta = DeltaTheta(buff_.GetTime(), kDELTA);
+  double theta = DeltaTheta(buff_.GetTime());
   while (angle > 90) angle -= 90;
   if (direction == common::Direction::kCW) theta = -theta;
   double predict_angle = angle + theta;

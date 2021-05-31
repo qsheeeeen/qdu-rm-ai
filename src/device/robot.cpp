@@ -90,6 +90,8 @@ game::Team Robot::GetTeam() {
   return game::Team::kUNKNOWN;
 }
 
+double Robot::GetTime() { return 90 - ref_.time; }
+
 cv::Mat Robot::GetRotMat() {
   cv::Quatf q(mcu_.quat.q0, mcu_.quat.q1, mcu_.quat.q2, mcu_.quat.q3);
   return cv::Mat(q.toRotMat3x3(), true);
@@ -121,7 +123,7 @@ void Robot::Aim(common::Euler aiming_eulr, bool auto_fire) {
   euler.yaw = atan2f(siny_cosp, cosy_cosp);
 
   if (!auto_fire)
-    data_.notice &= 0xE0;
+    data_.notice |= 0x07;
   else {
     if (fabs(euler.pitch - aiming_eulr.pitch) >= kLIMIT)
       ;
@@ -132,6 +134,8 @@ void Robot::Aim(common::Euler aiming_eulr, bool auto_fire) {
     else
       data_.notice |= AI_NOTICE_FIRE;
   }
+
+  commandq_.push(data_);
 }
 
 void Robot::Move() {}

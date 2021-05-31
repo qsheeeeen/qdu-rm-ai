@@ -12,8 +12,6 @@ Buff::Buff(game::Team team) : center_(cv::Point2f(0, 0)) {
 
 Buff::~Buff() { SPDLOG_TRACE("Destructed."); }
 
-void Buff::SetTeam(game::Team team) { team_ = team; }
-
 tbb::concurrent_vector<Armor> Buff::GetArmors() {
   SPDLOG_DEBUG("armors_: {}", armors_.size());
   return armors_;
@@ -54,3 +52,5 @@ game::Team Buff::GetTeam() {
   SPDLOG_DEBUG("team_: {}", team_);
   return team_;
 }
+
+void Buff::SetTeam(game::Team team) { team_ = team; }

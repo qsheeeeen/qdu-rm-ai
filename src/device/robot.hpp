@@ -31,6 +31,7 @@ class Robot {
   ~Robot();
 
   game::Team GetTeam();
+  double GetTime();
   cv::Mat GetRotMat();
   void Aim(common::Euler aiming_eulr, bool auto_fire);
   void Move();
