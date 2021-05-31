@@ -36,7 +36,7 @@ int main(int argc, char const* argv[]) {
   cv::Mat frame;
 
   do {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
   } while (robot.GetTeam() != game::Team::kUNKNOWN);
 
   ArmorDetector detector("RMUL2021_Armor.json", game::Team::kBLUE);
@@ -46,8 +46,9 @@ int main(int argc, char const* argv[]) {
     frame = cam.GetFrame();
     if (frame.empty()) continue;
     auto armors = detector.Detect(frame);
-    // compensator.Apply(armors, frame, robot.GetRotMat());
-    // robot.Aim(armors.front().GetAimEuler(), false);
+    // target = predictor.Predict(armors, frame);
+    // compensator.Apply(target, frame, robot.GetRotMat());
+    // robot.Aim(target.GetAimEuler(), false);
     detector.VisualizeResult(frame, 10);
     cv::imshow("show", frame);
     cv::waitKey(1);
