@@ -16,7 +16,6 @@ const cv::Scalar kGREEN(0., 255., 0.);
 const cv::Scalar kRED(0., 0., 255.);
 const cv::Scalar kYELLOW(0., 255., 255.);
 
-const int kR = 1400;
 const double kDELTA = 0.3;  //总延迟时间
 
 }  // namespace
@@ -43,7 +42,7 @@ static double Speed(double temp, bool flag) {
  *\Delta t
  * $
  */
-static double DeltaTheta(double t, double kDELTA) {
+static double DeltaTheta(double t) {
   // return 1.305 * kDELTA + sqrt(2 - 2 * cos(1.884 * kDELTA)) *
   //                          sin(1.884 * t + atan((1 - cos(1.884 * kDELTA)) /
   //                                             sin(1.884 * kDELTA)));
@@ -219,7 +218,7 @@ void BuffDetector::MatchDirection() {
 
 void BuffDetector::MatchArmors() {
   const auto start = high_resolution_clock::now();
-  tbb::concurrent_vector<Armor> armors;
+  std::vector<Armor> armors;
 
   for (auto &rect : rects_) {
     armors.emplace_back(Armor(rect));
@@ -259,7 +258,7 @@ void BuffDetector::MatchPredict() {
   Armor predict;
 
   double angle = Angle(target_center, center);
-  double theta = DeltaTheta(buff_.GetTime(), kDELTA);
+  double theta = DeltaTheta(buff_.GetTime());
   while (angle > 90) angle -= 90;
   if (direction == common::Direction::kCW) theta = -theta;
   double predict_angle = angle + theta;
@@ -277,7 +276,7 @@ void BuffDetector::MatchPredict() {
 }
 
 void BuffDetector::VisualizeArmors(const cv::Mat &output, bool add_lable) {
-  tbb::concurrent_vector<Armor> armors = buff_.GetArmors();
+  std::vector<Armor> armors = buff_.GetArmors();
   if (!armors.empty()) {
     for (auto &armor : armors) {
       auto vertices = armor.SurfaceVertices();
@@ -324,7 +323,7 @@ BuffDetector::BuffDetector(const std::string &params_path,
 
 BuffDetector::~BuffDetector() { SPDLOG_TRACE("Destructed."); }
 
-const tbb::concurrent_vector<Armor> &BuffDetector::Detect(
+const std::vector<Armor> &BuffDetector::Detect(
     const cv::Mat &frame) {
   SPDLOG_DEBUG("Detecting");
   FindRects(frame);
