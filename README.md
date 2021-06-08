@@ -2,6 +2,9 @@
 
 ***Developing.***
 
+[Gitee](https://gitee.com/qsheeeeen/qdu-rm-ai)
+[Github](https://github.com/qsheeeeen/qdu-rm-ai)
+
 软件正处在开发初期，只完成了视觉的核心部分，其余部分正在开发中。
 
 ## 软件介绍
