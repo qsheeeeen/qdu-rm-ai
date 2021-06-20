@@ -3,6 +3,7 @@
 #include "buff_detector.hpp"
 #include "camera.hpp"
 #include "opencv2/opencv.hpp"
+#include "predictor.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
@@ -30,21 +31,26 @@ int main(int argc, char const* argv[]) {
 
   SPDLOG_WARN("***** Running buff. *****");
 
-  cv::VideoCapture cap("../../../../image/redbuff.avi");
+  cv::VideoCapture cap("../../../../../redbuff.avi");
   cv::Mat frame;
   BuffDetector buff_detector("../../../../runtime/RMUT2021_Buff.json",
                              game::Team::kRED);
-  Camera cam(0, 640, 480);
+  Predictor predictor;
+  predictor.SetTime(6);
+  // Camera cam(0, 640, 480);
   while (1) {
-    frame = cam.GetFrame();
+    // frame = cam.GetFrame();
+    cap >> frame;
     if (frame.empty()) {
       SPDLOG_ERROR("cam.GetFrame is null");
       continue;
     }
-    // buff_detector.Detect(frame);
-    // buff_detector.VisualizeResult(frame, 5);
+    predictor.SetBuff(buff_detector.Detect(frame).back());
+    buff_detector.VisualizeResult(frame, 5);
+    predictor.Predict();
+    predictor.VisualizePrediction(frame, true);
     cv::imshow("win", frame);
-    if (' ' == cv::waitKey(5)) {
+    if (' ' == cv::waitKey(1000)) {
       cv::waitKey(0);
     }
   }

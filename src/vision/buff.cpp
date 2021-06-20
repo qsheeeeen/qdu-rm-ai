@@ -10,47 +10,38 @@ Buff::Buff(game::Team team) : center_(cv::Point2f(0, 0)) {
   SPDLOG_TRACE("Constructed.");
 }
 
+Buff::Buff(const cv::Point2f& center, const std::vector<Armor>& armors,
+           const Armor& target, game::Team team) {
+  SetCenter(center);
+  SetArmors(armors);
+  SetTarget(target);
+  SetTeam(team);
+  SPDLOG_TRACE("Constructed.");
+}
+
 Buff::~Buff() { SPDLOG_TRACE("Destructed."); }
 
-std::vector<Armor> Buff::GetArmors() {
+const std::vector<Armor>& Buff::GetArmors() const {
   SPDLOG_DEBUG("armors_: {}", armors_.size());
   return armors_;
 }
 
-void Buff::SetArmors(std::vector<Armor> armors) { armors_ = armors; }
+void Buff::SetArmors(const std::vector<Armor>& armors) { armors_ = armors; }
 
-cv::Point2f Buff::GetCenter() {
+const cv::Point2f& Buff::GetCenter() const {
   SPDLOG_DEBUG("center_: {}, {}", center_.x, center_.y);
   return center_;
 }
 
-void Buff::SetCenter(cv::Point2f center) { center_ = center; }
+void Buff::SetCenter(const cv::Point2f& center) { center_ = center; }
 
-common::Direction Buff::GetDirection() { return direction_; }
+const Armor& Buff::GetTarget() const { return target_; }
 
-void Buff::SetDirection(common::Direction direction) {
-  SPDLOG_DEBUG("direction_: {}", common::DirectionToString(direction));
-  direction_ = direction;
-}
+void Buff::SetTarget(const Armor& target) { target_ = target; }
 
-double Buff::GetTime() {
-  SPDLOG_DEBUG("time_: {}", time_);
-  return time_++;
-}
-
-void Buff::SetTime(double speed) { time_ = speed; }
-
-Armor Buff::GetTarget() { return target_; }
-
-void Buff::SetTarget(Armor target) { target_ = target; }
-
-Armor Buff::GetPredict() { return predict_; }
-
-void Buff::SetPridict(Armor predict) { predict_ = predict; }
-
-game::Team Buff::GetTeam() {
+const game::Team& Buff::GetTeam() const {
   SPDLOG_DEBUG("team_: {}", team_);
   return team_;
 }
 
-void Buff::SetTeam(game::Team team) { team_ = team; }
+void Buff::SetTeam(const game::Team& team) { team_ = team; }

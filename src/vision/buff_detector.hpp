@@ -24,12 +24,11 @@ struct BuffDetectorParam {
   double rect_center_ratio_high_th;
 };
 
-class BuffDetector : private Detector<Armor, BuffDetectorParam> {
+class BuffDetector : private Detector<Buff, BuffDetectorParam> {
  private:
   Buff buff_;
   std::vector<std::vector<cv::Point>> contours_, contours_poly_;
   std::vector<cv::RotatedRect> rects_;
-  std::vector<cv::Point2f> circumference_;
   cv::RotatedRect hammer_;
 
   std::chrono::milliseconds duration_armors_, duration_center_, duration_rects_;
@@ -38,10 +37,7 @@ class BuffDetector : private Detector<Armor, BuffDetectorParam> {
   bool PrepareParams(const std::string &path);
 
   void FindRects(const cv::Mat &frame);
-
   void MatchArmors();
-  void MatchDirection();
-  void MatchPredict();
 
   void VisualizeArmors(const cv::Mat &output, bool add_lable);
 
@@ -50,7 +46,7 @@ class BuffDetector : private Detector<Armor, BuffDetectorParam> {
   BuffDetector(const std::string &param_path, game::Team buff_team);
   ~BuffDetector();
 
-  const std::vector<Armor> &Detect(const cv::Mat &frame);
+  const std::vector<Buff> &Detect(const cv::Mat &frame);
 
   void VisualizeResult(const cv::Mat &frame, int verbose);
 };
