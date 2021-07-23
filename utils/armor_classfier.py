@@ -66,7 +66,7 @@ class ArmorClassifier(pl.LightningModule):
 
     def forward(self, x):
         y = self.cnn(x)
-        return y.view(-1)
+        return y.view(-1, self.num_classes)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
@@ -74,22 +74,16 @@ class ArmorClassifier(pl.LightningModule):
 
     def training_step(self, train_batch, batch_idx):
         x, y = train_batch
-        y_hat = self.cnn(x)
-        loss = F.cross_entropy(
-            y_hat.view(-1, self.num_classes),
-            y,
-        )
+        y_hat = self(x)[0]
+        loss = F.cross_entropy(y_hat, y)
         self.log("train_loss", loss)
         return loss
 
     def validation_step(self, val_batch, batch_idx):
         x, y = val_batch
         with torch.no_grad():
-            y_hat = self.cnn(x)
-            loss = F.cross_entropy(
-                y_hat.view(-1, self.num_classes),
-                y,
-            )
+            y_hat = self(x)[0]
+            loss = F.cross_entropy(y_hat, y)
         self.log("val_loss", loss)
 
 
