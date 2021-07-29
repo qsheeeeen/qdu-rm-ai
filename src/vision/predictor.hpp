@@ -15,7 +15,7 @@ class Predictor {
   std::size_t num_;
   std::chrono::system_clock::time_point end_time_;
   std::vector<cv::Point2f> circumference_;
-  common::Direction direction_ = common::Direction::kUNKNOWN;
+  component::Direction direction_ = component::Direction::kUNKNOWN;
 
   void MatchDirection();
   void MatchPredict();
@@ -33,8 +33,8 @@ class Predictor {
   const Armor &GetPredict() const;
   void SetPredict(const Armor &predict);
 
-  common::Direction GetDirection();
-  void SetDirection(common::Direction direction);
+  component::Direction GetDirection();
+  void SetDirection(component::Direction direction);
 
   double GetTime() const;
   void SetTime(double time);

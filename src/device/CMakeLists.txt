@@ -12,7 +12,7 @@ target_link_libraries(${PROJECT_NAME}
     MvCameraControl
     Threads::Threads
     spdlog::spdlog
-    common
+    component
 )
 
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
@@ -32,5 +32,5 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 add_dependencies(${PROJECT_NAME} 
-    common
+    component
 )

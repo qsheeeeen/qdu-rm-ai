@@ -51,6 +51,7 @@ class ArmorDetector : private Detector<Armor, ArmorDetectorParam> {
   ArmorDetector(const std::string &params_path, game::Team enemy_team);
   ~ArmorDetector();
 
+  void LoadParams(const std::string &params_path);
   void SetEnemyTeam(game::Team enemy_team);
 
   const std::vector<Armor> &Detect(const cv::Mat &frame);

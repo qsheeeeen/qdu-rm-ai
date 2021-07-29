@@ -87,13 +87,13 @@ cv::Vec3f Compensator::EstimateWorldCoord(Armor& armor) {
   return cv::Vec3f(world_coord);
 }
 
-void Compensator::Apply(std::vector<Armor>& armors,
-                        const cv::Mat& frame, const cv::Mat& rot_mat) {
+void Compensator::Apply(std::vector<Armor>& armors, const cv::Mat& frame,
+                        const cv::Mat& rot_mat) {
   for (auto& armor : armors) {
     const auto cam_coord = EstimateWorldCoord(armor);
     const cv::Point3f real_coord(cam_coord.dot(rot_mat));
 
-    common::Euler aiming_eulr;
+    component::Euler aiming_eulr;
     cv::Point2f surface_target(
         std::sqrt(std::pow(real_coord.x, 2) + std::pow(real_coord.y, 2)),
         -real_coord.z);

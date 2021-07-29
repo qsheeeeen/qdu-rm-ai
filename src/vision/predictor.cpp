@@ -37,7 +37,7 @@ static double DeltaTheta(double t) {
 
 void Predictor::MatchDirection() {
   SPDLOG_DEBUG("start MatchDirection");
-  if (direction_ == common::Direction::kUNKNOWN) {
+  if (direction_ == component::Direction::kUNKNOWN) {
     cv::Point2f center = buff_.GetCenter();
     double angle, sum = 0;
     std::vector<double> angles;
@@ -54,11 +54,11 @@ void Predictor::MatchDirection() {
       }
 
       if (sum > 0)
-        direction_ = common::Direction::kCCW;
+        direction_ = component::Direction::kCCW;
       else if (sum == 0)
-        direction_ = common::Direction::kUNKNOWN;
+        direction_ = component::Direction::kUNKNOWN;
       else
-        direction_ = common::Direction::kCW;
+        direction_ = component::Direction::kCW;
     }
 
     else {
@@ -92,19 +92,19 @@ void Predictor::MatchPredict() {
   SetPredict(Armor());
   if (cv::Point2f(0, 0) == buff_.GetCenter()) return;
   if (cv::Point2f(0, 0) == buff_.GetTarget().SurfaceCenter()) return;
-  if (common::Direction::kUNKNOWN == direction_) return;
+  if (component::Direction::kUNKNOWN == direction_) return;
 
   cv::Point2f target_center = buff_.GetTarget().SurfaceCenter();
   cv::Point2f center = buff_.GetCenter();
   SPDLOG_DEBUG("center is {},{}", buff_.GetCenter().x, buff_.GetCenter().y);
-  common::Direction direction = GetDirection();
+  component::Direction direction = GetDirection();
   Armor predict;
 
   double angle = Angle(target_center, center);
   SPDLOG_DEBUG("GetTime()");
   double theta = DeltaTheta(GetTime());  // GetTime()
   while (angle > 90) angle -= 90;
-  if (direction == common::Direction::kCW) theta = -theta;
+  if (direction == component::Direction::kCW) theta = -theta;
 
   theta = theta / 180 * CV_PI;
   SPDLOG_WARN("Theta : {}", theta);
@@ -140,12 +140,12 @@ void Predictor::SetPredict(const Armor &predict) {
   predict_ = predict;
 }
 
-common::Direction Predictor::GetDirection() {
-  SPDLOG_DEBUG("Direction : {}", common::DirectionToString(direction_));
+component::Direction Predictor::GetDirection() {
+  SPDLOG_DEBUG("Direction : {}", component::DirectionToString(direction_));
   return direction_;
 }
 
-void Predictor::SetDirection(common::Direction direction) {
+void Predictor::SetDirection(component::Direction direction) {
   direction_ = direction;
 }
 

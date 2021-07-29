@@ -10,7 +10,7 @@
 class Armor : public ImageObject, public PhysicObject {
  private:
   game::Team team_ = game::Team::kUNKNOWN;
-  common::Euler aiming_euler_;
+  component::Euler aiming_euler_;
 
  public:
   Armor();
@@ -21,6 +21,6 @@ class Armor : public ImageObject, public PhysicObject {
   game::Team GetTeam() const;
   void SetTeam(game::Team team);
 
-  common::Euler GetAimEuler() const;
-  void SetAimEuler(const common::Euler &elur);
+  component::Euler GetAimEuler() const;
+  void SetAimEuler(const component::Euler &elur);
 };

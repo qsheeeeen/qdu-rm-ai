@@ -4,7 +4,7 @@
 #include <cctype>
 #include <string>
 
-namespace common {
+namespace component {
 
 std::string DirectionToString(Direction direction) {
   switch (direction) {
@@ -19,7 +19,7 @@ std::string DirectionToString(Direction direction) {
   }
 }
 
-}  // namespace common
+}  // namespace component
 
 namespace game {
 

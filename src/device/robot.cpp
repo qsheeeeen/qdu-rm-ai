@@ -97,7 +97,7 @@ cv::Mat Robot::GetRotMat() {
   return cv::Mat(q.toRotMat3x3(), true);
 }
 
-void Robot::Aim(common::Euler aiming_eulr, bool auto_fire) {
+void Robot::Aim(component::Euler aiming_eulr, bool auto_fire) {
   data_.gimbal.pit = aiming_eulr.pitch;
   data_.gimbal.rol = aiming_eulr.roll;
   data_.gimbal.yaw = aiming_eulr.yaw;
@@ -105,7 +105,7 @@ void Robot::Aim(common::Euler aiming_eulr, bool auto_fire) {
   // TODO
 
   double w = mcu_.quat.q0, x = mcu_.quat.q1, y = mcu_.quat.q2, z = mcu_.quat.q3;
-  common::Euler euler;
+  component::Euler euler;
 
   const float sinr_cosp = 2.0f * (w * x + y * z);
   const float cosr_cosp = 1.0f - 2.0f * (x * x + y * y);

@@ -201,8 +201,8 @@ game::Team Armor::GetTeam() const {
 
 void Armor::SetTeam(game::Team team) { team_ = team; }
 
-common::Euler Armor::GetAimEuler() const { return aiming_euler_; }
+component::Euler Armor::GetAimEuler() const { return aiming_euler_; }
 
-void Armor::SetAimEuler(const common::Euler &elur) { aiming_euler_ = elur; }
+void Armor::SetAimEuler(const component::Euler &elur) { aiming_euler_ = elur; }
 
 /*********/
