@@ -26,6 +26,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/demo/camera)
 #---------------------------------------------------------------------------------------
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app/auto_aim)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app/sentry)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app/radar)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app/buff)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app/dart)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app/radar)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app/sentry)
