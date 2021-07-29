@@ -46,11 +46,11 @@ const cv::Point3f kHIT_TARGET(0., 0., kHIT_DEPTH);
 }  // namespace
 
 /**************/
-/* ImageArmor */
+/* ImageObject */
 /* 对于图像世界Armor的抽象 */
 
-cv::RotatedRect ImageArmor::FormRect(const LightBar &left_bar,
-                                     const LightBar &right_bar) {
+cv::RotatedRect ImageObject::FormRect(const LightBar &left_bar,
+                                      const LightBar &right_bar) {
   const cv::Point2f center = (left_bar.Center() + right_bar.Center()) / 2.;
   const cv::Size size(cv::norm(left_bar.Center() - right_bar.Center()),
                       (left_bar.Length() + right_bar.Length()));
@@ -58,43 +58,41 @@ cv::RotatedRect ImageArmor::FormRect(const LightBar &left_bar,
   return cv::RotatedRect(center, size, angle);
 }
 
-ImageArmor::ImageArmor() { SPDLOG_TRACE("Constructed."); }
+ImageObject::ImageObject() { SPDLOG_TRACE("Constructed."); }
 
-ImageArmor::ImageArmor(const LightBar &left_bar, const LightBar &right_bar) {
+ImageObject::ImageObject(const LightBar &left_bar, const LightBar &right_bar) {
   rect_ = FormRect(left_bar, right_bar);
   SPDLOG_TRACE("Constructed.");
 }
 
-ImageArmor::ImageArmor(const cv::RotatedRect &rect) {
+ImageObject::ImageObject(const cv::RotatedRect &rect) {
   rect_ = rect;
   SPDLOG_TRACE("Constructed.");
 }
 
-ImageArmor::~ImageArmor() { SPDLOG_TRACE("Destructed."); }
+ImageObject::~ImageObject() { SPDLOG_TRACE("Destructed."); }
 
-const cv::RotatedRect &ImageArmor::GetRect() const { return rect_; }
+const cv::RotatedRect &ImageObject::GetRect() const { return rect_; }
 
-void ImageArmor::SetRect(const cv::RotatedRect & rect) {
-  rect_ = rect;
-}
+void ImageObject::SetRect(const cv::RotatedRect &rect) { rect_ = rect; }
 
-const cv::Point2f &ImageArmor::SurfaceCenter() const {
+const cv::Point2f &ImageObject::SurfaceCenter() const {
   SPDLOG_DEBUG("rect_.center: ({}, {})", rect_.center.x, rect_.center.y);
   return rect_.center;
 }
 
-std::vector<cv::Point2f> ImageArmor::SurfaceVertices() const {
+std::vector<cv::Point2f> ImageObject::SurfaceVertices() const {
   std::vector<cv::Point2f> vertices(4);
   rect_.points(vertices.data());
   return vertices;
 }
 
-double ImageArmor::SurfaceAngle() const {
+double ImageObject::SurfaceAngle() const {
   SPDLOG_DEBUG("rect_.angle: {}", rect_.angle);
   return rect_.angle;
 }
 
-cv::Mat ImageArmor::Face(const cv::Mat &frame) const {
+cv::Mat ImageObject::Face(const cv::Mat &frame) const {
   cv::Mat p, t;
   double len;
   if (AspectRatio() > 1.2) {
@@ -118,7 +116,7 @@ cv::Mat ImageArmor::Face(const cv::Mat &frame) const {
   return p;
 }
 
-double ImageArmor::AspectRatio() const {
+double ImageObject::AspectRatio() const {
   double aspect_ratio = std::max(rect_.size.height, rect_.size.width) /
                         std::min(rect_.size.height, rect_.size.width);
   SPDLOG_DEBUG("aspect_ratio: {}", aspect_ratio);
@@ -128,48 +126,48 @@ double ImageArmor::AspectRatio() const {
 /***************/
 
 /***************/
-/* PhysicArmor */
+/* PhysicObject */
 /* 对于现实世界的Armor的抽象 */
 
-PhysicArmor::PhysicArmor() { SPDLOG_TRACE("Constructed."); }
+PhysicObject::PhysicObject() { SPDLOG_TRACE("Constructed."); }
 
-PhysicArmor::~PhysicArmor() { SPDLOG_TRACE("Destructed."); }
+PhysicObject::~PhysicObject() { SPDLOG_TRACE("Destructed."); }
 
-game::Model PhysicArmor::GetModel() const {
+game::Model PhysicObject::GetModel() const {
   SPDLOG_DEBUG("model_: {}", model_);
   return model_;
 }
 
-void PhysicArmor::SetModel(game::Model model) { model_ = model; }
+void PhysicObject::SetModel(game::Model model) { model_ = model; }
 
-const cv::Mat &PhysicArmor::GetRotVec() const { return rot_vec_; }
+const cv::Mat &PhysicObject::GetRotVec() const { return rot_vec_; }
 
-void PhysicArmor::SetRotVec(const cv::Mat &rot_vec) {
+void PhysicObject::SetRotVec(const cv::Mat &rot_vec) {
   rot_vec_ = rot_vec;
   cv::Rodrigues(rot_vec_, rot_mat_);
 }
 
-const cv::Mat &PhysicArmor::GetRotMat() const { return rot_mat_; }
+const cv::Mat &PhysicObject::GetRotMat() const { return rot_mat_; }
 
-void PhysicArmor::SetRotMat(const cv::Mat &rot_mat) {
+void PhysicObject::SetRotMat(const cv::Mat &rot_mat) {
   rot_mat_ = rot_mat;
   cv::Rodrigues(rot_mat_, rot_vec_);
 }
 
-const cv::Mat &PhysicArmor::GetTransVec() const { return trans_vec_; }
+const cv::Mat &PhysicObject::GetTransVec() const { return trans_vec_; }
 
-void PhysicArmor::SetTransVec(const cv::Mat &trans_vec) {
+void PhysicObject::SetTransVec(const cv::Mat &trans_vec) {
   trans_vec_ = trans_vec;
 }
 
-cv::Vec3d PhysicArmor::RotationAxis() const {
+cv::Vec3d PhysicObject::RotationAxis() const {
   cv::Vec3d axis(rot_mat_.at<double>(2, 1) - rot_mat_.at<double>(1, 2),
                  rot_mat_.at<double>(0, 2) - rot_mat_.at<double>(2, 0),
                  rot_mat_.at<double>(1, 0) - rot_mat_.at<double>(0, 1));
   return axis;
 }
 
-const cv::Mat PhysicArmor::ModelVertices() const {
+const cv::Mat PhysicObject::ModelVertices() const {
   if (game::HasBigArmor(GetModel())) {
     return cv::Mat(kCOORD_BIG_ARMOR);
   } else {
@@ -185,7 +183,7 @@ const cv::Mat PhysicArmor::ModelVertices() const {
 Armor::Armor() { SPDLOG_TRACE("Constructed."); }
 
 Armor::Armor(const LightBar &left_bar, const LightBar &right_bar)
-    : ImageArmor(left_bar, right_bar) {
+    : ImageObject(left_bar, right_bar) {
   SPDLOG_TRACE("Constructed.");
 }
 
