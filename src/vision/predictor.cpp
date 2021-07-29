@@ -21,6 +21,7 @@ static double Angle(const cv::Point2f &p, const cv::Point2f &ctr) {
   return std::atan2(rel.x, rel.y);
 }
 
+// TODO: Flag你大爷，你给我好好写
 static double Speed(double temp, bool flag) {
   if (flag)
     temp = 0.785 * std::sin(1.884 * temp) + 1.305;

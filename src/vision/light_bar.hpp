@@ -4,6 +4,7 @@
 
 #include "opencv2/opencv.hpp"
 
+// TODO: 这个也应该继承 PhysicObject 和 ImageObject
 class LightBar {
  private:
   cv::RotatedRect rect_;
