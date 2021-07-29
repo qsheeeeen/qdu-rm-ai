@@ -1,5 +1,3 @@
-#pragma once
-
 #include "app.hpp"
 #include "servo.hpp"
 
@@ -8,9 +6,8 @@ class Dart : private App {
   Servo servo;
 
  public:
-  Dart() {
-    SPDLOG_WARN("***** Starting Dart Control system. *****");
-    PrepareLogging("logs/dart.log");
+  Dart(const std::string &log_path) : App(log_path) {
+    SPDLOG_WARN("***** Setting Up Dart Control system. *****");
 
     /* 初始化设备 */
   }
@@ -23,6 +20,8 @@ class Dart : private App {
 
   /* 运行的主程序 */
   void Run() {
+    SPDLOG_WARN("***** Running Dart Control system. *****");
+
     while (1) {
       SPDLOG_DEBUG("Tiking");
     }
@@ -32,8 +31,8 @@ class Dart : private App {
 int main(int argc, char const *argv[]) {
   (void)argc;
   (void)argv;
-  Dart dart;
 
+  Dart dart("logs/dart.log");
   dart.Run();
 
   return EXIT_SUCCESS;

@@ -1,3 +1,4 @@
+#include "app.hpp"
 #include "armor_detector.hpp"
 #include "camera.hpp"
 #include "compensator.hpp"
@@ -11,9 +12,8 @@ class AutoAim : private App {
   Compensator compensator;
 
  public:
-  Dart() {
-    SPDLOG_WARN("***** Starting Auto aiming system. *****");
-    PrepareLogging("logs/auto_aim.log");
+  AutoAim(const std::string& log_path) : App(log_path) {
+    SPDLOG_WARN("***** Setting Up Auto Aiming system. *****");
 
     /* 初始化设备 */
     do {
@@ -21,14 +21,16 @@ class AutoAim : private App {
     } while (robot.GetTeam() != game::Team::kUNKNOWN);
   }
 
-  ~Dart() {
+  ~AutoAim() {
     /* 关闭设备 */
 
-    SPDLOG_WARN("***** Shuted Down Auto aiming system. *****");
+    SPDLOG_WARN("***** Shuted Down Auto Aiming system. *****");
   }
 
   /* 运行的主程序 */
   void Run() {
+    SPDLOG_WARN("***** Running Auto Aiming system. *****");
+
     while (1) {
       cv::Mat frame = cam.GetFrame();
       if (frame.empty()) continue;
@@ -47,7 +49,7 @@ int main(int argc, char const* argv[]) {
   (void)argc;
   (void)argv;
 
-  AutoAim auto_aim;
+  AutoAim auto_aim("logs/auto_aim.log");
   auto_aim.Run();
 
   return EXIT_SUCCESS;

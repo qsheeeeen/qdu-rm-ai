@@ -7,8 +7,7 @@
 #include "spdlog/spdlog.h"
 
 class App {
- public:
-  /* 准备logging */
+ private:
   void PrepareLogging(const std::string &path) {
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     auto file_sink =
@@ -24,8 +23,11 @@ class App {
     spdlog::flush_on(spdlog::level::info);
     spdlog::set_level(spdlog::level::info);
 #endif
+    SPDLOG_DEBUG("Logging setted.");
   }
 
+ public:
+  App(const std::string &log_path) { PrepareLogging(log_path); }
   /* 运行的主程序 */
   virtual void Run() = 0;
 };
