@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "behavior.hpp"
-#include "camera.hpp"
+#include "hik_camera.hpp"
 #include "robot.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"

@@ -1,4 +1,4 @@
-#include "camera.hpp"
+#include "hik_camera.hpp"
 
 #include <fstream>
 
@@ -7,8 +7,8 @@
 
 const std::string img_path = "../../../image/test.png";
 
-TEST(TestCamera, TestCapture) {
-  Camera cam;
+TEST(TestHikCamera, TestCapture) {
+  HikCamera cam;
   ASSERT_TRUE(cam.Open(0) == 0) << "Can not open camera 0.";
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
   cv::Mat frame = cam.GetFrame();

@@ -4,15 +4,11 @@
 #include <mutex>
 #include <thread>
 
-#include "MvCameraControl.h"
 #include "opencv2/core/mat.hpp"
+#include "spdlog/spdlog.h"
 
 class Camera {
- private:
-  MV_CC_DEVICE_INFO_LIST mv_dev_list_;
-  void *camera_handle_ = nullptr;
-  MV_FRAME_OUT raw_frame;
-
+ public:
   unsigned int frame_h_, frame_w_;
 
   bool grabing = false;
@@ -20,39 +16,16 @@ class Camera {
   std::mutex frame_stack_mutex_;
   std::deque<cv::Mat> frame_stack_;
 
-  /**
-   * @brief 用于抓取图片帧的线程
-   *
-   */
-  void GrabThread();
+  virtual void GrabPrepare() = 0;
+  virtual void GrabLoop() = 0;
 
-  /**
-   * @brief 相机初始化前的准备工作
-   *
-   */
-  void Prepare();
+  void GrabThread() {
+    SPDLOG_DEBUG("[GrabThread] Started.");
+    GrabPrepare();
+    while (grabing) GrabLoop();
 
- public:
-  /**
-   * @brief Construct a new Camera object
-   *
-   */
-  Camera();
-
-  /**
-   * @brief Construct a new Camera object
-   *
-   * @param index 相机索引号
-   * @param height 输出图像高度
-   * @param width 输出图像宽度
-   */
-  Camera(unsigned int index, unsigned int height, unsigned int width);
-
-  /**
-   * @brief Destroy the Camera object
-   *
-   */
-  ~Camera();
+    SPDLOG_DEBUG("[GrabThread] Stoped.");
+  }
 
   /**
    * @brief 设置相机参数
@@ -60,33 +33,28 @@ class Camera {
    * @param height 输出图像高度
    * @param width 输出图像宽度
    */
-  void Setup(unsigned int height, unsigned int width);
+  virtual void Setup(unsigned int height, unsigned int width) = 0;
 
   /**
    * @brief 打开相机设备
    *
    * @param index 相机索引号
-   * @return int 状态代码
+   * @return true 打开成功
+   * @return false 打开失败
    */
-  int Open(unsigned int index);
+  virtual bool Open(unsigned int index) = 0;
 
   /**
    * @brief Get the Frame object
    *
    * @return cv::Mat 拍摄的图像
    */
-  cv::Mat GetFrame();
+  virtual cv::Mat GetFrame() = 0;
 
   /**
    * @brief 关闭相机设备
    *
    * @return int 状态代码
    */
-  int Close();
-
-  /**
-   * @brief 相机标定
-   *
-   */
-  void Calibrate();
+  virtual int Close() = 0;
 };

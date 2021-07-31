@@ -1,4 +1,4 @@
-#include "camera.hpp"
+#include "hik_camera.hpp"
 
 #include <cstring>
 #include <exception>
@@ -33,44 +33,38 @@ static void PrintDeviceInfo(MV_CC_DEVICE_INFO *mv_dev_info) {
   }
 }
 
-/**
- * @brief 用于抓取图片帧的线程
- *
- */
-void Camera::GrabThread(void) {
-  SPDLOG_DEBUG("[GrabThread] Started.");
-  int err = MV_OK;
+void HikCamera::GrabPrepare() {
   std::memset(&raw_frame, 0, sizeof(MV_FRAME_OUT));
-  while (grabing) {
-    err = MV_CC_GetImageBuffer(camera_handle_, &raw_frame, 1000);
-    if (err == MV_OK) {
-      SPDLOG_DEBUG("[GrabThread] FrameNum: {}.",
-                   raw_frame.stFrameInfo.nFrameNum);
-    } else {
-      SPDLOG_ERROR("[GrabThread] GetImageBuffer fail! err: {0:x}.", err);
-    }
+}
 
-    cv::Mat raw_mat(
-        cv::Size(raw_frame.stFrameInfo.nWidth, raw_frame.stFrameInfo.nHeight),
-        CV_8UC3, raw_frame.pBufAddr);
+void HikCamera::GrabLoop() {
+  int err = MV_OK;
+  err = MV_CC_GetImageBuffer(camera_handle_, &raw_frame, 1000);
+  if (err == MV_OK) {
+    SPDLOG_DEBUG("[GrabThread] FrameNum: {}.", raw_frame.stFrameInfo.nFrameNum);
+  } else {
+    SPDLOG_ERROR("[GrabThread] GetImageBuffer fail! err: {0:x}.", err);
+  }
 
-    std::lock_guard<std::mutex> lock(frame_stack_mutex_);
-    frame_stack_.push_front(raw_mat.clone());
+  cv::Mat raw_mat(
+      cv::Size(raw_frame.stFrameInfo.nWidth, raw_frame.stFrameInfo.nHeight),
+      CV_8UC3, raw_frame.pBufAddr);
 
-    if (nullptr != raw_frame.pBufAddr) {
-      if ((err = MV_CC_FreeImageBuffer(camera_handle_, &raw_frame)) != MV_OK) {
-        SPDLOG_ERROR("[GrabThread] FreeImageBuffer fail! err: {0:x}.", err);
-      }
+  std::lock_guard<std::mutex> lock(frame_stack_mutex_);
+  frame_stack_.push_front(raw_mat.clone());
+
+  if (nullptr != raw_frame.pBufAddr) {
+    if ((err = MV_CC_FreeImageBuffer(camera_handle_, &raw_frame)) != MV_OK) {
+      SPDLOG_ERROR("[GrabThread] FreeImageBuffer fail! err: {0:x}.", err);
     }
   }
-  SPDLOG_DEBUG("[GrabThread] Stoped.");
 }
 
 /**
  * @brief 相机初始化前的准备工作
  *
  */
-void Camera::Prepare() {
+void HikCamera::Prepare() {
   int err = MV_OK;
   SPDLOG_DEBUG("Prepare.");
 
@@ -95,33 +89,34 @@ void Camera::Prepare() {
 }
 
 /**
- * @brief Construct a new Camera object
+ * @brief Construct a new HikCamera object
  *
  */
-Camera::Camera() {
+HikCamera::HikCamera() {
   Prepare();
   SPDLOG_TRACE("Constructed.");
 }
 
 /**
- * @brief Construct a new Camera object
+ * @brief Construct a new HikCamera object
  *
  * @param index 相机索引号
  * @param height 输出图像高度
  * @param width 输出图像宽度
  */
-Camera::Camera(unsigned int index, unsigned int height, unsigned int width)
-    : frame_h_(height), frame_w_(width) {
+HikCamera::HikCamera(unsigned int index, unsigned int height,
+                     unsigned int width) {
   Prepare();
   Open(index);
+  Setup(height, width);
   SPDLOG_TRACE("Constructed.");
 }
 
 /**
- * @brief Destroy the Camera object
+ * @brief Destroy the HikCamera object
  *
  */
-Camera::~Camera() {
+HikCamera::~HikCamera() {
   Close();
   SPDLOG_TRACE("Destructed.");
 }
@@ -132,7 +127,7 @@ Camera::~Camera() {
  * @param height 输出图像高度
  * @param width 输出图像宽度
  */
-void Camera::Setup(unsigned int height, unsigned int width) {
+void HikCamera::Setup(unsigned int height, unsigned int width) {
   frame_h_ = height;
   frame_w_ = width;
 
@@ -145,7 +140,7 @@ void Camera::Setup(unsigned int height, unsigned int width) {
  * @param index 相机索引号
  * @return int 状态代码
  */
-int Camera::Open(unsigned int index) {
+bool HikCamera::Open(unsigned int index) {
   int err = MV_OK;
 
   SPDLOG_DEBUG("Open index: {}.", index);
@@ -215,7 +210,7 @@ int Camera::Open(unsigned int index) {
   }
 
   grabing = true;
-  grab_thread_ = std::thread(&Camera::GrabThread, this);
+  grab_thread_ = std::thread(&HikCamera::GrabThread, this);
   return MV_OK;
 }
 
@@ -224,7 +219,7 @@ int Camera::Open(unsigned int index) {
  *
  * @return cv::Mat 拍摄的图像
  */
-cv::Mat Camera::GetFrame() {
+cv::Mat HikCamera::GetFrame() {
   cv::Mat frame;
 
   std::lock_guard<std::mutex> lock(frame_stack_mutex_);
@@ -242,7 +237,7 @@ cv::Mat Camera::GetFrame() {
  *
  * @return int 状态代码
  */
-int Camera::Close() {
+int HikCamera::Close() {
   grabing = false;
   grab_thread_.join();
 

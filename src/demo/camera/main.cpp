@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "camera.hpp"
+#include "hik_camera.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
@@ -26,7 +26,7 @@ int main(int argc, char const* argv[]) {
   spdlog::set_level(spdlog::level::info);
 #endif
 
-  SPDLOG_WARN("***** Running Camera Recording Demo. *****");
-  
+  SPDLOG_WARN("***** Running HikCamera Recording Demo. *****");
+
   return 0;
 }

@@ -1,7 +1,7 @@
 #include "app.hpp"
 #include "armor_detector.hpp"
-#include "camera.hpp"
 #include "compensator.hpp"
+#include "hik_camera.hpp"
 #include "robot.hpp"
 
 class AutoAim : private App {

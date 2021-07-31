@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "buff_detector.hpp"
-#include "camera.hpp"
+#include "hik_camera.hpp"
 #include "opencv2/opencv.hpp"
 #include "predictor.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
@@ -37,7 +37,7 @@ int main(int argc, char const* argv[]) {
                              game::Team::kRED);
   Predictor predictor;
   predictor.SetTime(6);
-  // Camera cam(0, 640, 480);
+  // HikCamera cam(0, 640, 480);
   while (1) {
     // frame = cam.GetFrame();
     cap >> frame;

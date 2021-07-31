@@ -59,16 +59,10 @@ void Robot::ThreadTrans() {
   SPDLOG_DEBUG("[ThreadTrans] Stoped.");
 }
 
-Robot::Robot(const std::string &dev_path) {
-  serial_.Open(dev_path);
-  serial_.Config();
-  if (!serial_.IsOpen()) {
-    SPDLOG_ERROR("Can't open device.");
-  }
+Robot::Robot() { SPDLOG_TRACE("Constructed."); }
 
-  thread_continue = true;
-  thread_recv_ = std::thread(&Robot::ThreadRecv, this);
-  thread_trans_ = std::thread(&Robot::ThreadTrans, this);
+Robot::Robot(const std::string &dev_path) {
+  Init(dev_path);
 
   SPDLOG_TRACE("Constructed.");
 }
@@ -80,6 +74,18 @@ Robot::~Robot() {
   thread_recv_.join();
   thread_trans_.join();
   SPDLOG_TRACE("Destructed.");
+}
+
+void Robot::Init(const std::string &dev_path) {
+  serial_.Open(dev_path);
+  serial_.Config();
+  if (!serial_.IsOpen()) {
+    SPDLOG_ERROR("Can't open device.");
+  }
+
+  thread_continue = true;
+  thread_recv_ = std::thread(&Robot::ThreadRecv, this);
+  thread_trans_ = std::thread(&Robot::ThreadTrans, this);
 }
 
 game::Team Robot::GetTeam() {

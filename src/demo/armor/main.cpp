@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "armor_detector.hpp"
-#include "camera.hpp"
+#include "hik_camera.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
