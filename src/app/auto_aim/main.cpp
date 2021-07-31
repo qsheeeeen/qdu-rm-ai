@@ -6,9 +6,9 @@
 
 class AutoAim : private App {
  private:
-  Robot robot("/dev/ttyTHS2");
-  Camera cam(0, 640, 480);
-  ArmorDetector detector("RMUL2021_Armor.json", game::Team::kBLUE);
+  Robot robot;
+  HikCamera cam;
+  ArmorDetector detector;
   Compensator compensator;
 
  public:
@@ -16,6 +16,11 @@ class AutoAim : private App {
     SPDLOG_WARN("***** Setting Up Auto Aiming system. *****");
 
     /* 初始化设备 */
+    robot.Init("/dev/ttyTHS2");
+    cam.Open(0);
+    cam.Setup(640, 480);
+    detector.LoadParams("RMUL2021_Armor.json");
+
     do {
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     } while (robot.GetTeam() != game::Team::kUNKNOWN);
