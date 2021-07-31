@@ -28,7 +28,7 @@ struct ArmorDetectorParam {
   double center_dist_high_th;
 };
 
-class ArmorDetector : private Detector<Armor, ArmorDetectorParam> {
+class ArmorDetector : public Detector<Armor, ArmorDetectorParam> {
  private:
   game::Team enemy_team_;
   std::vector<std::vector<cv::Point>> contours_, contours_poly_;
@@ -51,7 +51,6 @@ class ArmorDetector : private Detector<Armor, ArmorDetectorParam> {
   ArmorDetector(const std::string &params_path, game::Team enemy_team);
   ~ArmorDetector();
 
-  void LoadParams(const std::string &params_path);
   void SetEnemyTeam(game::Team enemy_team);
 
   const std::vector<Armor> &Detect(const cv::Mat &frame);

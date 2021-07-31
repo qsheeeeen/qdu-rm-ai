@@ -8,13 +8,14 @@
 
 template <typename Target, typename Param>
 class Detector {
+ private:
+  virtual void InitDefaultParams(const std::string &path) = 0;
+  virtual bool PrepareParams(const std::string &path) = 0;
+
  public:
   cv::Size frame_size_;
   std::vector<Target> targets_;
   Param params_;
-
-  virtual void InitDefaultParams(const std::string &path) = 0;
-  virtual bool PrepareParams(const std::string &path) = 0;
 
   void LoadParams(const std::string &path) {
     if (!PrepareParams(path)) {
@@ -25,7 +26,6 @@ class Detector {
     SPDLOG_DEBUG("Params loaded.");
   }
 
-  virtual const std::vector<Target> &Detect(
-      const cv::Mat &frame) = 0;
+  virtual const std::vector<Target> &Detect(const cv::Mat &frame) = 0;
   virtual void VisualizeResult(const cv::Mat &output, int verbose = 1) = 0;
 };
