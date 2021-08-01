@@ -39,7 +39,7 @@ double Compensator::SolveSurfaceLanchAngle(cv::Point2f target) {
 void Compensator::VisualizePnp(Armor& armor, const cv::Mat& output,
                                bool add_lable) {
   std::vector<cv::Point2f> out_points;
-  cv::projectPoints(armor.SurfaceVertices(), armor.GetRotVec(),
+  cv::projectPoints(armor.ImageVertices(), armor.GetRotVec(),
                     armor.GetTransVec(), cam_mat_, distor_coff_, out_points);
   for (std::size_t i = 0; i < out_points.size(); ++i) {
     cv::line(output, out_points[i], out_points[(i + 1) % out_points.size()],
@@ -78,11 +78,11 @@ void Compensator::LoadCameraMat(const std::string& path) {
 
 cv::Vec3f Compensator::EstimateWorldCoord(Armor& armor) {
   cv::Mat rot_vec, trans_vec;
-  cv::solvePnP(armor.ModelVertices(), armor.SurfaceVertices(), cam_mat_,
+  cv::solvePnP(armor.PhysicVertices(), armor.ImageVertices(), cam_mat_,
                distor_coff_, rot_vec, trans_vec, false, cv::SOLVEPNP_IPPE);
   armor.SetRotVec(rot_vec), armor.SetTransVec(trans_vec);
   cv::Mat world_coord =
-      ((cv::Vec2f(armor.SurfaceCenter()) * cam_mat_.inv() - trans_vec) *
+      ((cv::Vec2f(armor.ImageCenter()) * cam_mat_.inv() - trans_vec) *
        armor.GetRotMat().inv());
   return cv::Vec3f(world_coord);
 }
@@ -104,8 +104,8 @@ void Compensator::Apply(std::vector<Armor>& armors, const cv::Mat& frame,
   cv::Point2f frame_center(frame.cols / 2, frame.rows / 2);
   std::sort(armors.begin(), armors.end(),
             [frame_center](Armor& armor1, Armor& armor2) {
-              return cv::norm(armor1.SurfaceCenter() - frame_center) <
-                     cv::norm(armor2.SurfaceCenter() - frame_center);
+              return cv::norm(armor1.ImageCenter() - frame_center) <
+                     cv::norm(armor2.ImageCenter() - frame_center);
             });
 }
 

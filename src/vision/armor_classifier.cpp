@@ -46,7 +46,7 @@ void ArmorClassifier::SetInputSize(const cv::Size &input_size) {
 }
 
 void ArmorClassifier::ClassifyModel(Armor &armor, const cv::Mat &frame) {
-  cv::Mat image = armor.Face(frame);
+  cv::Mat image = armor.ImageFace(frame);
   cv::dnn::blobFromImage(image, blob_, 1. / 128., net_input_size_);
   net_.setInput(blob_);
   cv::Mat prob = net_.forward();

@@ -62,10 +62,10 @@ void Armor::Init() {
 
   double len;
   if (AspectRatio() > 1.2) {
-    trans_ = cv::getPerspectiveTransform(SurfaceVertices(), kDST_POV_BIG);
+    trans_ = cv::getPerspectiveTransform(ImageVertices(), kDST_POV_BIG);
     len = kARMOR_LENGTH_BIG;
   } else {
-    trans_ = cv::getPerspectiveTransform(SurfaceVertices(), kDST_POV_SMALL);
+    trans_ = cv::getPerspectiveTransform(ImageVertices(), kDST_POV_SMALL);
     len = kARMOR_LENGTH_SMALL;
   }
   face_size_ = cv::Size(len, kARMOR_WIDTH);
@@ -93,7 +93,7 @@ double Armor::AspectRatio() const {
   return aspect_ratio;
 }
 
-std::vector<cv::Point2f> Armor::SurfaceVertices() const {
+std::vector<cv::Point2f> Armor::ImageVertices() const {
   return image_vertices_;
 }
 

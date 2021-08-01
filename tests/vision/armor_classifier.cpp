@@ -32,8 +32,8 @@ TEST(TestVision, TestArmorClassifierInput) {
   Armor armor(cv::RotatedRect(cv::Point2f(0, 0), cv::Point2f(f.cols, 0),
                               cv::Point2f(f.cols, f.rows)));
 
-  cv::imwrite("../../../image/test_face.png", armor.Face(f));
+  cv::imwrite("../../../image/test_face.png", armor.ImageFace(f));
   cv::Mat nn_input;
-  cv::resize(armor.Face(f), nn_input, cv::Size(28, 28));
+  cv::resize(armor.ImageFace(f), nn_input, cv::Size(28, 28));
   cv::imwrite("../../../image/test_nn_input.png", nn_input);
 }

@@ -232,17 +232,17 @@ void ArmorDetector::VisualizeLightBar(const cv::Mat &output, bool add_lable) {
 void ArmorDetector::VisualizeArmor(const cv::Mat &output, bool add_lable) {
   if (!targets_.empty()) {
     for (auto &armor : targets_) {
-      auto vertices = armor.SurfaceVertices();
+      auto vertices = armor.ImageVertices();
       auto num_vertices = vertices.size();
       for (std::size_t i = 0; i < num_vertices; ++i) {
         cv::line(output, vertices[i], vertices[(i + 1) % num_vertices], kGREEN);
       }
-      cv::drawMarker(output, armor.SurfaceCenter(), kGREEN, cv::MARKER_DIAMOND);
+      cv::drawMarker(output, armor.ImageCenter(), kGREEN, cv::MARKER_DIAMOND);
 
       if (add_lable) {
         cv::putText(output,
-                    cv::format("%.2f, %.2f", armor.SurfaceCenter().x,
-                               armor.SurfaceCenter().y),
+                    cv::format("%.2f, %.2f", armor.ImageCenter().x,
+                               armor.ImageCenter().y),
                     vertices[1], kCV_FONT, 1.0, kGREEN);
       }
     }

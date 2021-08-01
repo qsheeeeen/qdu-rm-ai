@@ -170,8 +170,8 @@ void BuffDetector::MatchArmors() {
   if (armors.size() > 0 && hammer_.size.area() > 0) {
     buff_.SetTarget(armors[0]);
     for (auto armor : armors) {
-      if (cv::norm(hammer_.center - armor.SurfaceCenter()) <
-          cv::norm(hammer_.center - buff_.GetTarget().SurfaceCenter())) {
+      if (cv::norm(hammer_.center - armor.ImageCenter()) <
+          cv::norm(hammer_.center - buff_.GetTarget().ImageCenter())) {
         buff_.SetTarget(armor);
       }
     }
@@ -187,30 +187,30 @@ void BuffDetector::VisualizeArmors(const cv::Mat &output, bool add_lable) {
   std::vector<Armor> armors = buff_.GetArmors();
   if (!armors.empty()) {
     for (auto &armor : armors) {
-      auto vertices = armor.SurfaceVertices();
-      if (vertices == buff_.GetTarget().SurfaceVertices()) continue;
+      auto vertices = armor.ImageVertices();
+      if (vertices == buff_.GetTarget().ImageVertices()) continue;
       for (std::size_t i = 0; i < vertices.size(); ++i)
         cv::line(output, vertices[i], vertices[(i + 1) % 4], kGREEN);
 
-      cv::drawMarker(output, armor.SurfaceCenter(), kGREEN, cv::MARKER_DIAMOND);
+      cv::drawMarker(output, armor.ImageCenter(), kGREEN, cv::MARKER_DIAMOND);
 
       if (add_lable) {
         std::ostringstream buf;
-        buf << armor.SurfaceCenter().x << ", " << armor.SurfaceCenter().y;
+        buf << armor.ImageCenter().x << ", " << armor.ImageCenter().y;
         cv::putText(output, buf.str(), vertices[1], kCV_FONT, 1.0, kGREEN);
       }
     }
   }
 
   Armor target = buff_.GetTarget();
-  if (cv::Point2f(0, 0) != target.SurfaceCenter()) {
-    auto vertices = target.SurfaceVertices();
+  if (cv::Point2f(0, 0) != target.ImageCenter()) {
+    auto vertices = target.ImageVertices();
     for (std::size_t i = 0; i < vertices.size(); ++i)
       cv::line(output, vertices[i], vertices[(i + 1) % 4], kRED);
-    cv::drawMarker(output, target.SurfaceCenter(), kRED, cv::MARKER_DIAMOND);
+    cv::drawMarker(output, target.ImageCenter(), kRED, cv::MARKER_DIAMOND);
     if (add_lable) {
       std::ostringstream buf;
-      buf << target.SurfaceCenter().x << ", " << target.SurfaceCenter().y;
+      buf << target.ImageCenter().x << ", " << target.ImageCenter().y;
       cv::putText(output, buf.str(), vertices[1], kCV_FONT, 1.0, kRED);
     }
   }

@@ -13,13 +13,13 @@ class ImageObject {
   cv::Mat trans_, face_;
   float image_angle_;
 
-  const cv::Point2f &SurfaceCenter() const { return image_center_; }
+  const cv::Point2f &ImageCenter() const { return image_center_; }
 
-  virtual std::vector<cv::Point2f> SurfaceVertices() const = 0;
+  virtual std::vector<cv::Point2f> ImageVertices() const = 0;
 
-  double SurfaceAngle() const { return image_angle_; }
+  double ImageAngle() const { return image_angle_; }
 
-  cv::Mat Face(const cv::Mat &frame) const {
+  cv::Mat ImageFace(const cv::Mat &frame) const {
     cv::Mat face;
     cv::warpPerspective(frame, face, trans_, face_size_);
     cv::cvtColor(face, face, cv::COLOR_RGB2GRAY);
@@ -64,5 +64,5 @@ class PhysicObject {
                    rot_mat_.at<double>(1, 0) - rot_mat_.at<double>(0, 1));
     return axis;
   }
-  const cv::Mat ModelVertices() const { return vertices_; }
+  const cv::Mat PhysicVertices() const { return vertices_; }
 };

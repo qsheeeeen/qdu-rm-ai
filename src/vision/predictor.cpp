@@ -62,10 +62,10 @@ void Predictor::MatchDirection() {
     }
 
     else {
-      circumference_.emplace_back(buff_.GetTarget().SurfaceCenter());
+      circumference_.emplace_back(buff_.GetTarget().ImageCenter());
       SPDLOG_DEBUG("Emplace_back point {},{}.",
-                   buff_.GetTarget().SurfaceCenter().x,
-                   buff_.GetTarget().SurfaceCenter().y);
+                   buff_.GetTarget().ImageCenter().x,
+                   buff_.GetTarget().ImageCenter().y);
     }
 
     SPDLOG_DEBUG("buff_'s getDirection is {}", GetDirection());
@@ -77,7 +77,7 @@ Armor Predictor::RotateArmor(const Armor &armor, double theta,
   cv::Point2f predict_point[4];
   cv::Matx22d rot(cos(theta), -sin(theta), sin(theta), cos(theta));
 
-  auto vertices = armor.SurfaceVertices();
+  auto vertices = armor.ImageVertices();
   for (int i = 0; i < 3; i++) {
     cv::Matx21d vec(vertices[i].x - center.x, vertices[i].y - center.y);
     cv::Matx21d mat = rot * vec;
@@ -91,10 +91,10 @@ Armor Predictor::RotateArmor(const Armor &armor, double theta,
 void Predictor::MatchPredict() {
   SetPredict(Armor());
   if (cv::Point2f(0, 0) == buff_.GetCenter()) return;
-  if (cv::Point2f(0, 0) == buff_.GetTarget().SurfaceCenter()) return;
+  if (cv::Point2f(0, 0) == buff_.GetTarget().ImageCenter()) return;
   if (component::Direction::kUNKNOWN == direction_) return;
 
-  cv::Point2f target_center = buff_.GetTarget().SurfaceCenter();
+  cv::Point2f target_center = buff_.GetTarget().ImageCenter();
   cv::Point2f center = buff_.GetCenter();
   SPDLOG_DEBUG("center is {},{}", buff_.GetCenter().x, buff_.GetCenter().y);
   component::Direction direction = GetDirection();
@@ -117,7 +117,7 @@ Predictor::Predictor() { SPDLOG_TRACE("Constructed."); }
 Predictor::Predictor(const std::vector<Buff> &buffs) {
   if (circumference_.size() < 5)
     for (auto buff : buffs)
-      circumference_.push_back(buff.GetTarget().SurfaceCenter());
+      circumference_.push_back(buff.GetTarget().ImageCenter());
   buff_ = buffs.back();
   num_ = buff_.GetArmors().size();
   SPDLOG_TRACE("Constructed.");
@@ -135,8 +135,8 @@ void Predictor::SetBuff(const Buff &buff) {
 const Armor &Predictor::GetPredict() const { return predict_; }
 
 void Predictor::SetPredict(const Armor &predict) {
-  SPDLOG_DEBUG("Predict center is {},{}", predict.SurfaceCenter().x,
-               predict.SurfaceCenter().y);
+  SPDLOG_DEBUG("Predict center is {},{}", predict.ImageCenter().x,
+               predict.ImageCenter().y);
   predict_ = predict;
 }
 
@@ -183,14 +183,14 @@ Buff Predictor::Predict() {
 
 void Predictor::VisualizePrediction(const cv::Mat &output, bool add_lable) {
   Armor predict = GetPredict();
-  if (cv::Point2f(0, 0) != predict.SurfaceCenter()) {
-    auto vertices = predict.SurfaceVertices();
+  if (cv::Point2f(0, 0) != predict.ImageCenter()) {
+    auto vertices = predict.ImageVertices();
     for (std::size_t i = 0; i < vertices.size(); ++i)
       cv::line(output, vertices[i], vertices[(i + 1) % 4], kYELLOW, 8);
-    cv::line(output, buff_.GetCenter(), predict_.SurfaceCenter(), kRED, 3);
+    cv::line(output, buff_.GetCenter(), predict_.ImageCenter(), kRED, 3);
     if (add_lable) {
       std::ostringstream buf;
-      buf << predict.SurfaceCenter().x << ", " << predict.SurfaceCenter().y;
+      buf << predict.ImageCenter().x << ", " << predict.ImageCenter().y;
       cv::putText(output, buf.str(), vertices[1], kCV_FONT, 1.0, kRED);
     }
   }
