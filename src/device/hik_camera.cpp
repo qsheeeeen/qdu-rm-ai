@@ -33,9 +33,7 @@ static void PrintDeviceInfo(MV_CC_DEVICE_INFO *mv_dev_info) {
   }
 }
 
-void HikCamera::GrabPrepare() {
-  std::memset(&raw_frame, 0, sizeof(MV_FRAME_OUT));
-}
+void HikCamera::GrabPrepare() { std::memset(&raw_frame, 0, sizeof(raw_frame)); }
 
 void HikCamera::GrabLoop() {
   int err = MV_OK;
@@ -194,17 +192,18 @@ bool HikCamera::Open(unsigned int index) {
     return err;
   }
 
-  if ((MV_CC_SetEnumValue(camera_handle_, "GammaSelector", 2)) != MV_OK) {
+  if ((err = MV_CC_SetEnumValue(camera_handle_, "GammaSelector", 2)) != MV_OK) {
     SPDLOG_ERROR("GammaSelector fail! err: {0:x}.", err);
     return err;
   }
 
-  if ((MV_CC_SetBoolValue(camera_handle_, "GammaEnable", true)) != MV_OK) {
+  if ((err = MV_CC_SetBoolValue(camera_handle_, "GammaEnable", true)) !=
+      MV_OK) {
     SPDLOG_ERROR("GammaEnable fail! err: {0:x}.", err);
     return err;
   }
 
-  if ((MV_CC_StartGrabbing(camera_handle_)) != MV_OK) {
+  if ((err = MV_CC_StartGrabbing(camera_handle_)) != MV_OK) {
     SPDLOG_ERROR("StartGrabbing fail! err: {0:x}.", err);
     return err;
   }
