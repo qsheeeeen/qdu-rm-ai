@@ -8,14 +8,7 @@
 #include "spdlog/spdlog.h"
 
 class Camera {
- public:
-  unsigned int frame_h_, frame_w_;
-
-  bool grabing = false;
-  std::thread grab_thread_;
-  std::mutex frame_stack_mutex_;
-  std::deque<cv::Mat> frame_stack_;
-
+ private:
   virtual void GrabPrepare() = 0;
   virtual void GrabLoop() = 0;
 
@@ -27,13 +20,28 @@ class Camera {
     SPDLOG_DEBUG("[GrabThread] Stoped.");
   }
 
+  virtual bool OpenPrepare(unsigned int index) = 0;
+
+ public:
+  unsigned int frame_h_, frame_w_;
+
+  bool grabing = false;
+  std::thread grab_thread_;
+  std::mutex frame_stack_mutex_;
+  std::deque<cv::Mat> frame_stack_;
+
   /**
    * @brief 设置相机参数
    *
    * @param height 输出图像高度
    * @param width 输出图像宽度
    */
-  virtual void Setup(unsigned int height, unsigned int width) = 0;
+  void Setup(unsigned int height, unsigned int width) {
+    frame_h_ = height;
+    frame_w_ = width;
+
+    // TODO: 配置相机输入输出
+  }
 
   /**
    * @brief 打开相机设备
@@ -42,15 +50,32 @@ class Camera {
    * @return true 打开成功
    * @return false 打开失败
    */
-  virtual bool Open(unsigned int index) = 0;
+  bool Open(unsigned int index) {
+    if (OpenPrepare(index)) {
+      grabing = true;
+      grab_thread_ = std::thread(&Camera::GrabThread, this);
+      return true;
+    }
+    return false;
+  }
 
   /**
    * @brief Get the Frame object
    *
    * @return cv::Mat 拍摄的图像
    */
-  virtual cv::Mat GetFrame() = 0;
+  virtual cv::Mat GetFrame() {
+    cv::Mat frame;
 
+    std::lock_guard<std::mutex> lock(frame_stack_mutex_);
+    if (!frame_stack_.empty()) {
+      frame = frame_stack_.front();
+      frame_stack_.clear();
+    } else {
+      SPDLOG_ERROR("Empty frame stack!");
+    }
+    return frame;
+  }
   /**
    * @brief 关闭相机设备
    *

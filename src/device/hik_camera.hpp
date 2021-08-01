@@ -16,6 +16,7 @@ class HikCamera : public Camera {
 
   void GrabPrepare();
   void GrabLoop();
+  bool OpenPrepare(unsigned int index);
 
   /**
    * @brief 相机初始化前的准备工作
@@ -46,38 +47,9 @@ class HikCamera : public Camera {
   ~HikCamera();
 
   /**
-   * @brief 设置相机参数
-   *
-   * @param height 输出图像高度
-   * @param width 输出图像宽度
-   */
-  void Setup(unsigned int height, unsigned int width);
-
-  /**
-   * @brief 打开相机设备
-   *
-   * @param index 相机索引号
-   * @return int 状态代码
-   */
-  bool Open(unsigned int index);
-
-  /**
-   * @brief Get the Frame object
-   *
-   * @return cv::Mat 拍摄的图像
-   */
-  cv::Mat GetFrame();
-
-  /**
    * @brief 关闭相机设备
    *
    * @return int 状态代码
    */
   int Close();
-
-  /**
-   * @brief 相机标定
-   *
-   */
-  void Calibrate();
 };
