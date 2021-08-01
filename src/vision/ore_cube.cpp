@@ -1,4 +1,5 @@
-#include "guiding_light.hpp"
+#include "ore_cube.hpp"
+
 #include "opencv2/opencv.hpp"
 #include "spdlog/spdlog.h"
 
