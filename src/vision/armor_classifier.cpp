@@ -36,7 +36,8 @@ void ArmorClassifier::LoadLable(const std::string &path) {
 
   cv::FileNode root = fs.root();
   for (size_t i = 0; i < root.size(); ++i) {
-    classes_.push_back(game::StringToModel(std::string(root[std::to_string(i)])));
+    classes_.push_back(
+        game::StringToModel(std::string(root[std::to_string(i)])));
   }
 }
 
