@@ -15,15 +15,13 @@ target_link_libraries(${PROJECT_NAME}
     component
 )
 
-if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
-    target_link_directories(${PROJECT_NAME} PUBLIC 
+target_link_directories(${PROJECT_NAME} PUBLIC 
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
         /opt/MVS/lib/aarch64/
-    )
-else()
-    target_link_directories(${PROJECT_NAME} PUBLIC
+    else()
         /opt/MVS/lib/64/
-    )
-endif()
+    endif()
+)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
