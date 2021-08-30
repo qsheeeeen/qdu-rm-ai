@@ -20,6 +20,7 @@ class AutoAim : private App {
     cam.Open(0);
     cam.Setup(640, 480);
     detector.LoadParams("RMUL2021_Armor.json");
+    compensator.LoadCameraMat("MV-CA016-10UC-6mm.json");
 
     do {
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -45,7 +46,9 @@ class AutoAim : private App {
       // robot.Aim(target.GetAimEuler(), false);
       detector.VisualizeResult(frame, 10);
       cv::imshow("show", frame);
-      cv::waitKey(1);
+      if (' ' == cv::waitKey(10)) {
+        cv::waitKey(0);
+      }
     }
   }
 };
