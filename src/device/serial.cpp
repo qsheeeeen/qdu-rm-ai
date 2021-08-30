@@ -49,7 +49,7 @@ Serial::~Serial() {
  * @param dev_path 具体要读写的串口设备
  */
 void Serial::Open(const std::string& dev_path) {
-  dev_ = open(dev_path.c_str(), O_RDWR);
+  dev_ = open(dev_path.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
 
   if (dev_ < 0) SPDLOG_ERROR("Can't open Serial device.");
 }
@@ -68,7 +68,7 @@ bool Serial::IsOpen() { return (dev_ > 0); }
  * @param parity
  * @param stop_bit 停止位
  * @param flow_ctrl 流控制
- * @param br 波特率
+ * @param baud_rate 波特率
  * @return true 配置成功
  * @return false 配置失败
  */
@@ -88,9 +88,10 @@ bool Serial::Config(bool parity, StopBits stop_bit, DataLength data_length,
 
   if (parity)
     tty_cfg.c_cflag |= PARENB;
-  else
+  else {
     tty_cfg.c_cflag &= ~PARENB;
-
+    tty_cfg.c_iflag &= ~INPCK;
+  }
   switch (stop_bit) {
     case StopBits::kSTOP_BITS_1:
       tty_cfg.c_cflag &= ~CSTOPB;
@@ -119,8 +120,15 @@ bool Serial::Config(bool parity, StopBits stop_bit, DataLength data_length,
       cfsetospeed(&tty_cfg, B460800);
       break;
   }
-
-  tty_cfg.c_cflag &= ~CSIZE;
+  // 一般必设置的标志
+  tty_cfg.c_cflag |= (CLOCAL | CREAD);
+  tty_cfg.c_oflag &= ~(OPOST);
+  tty_cfg.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
+  tty_cfg.c_iflag &= ~(ICRNL | INLCR | IGNCR | IXON | IXOFF | IXANY);
+  
+  // 清空输入输出缓冲区
+  tcflush(dev_, TCIOFLUSH);
+  
   switch (data_length) {
     case DataLength::kDATA_LEN_5:
       tty_cfg.c_cflag |= CS5;
@@ -132,6 +140,7 @@ bool Serial::Config(bool parity, StopBits stop_bit, DataLength data_length,
       tty_cfg.c_cflag |= CS7;
       break;
     case DataLength::kDATA_LEN_8:
+      tty_cfg.c_cflag &= ~CSIZE;
       tty_cfg.c_cflag |= CS8;
       break;
   }
