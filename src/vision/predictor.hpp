@@ -16,6 +16,7 @@ class Predictor {
   std::chrono::system_clock::time_point end_time_;
   std::vector<cv::Point2f> circumference_;
   component::Direction direction_ = component::Direction::kUNKNOWN;
+  std::chrono::milliseconds duration_direction_, duration_predict_;
 
   void MatchDirection();
   void MatchPredict();
@@ -40,7 +41,7 @@ class Predictor {
   void SetTime(double time);
   void ResetTime();
 
-  Buff Predict();
+  std::vector<Armor> Predict();
 
   void VisualizePrediction(const cv::Mat &output, bool add_lable);
 };

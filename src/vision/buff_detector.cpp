@@ -2,7 +2,6 @@
 
 #include <cmath>
 
-#include "compensator.hpp"
 #include "opencv2/opencv.hpp"
 #include "spdlog/spdlog.h"
 
@@ -266,7 +265,6 @@ void BuffDetector::VisualizeResult(const cv::Mat &output, int verbose) {
     for (std::size_t i = 0; i < 4; ++i)
       cv::line(output, vertices[i], vertices[(i + 1) % 4], kRED);
 
-    cv::drawMarker(output, buff_.GetCenter(), kRED, cv::MARKER_DIAMOND);
     cv::drawMarker(output, buff_.GetCenter(), kRED, cv::MARKER_DIAMOND);
   }
   VisualizeArmors(output, verbose);

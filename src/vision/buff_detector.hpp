@@ -24,7 +24,7 @@ struct BuffDetectorParam {
   double rect_center_ratio_high_th;
 };
 
-class BuffDetector : private Detector<Buff, BuffDetectorParam> {
+class BuffDetector : public Detector<Buff, BuffDetectorParam> {
  private:
   Buff buff_;
   std::vector<std::vector<cv::Point>> contours_, contours_poly_;
