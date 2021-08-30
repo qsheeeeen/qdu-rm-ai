@@ -98,6 +98,8 @@ game::Team Robot::GetTeam() {
 
 double Robot::GetTime() { return 90 - ref_.time; }
 
+double Robot::GetBalletSpeed() { return mcu_.ball_speed; }
+
 cv::Mat Robot::GetRotMat() {
   cv::Quatf q(mcu_.quat.q0, mcu_.quat.q1, mcu_.quat.q2, mcu_.quat.q3);
   return cv::Mat(q.toRotMat3x3(), true);
