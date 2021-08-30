@@ -13,7 +13,7 @@
 
 - 基于OpenCV的识别算法
 - 基于行为树设计哨兵的AI
-- 一个项目适配不同型号的机器人。
+- 一个项目适配不同型号的机器人
 
 这样做增加代码了的重用，减少了工作量。实现了通过DLA(深度学习加速器)加速妙算上模型的推断速度。利用行为树实现了可控的复杂行为。
 
@@ -36,11 +36,11 @@
 - 依赖
   - [OpenCV](https://docs.opencv.org/4.5.1/d7/d9f/tutorial_linux_install.html)
   - [BehavoirTree.CPP](https://github.com/BehaviorTree/BehaviorTree.CPP).
-  - [MVS SDK from HIKROBOT](https://www.hikrobotics.com/service/download/0/0).
+  - [MVS SDK from HIKROBOT](https://www.hikrobotics.com/cn/machinevision/service/download?module=0).
   - [spdlog](https://github.com/gabime/spdlog).
   - [Google Test](https://github.com/google/googletest)
-  - [oneTBB](https://github.com/oneapi-src/oneTBB) or `libtbb-dev`
   - 可选
+    - [oneTBB](https://github.com/oneapi-src/oneTBB) or `libtbb-dev`
     - [CUDA](https://developer.nvidia.com/cuda-downloads)
     - [TensorRT](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html)
 
@@ -52,9 +52,9 @@
 
 1. 安装依赖
     1. 根据上面链接安装相关依赖
-    1. 安装完成后运行`ldconfig`
+    2. 安装完成后运行`ldconfig`
 
-1. 获得代码
+2. 获得代码
 
     ```sh
     git clone --recursive https://github.com/qsheeeeen/qdu-rm-ai
@@ -63,7 +63,7 @@
     
     ```
 
-1. 编译 & 安装
+3. 编译 & 安装
 
     ```sh
     cd qdu-rm-ai
@@ -74,7 +74,7 @@
     make install
     ```
 
-1. 神经网络(可选)
+4. 神经网络(可选)
 
     1. 准备
 
@@ -86,7 +86,7 @@
         pip3 install -r qdu-rm-ai/third_party/yolov5/requirements.txt
         ```
 
-    1. 训练
+    2. 训练
 
         ```sh
         # 以下脚本涉及相对路径，需要在此文件夹内运行。
@@ -99,7 +99,7 @@
         sh ./train_vision.sh
         ```
 
-1. 运行
+5. 运行
 
     ```sh
     cd qdu-rm-ai/runtime
@@ -146,16 +146,21 @@
 
 近期：
 
-1. 实现类似多级流水线的视觉算法流程。[参考文章](https://opencv.org/hybrid-cv-dl-pipelines-with-opencv-4-4-g-api/)
+1. 完成对物理世界模型的抽象
+
+2. 修缮好测距模块和弹道补偿器模块
+
+3. 实现类似多级流水线的视觉算法流程。[参考文章](https://opencv.org/hybrid-cv-dl-pipelines-with-opencv-4-4-g-api/)
 
 远期：
 
-1. 添加机关击打
-
-1. 第二阶段
+1. 第一阶段
     1. 使用基于pytorch的yolov5算法，训练得到的权重和模型导出到ONNX格式。
-    1. 在妙算平台使用TensorRT运行导出的模型。
-    1. 添加Int8运行
+    2. 在妙算平台使用TensorRT运行导出的模型。
+    3. 添加Int8运行
 
-1. 第三阶段
+2. 第二阶段
     1. 添加雷达部分代码
+    2. 矿石旋转部分代码
+    3. 飞镖控制部分代码
+
